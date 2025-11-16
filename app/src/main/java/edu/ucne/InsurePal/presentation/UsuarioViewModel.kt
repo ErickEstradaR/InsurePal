@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.InsurePal.data.Resource
-import edu.ucne.InsurePal.data.remote.usuario.dto.UsuarioRequest
 import edu.ucne.InsurePal.domain.Usuario
 import edu.ucne.InsurePal.domain.useCases.obtenerUsuarioUseCase
 import edu.ucne.InsurePal.domain.useCases.obtenerUsuariosUseCase
@@ -74,21 +73,17 @@ class UsuarioViewModel @Inject constructor(
                 clearForm()
                 _state.value = _state.value.copy()
             }
-            is UsuarioEvent.onLoginClick -> Login()
+            is UsuarioEvent.onLoginClick -> login()
         }
     }
 
-    private fun Login() {
+    private fun login() {
         viewModelScope.launch {
         }
     }
 
     private fun crearUsuario(usuario: Usuario) {
         viewModelScope.launch {
-            val usuarioReq = UsuarioRequest(
-                userName = usuario.userName,
-                password = usuario.password
-            )
             val result = guardar(id = 0,usuario)
 
             when (result) {
