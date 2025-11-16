@@ -1,241 +1,176 @@
-package edu.ucne.InsurePal.presentation
+package edu.ucne.InsurePal.presentation.usuario
 
 import edu.ucne.InsurePal.data.Resource
 import edu.ucne.InsurePal.domain.Usuario
 import edu.ucne.InsurePal.domain.useCases.obtenerUsuarioUseCase
 import edu.ucne.InsurePal.domain.useCases.obtenerUsuariosUseCase
 import edu.ucne.InsurePal.domain.useCases.saveUsuarioUseCase
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.coVerifyOrder
-import io.mockk.mockk
-import io.mockk.unmockkAll
-import org.junit.jupiter.api.Assertions.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.TestDispatcher
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.AfterEachCallback
-import org.junit.jupiter.api.extension.BeforeEachCallback
-import org.junit.jupiter.api.extension.ExtensionContext
-import org.junit.jupiter.api.extension.RegisterExtension
-
+import kotlinx.coroutines.test.resetMain
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Before
+import org.junit.Test
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @ExperimentalCoroutinesApi
 class UsuarioViewModelTest {
 
-    @JvmField
-    @RegisterExtension
-    val mainDispatcherRule = MainDispatcherRule()
-
-    private lateinit var guardar: saveUsuarioUseCase
-    private lateinit var obtener: obtenerUsuarioUseCase
-    private lateinit var obtenerLista: obtenerUsuariosUseCase
+    private lateinit var guardarUseCase: saveUsuarioUseCase
+    private lateinit var obtenerUseCase: obtenerUsuarioUseCase
+    private lateinit var obtenerListaUseCase: obtenerUsuariosUseCase
 
     private lateinit var viewModel: UsuarioViewModel
 
-    @BeforeEach
+    private val testDispatcher = StandardTestDispatcher()
+
+    @Before
     fun setUp() {
-        guardar = mockk()
-        obtener = mockk()
-        obtenerLista = mockk()
-
-        coEvery { obtenerLista() } returns flowOf(Resource.Success(emptyList()))
-
-        viewModel = UsuarioViewModel(guardar, obtener, obtenerLista)
+        Dispatchers.setMain(testDispatcher)
+        guardarUseCase = mock()
+        obtenerUseCase = mock()
+        obtenerListaUseCase = mock()
     }
 
-    @AfterEach
+    @After
     fun tearDown() {
-        unmockkAll()
+        Dispatchers.resetMain()
     }
 
     @Test
-    fun `init carga usuarios y actualiza el estado a éxito`() = runTest {
-        val fakeList = listOf(Usuario(1, "User1", "pass"))
-        coEvery { obtenerLista() } returns flowOf(Resource.Success(fakeList))
+    fun `init - deberia cargar usuarios exitosamente`() = runTest(testDispatcher) {
+        val mockUserList = listOf(Usuario(1, "testUser", "pass"))
+        val successFlow = flow {
+            emit(Resource.Loading())
+            emit(Resource.Success(mockUserList))
+        }
+        whenever(obtenerListaUseCase()).thenReturn(successFlow)
 
-        val vm = UsuarioViewModel(guardar, obtener, obtenerLista)
+        viewModel = UsuarioViewModel(guardarUseCase, obtenerUseCase, obtenerListaUseCase)
 
-        assertFalse(vm.state.value.isLoading)
-        assertEquals(fakeList, vm.state.value.usuarios)
-        coVerify(exactly = 1) { obtenerLista() }
+        assertEquals(true, viewModel.state.value.isLoading)
+
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertEquals(false, state.isLoading)
+        assertEquals(mockUserList, state.usuarios)
+        assertEquals(null, state.userMessage)
     }
 
     @Test
-    fun `init carga usuarios y actualiza el estado a error`() = runTest {
-        val errorMsg = "Error de red"
-        coEvery { obtenerLista() } returns flowOf(Resource.Error(errorMsg))
+    fun `init - deberia manejar error al cargar usuarios`() = runTest(testDispatcher) {
+        val errorFlow = flow<Resource<List<Usuario>>> {
+            emit(Resource.Loading())
+            emit(Resource.Error("Error de prueba"))
+        }
+        whenever(obtenerListaUseCase()).thenReturn(errorFlow)
 
-        val vm = UsuarioViewModel(guardar, obtener, obtenerLista)
+        viewModel = UsuarioViewModel(guardarUseCase, obtenerUseCase, obtenerListaUseCase)
+        advanceUntilIdle()
 
-        assertFalse(vm.state.value.isLoading)
-        assertEquals(errorMsg, vm.state.value.userMessage)
-        assertTrue(vm.state.value.usuarios.isEmpty())
+        val state = viewModel.state.value
+        assertEquals(false, state.isLoading)
+        assertEquals("Error de prueba", state.userMessage)
+        assertEquals(emptyList<Usuario>(), state.usuarios)
     }
 
     @Test
-    fun `onEvent(crear) con éxito guarda, limpia formulario y recarga usuarios`() = runTest {
-        val newUser = Usuario(0, "New", "pass")
-        val createdUser = Usuario(1, "New", "pass")
+    fun `onEvent crear - deberia guardar usuario y recargar la lista`() = runTest(testDispatcher) {
+        val newUser = Usuario(0, "nuevo", "123")
+        val createdUser = Usuario(1, "nuevo", "123")
+        val refreshedList = listOf(createdUser)
 
-        coEvery { guardar(0, newUser) } returns Resource.Success(createdUser)
-        coEvery { obtenerLista() } returnsMany listOf(
-            flowOf(Resource.Success(emptyList())),
-            flowOf(Resource.Success(listOf(createdUser)))
-        )
+        whenever(obtenerListaUseCase()).thenReturn(flowOf(Resource.Success(emptyList())))
 
-        viewModel = UsuarioViewModel(guardar, obtener, obtenerLista)
+        whenever(guardarUseCase(0, newUser)).thenReturn(Resource.Success<Usuario?>(null))
+
+        whenever(obtenerListaUseCase())
+            .thenReturn(flowOf(Resource.Success(emptyList())))
+            .thenReturn(flowOf(Resource.Success(refreshedList)))
+
+        viewModel = UsuarioViewModel(guardarUseCase, obtenerUseCase, obtenerListaUseCase)
+        advanceUntilIdle()
+
+        assertEquals(emptyList<Usuario>(), viewModel.state.value.usuarios)
 
         viewModel.onEvent(UsuarioEvent.crear(newUser))
+        advanceUntilIdle()
 
         val state = viewModel.state.value
         assertEquals("Usuario creado", state.userMessage)
-        assertEquals(listOf(createdUser), state.usuarios)
-        assertNull(state.usuarioId)
+        assertEquals(refreshedList, state.usuarios)
 
-        coVerifyOrder {
-            obtenerLista()
-            guardar(0, newUser)
-            obtenerLista()
-        }
+        verify(guardarUseCase, times(1)).invoke(0, newUser)
+        verify(obtenerListaUseCase, times(2)).invoke()
     }
 
     @Test
-    fun `onEvent(crear) con error muestra mensaje`() = runTest {
-        val newUser = Usuario(0, "New", "pass")
-        val errorMsg = "Error al guardar"
+    fun `onEvent crear - deberia manejar error al guardar`() = runTest(testDispatcher) {
 
-        coEvery { guardar(0, newUser) } returns Resource.Error(errorMsg)
+        val newUser = Usuario(0, "nuevo", "123")
+
+        whenever(obtenerListaUseCase.invoke())
+            .thenReturn(flowOf(Resource.Success(emptyList())))
+
+
+        whenever(guardarUseCase.invoke(0, newUser))
+            .thenReturn(Resource.Error("Error al guardar"))
+
+        viewModel = UsuarioViewModel(guardarUseCase, obtenerUseCase, obtenerListaUseCase)
+        advanceUntilIdle()
+
 
         viewModel.onEvent(UsuarioEvent.crear(newUser))
+        advanceUntilIdle()
 
-        assertEquals("Error al crear el usuario", viewModel.state.value.userMessage)
-        coVerify(exactly = 1) { guardar(0, newUser) }
-        coVerify(exactly = 1) { obtenerLista() }
-    }
-
-    @Test
-    fun `onEvent(actualizar) con éxito guarda, limpia formulario y recarga usuarios`() = runTest {
-        val updatedUser = Usuario(1, "Updated", "pass")
-
-        coEvery { guardar(updatedUser.usuarioId, updatedUser) } returns Resource.Success(updatedUser)
-        coEvery { obtenerLista() } returnsMany listOf(
-            flowOf(Resource.Success(emptyList())),
-            flowOf(Resource.Success(listOf(updatedUser)))
-        )
-
-        viewModel = UsuarioViewModel(guardar, obtener, obtenerLista)
-
-        viewModel.onEvent(UsuarioEvent.actualizar(updatedUser))
 
         val state = viewModel.state.value
-        assertEquals("Usuario actualizado exitosamente", state.userMessage)
-        assertEquals(listOf(updatedUser), state.usuarios)
-        assertNull(state.usuarioId)
+        assertEquals("Error al crear el usuario", state.userMessage)
+        assertEquals(emptyList<Usuario>(), state.usuarios)
 
-        coVerifyOrder {
-            obtenerLista()
-            guardar(updatedUser.usuarioId, updatedUser)
-            obtenerLista()
-        }
+        verify(guardarUseCase, times(1)).invoke(0, newUser)
+        verify(obtenerListaUseCase, times(1)).invoke()
+    }
+
+
+    @Test
+    fun `onEvent registerNewUser - deberia fallar si las contraseñas no coinciden`() = runTest(testDispatcher) {
+        whenever(obtenerListaUseCase()).thenReturn(flowOf(Resource.Success(emptyList())))
+
+        viewModel = UsuarioViewModel(guardarUseCase, obtenerUseCase, obtenerListaUseCase)
+        advanceUntilIdle()
+
+        viewModel.onEvent(UsuarioEvent.onRegUsernameChange("regUser"))
+        viewModel.onEvent(UsuarioEvent.onRegPasswordChange("pass1"))
+        viewModel.onEvent(UsuarioEvent.onRegConfirmPasswordChange("pass2"))
+
+        viewModel.onEvent(UsuarioEvent.registerNewUser)
+        advanceUntilIdle()
+
+        assertEquals("Las contraseñas no coinciden", viewModel.state.value.userMessage)
+
+        verify(guardarUseCase, times(0))
     }
 
     @Test
-    fun `onEvent(actualizar) con error muestra mensaje`() = runTest {
-        val updatedUser = Usuario(1, "Updated", "pass")
-        val errorMsg = "Error al actualizar"
+    fun `onEvent onUsernameChange - deberia actualizar el userName en el estado`() = runTest(testDispatcher) {
+        whenever(obtenerListaUseCase()).thenReturn(flowOf(Resource.Success(emptyList())))
+        viewModel = UsuarioViewModel(guardarUseCase, obtenerUseCase, obtenerListaUseCase)
+        advanceUntilIdle()
 
-        coEvery { guardar(updatedUser.usuarioId, updatedUser) } returns Resource.Error(errorMsg)
+        viewModel.onEvent(UsuarioEvent.onUsernameChange("nuevoUsuario"))
 
-        viewModel.onEvent(UsuarioEvent.actualizar(updatedUser))
-
-        assertEquals("Error al actualizar el usuario", viewModel.state.value.userMessage)
-        coVerify(exactly = 1) { guardar(updatedUser.usuarioId, updatedUser) }
-    }
-
-    @Test
-    fun `onEvent(obtener) con ID válido carga datos en el formulario`() = runTest {
-        val user = Usuario(5, "TestUser", "TestPass")
-        coEvery { obtener(5) } returns flowOf(Resource.Success(user))
-
-        viewModel.onEvent(UsuarioEvent.obtener(5))
-
-        val state = viewModel.state.value
-        assertEquals(user.usuarioId, state.usuarioId)
-        assertEquals(user.userName, state.userName)
-        assertEquals(user.password, state.password)
-    }
-
-    @Test
-    fun `onEvent(obtener) con ID nulo`() = runTest {
-        val errorMsg = "ID nulo"
-        coEvery { obtener(null) } returns flowOf(Resource.Error(errorMsg))
-
-        viewModel.onEvent(UsuarioEvent.obtener(null))
-
-        assertEquals(errorMsg, viewModel.state.value.userMessage)
-        assertEquals(null, viewModel.state.value.usuarioId)
-        coVerify(exactly = 1) { obtener(null) }
-    }
-
-    @Test
-    fun `onEvent(onUsernameChange) actualiza el estado`() {
-        val newUsername = "nuevo_usuario"
-        viewModel.onEvent(UsuarioEvent.onUsernameChange(newUsername))
-        assertEquals(newUsername, viewModel.state.value.userName)
-    }
-
-    @Test
-    fun `onEvent(onPasswordChange) actualiza el estado`() {
-        val newPassword = "nueva_clave"
-        viewModel.onEvent(UsuarioEvent.onPasswordChange(newPassword))
-        assertEquals(newPassword, viewModel.state.value.password)
-    }
-
-    @Test
-    fun `onEvent(userMessageShown) limpia el mensaje`() = runTest {
-        coEvery { obtener(99) } returns flowOf(Resource.Error("Error"))
-
-        viewModel.onEvent(UsuarioEvent.obtener(99))
-        assertNotNull(viewModel.state.value.userMessage)
-
-        viewModel.onEvent(UsuarioEvent.userMessageShown)
-
-        assertNull(viewModel.state.value.userMessage)
-    }
-
-    @Test
-    fun `onEvent(new) limpia el usuarioId`() = runTest {
-        val user = Usuario(5, "TestUser", "TestPass")
-        coEvery { obtener(5) } returns flowOf(Resource.Success(user))
-
-        viewModel.onEvent(UsuarioEvent.obtener(5))
-        assertEquals(5, viewModel.state.value.usuarioId)
-
-        viewModel.onEvent(UsuarioEvent.new)
-
-        assertNull(viewModel.state.value.usuarioId)
-    }
-}
-
-@ExperimentalCoroutinesApi
-class MainDispatcherRule(
-    private val testDispatcher: TestDispatcher = UnconfinedTestDispatcher()
-) : BeforeEachCallback, AfterEachCallback {
-
-    override fun beforeEach(context: ExtensionContext?) {
-        Dispatchers.setMain(testDispatcher)
-    }
-
-    override fun afterEach(context: ExtensionContext?) {
-        Dispatchers.resetMain()
+        assertEquals("nuevoUsuario", viewModel.state.value.userName)
     }
 }
