@@ -1,4 +1,4 @@
-package edu.ucne.InsurePal.presentation
+package edu.ucne.InsurePal.presentation.usuario
 
 import edu.ucne.InsurePal.domain.Usuario
 
@@ -9,4 +9,9 @@ data class UsuarioUiState (
     val usuarioId : Int? = null,
     val userName: String = "",
     val password:String? = "",
+
+    val isDialogVisible: Boolean = false,
+    val regUserName: String = "",
+    val regPassword: String = "",
+    val regConfirmPassword: String = ""
 )
