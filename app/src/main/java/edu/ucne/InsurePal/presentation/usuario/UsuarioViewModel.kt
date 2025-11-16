@@ -1,4 +1,4 @@
-package edu.ucne.InsurePal.presentation
+package edu.ucne.InsurePal.presentation.usuario
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -74,6 +74,73 @@ class UsuarioViewModel @Inject constructor(
                 _state.value = _state.value.copy()
             }
             is UsuarioEvent.onLoginClick -> login()
+            UsuarioEvent.onLoginClick -> {
+                viewModelScope.launch {
+                    // TODO: Añadir lógica de INICIO DE SESIÓN aquí
+                    // Por ejemplo, verificar _state.value.userName y _state.value.password
+                    _state.update { it.copy(userMessage = "Lógica de login no implementada") }
+                }
+            }
+
+            UsuarioEvent.showRegistrationDialog -> {
+                _state.update { it.copy(isDialogVisible = true) }
+            }
+
+            UsuarioEvent.hideRegistrationDialog -> {
+                _state.update {
+                    it.copy(
+                        isDialogVisible = false,
+                        regUserName = "",
+                        regPassword = "",
+                        regConfirmPassword = ""
+                    )
+                }
+            }
+
+            UsuarioEvent.registerNewUser -> {
+
+                viewModelScope.launch {
+                    val state = _state.value
+                    if (state.regPassword != state.regConfirmPassword) {
+                        _state.update { it.copy(userMessage = "Las contraseñas no coinciden") }
+                        return@launch
+                    }
+
+                    val usuario = Usuario(
+                        usuarioId = 0,
+                        userName = state.regUserName,
+                        password = state.regPassword
+                    )
+
+                    when (guardar(0, usuario)) {
+                        is Resource.Success -> {
+                            _state.update {
+                                it.copy(
+                                    userMessage = "Usuario registrado exitosamente",
+                                    isDialogVisible = false,
+                                    regUserName = "",
+                                    regPassword = "",
+                                    regConfirmPassword = ""
+                                )
+                            }
+
+                        }
+                        is Resource.Error -> {
+                            _state.update { it.copy(userMessage = "Error al registrar el usuario") }
+                        }
+                        else -> {}
+                    }
+                }
+            }
+            is UsuarioEvent.onRegUsernameChange -> {
+                _state.update { it.copy(regUserName = event.userName) }
+            }
+            is UsuarioEvent.onRegPasswordChange -> {
+                _state.update { it.copy(regPassword = event.password) }
+            }
+            is UsuarioEvent.onRegConfirmPasswordChange -> {
+                _state.update { it.copy(regConfirmPassword = event.password) }
+            }
         }
     }
 
