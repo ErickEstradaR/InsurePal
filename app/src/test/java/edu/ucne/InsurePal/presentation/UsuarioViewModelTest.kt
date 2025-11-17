@@ -2,9 +2,9 @@ package edu.ucne.InsurePal.presentation.usuario
 
 import edu.ucne.InsurePal.data.Resource
 import edu.ucne.InsurePal.domain.Usuario
-import edu.ucne.InsurePal.domain.useCases.obtenerUsuarioUseCase
-import edu.ucne.InsurePal.domain.useCases.obtenerUsuariosUseCase
-import edu.ucne.InsurePal.domain.useCases.saveUsuarioUseCase
+import edu.ucne.InsurePal.domain.useCases.ObtenerUsuarioUseCase
+import edu.ucne.InsurePal.domain.useCases.ObtenerUsuariosUseCase
+import edu.ucne.InsurePal.domain.useCases.SaveUsuarioUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
@@ -26,9 +26,9 @@ import org.mockito.kotlin.whenever
 @ExperimentalCoroutinesApi
 class UsuarioViewModelTest {
 
-    private lateinit var guardarUseCase: saveUsuarioUseCase
-    private lateinit var obtenerUseCase: obtenerUsuarioUseCase
-    private lateinit var obtenerListaUseCase: obtenerUsuariosUseCase
+    private lateinit var guardarUseCase: SaveUsuarioUseCase
+    private lateinit var obtenerUseCase: ObtenerUsuarioUseCase
+    private lateinit var obtenerListaUseCase: ObtenerUsuariosUseCase
 
     private lateinit var viewModel: UsuarioViewModel
 

@@ -6,9 +6,9 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.InsurePal.data.Resource
 import edu.ucne.InsurePal.domain.Usuario
-import edu.ucne.InsurePal.domain.useCases.obtenerUsuarioUseCase
-import edu.ucne.InsurePal.domain.useCases.obtenerUsuariosUseCase
-import edu.ucne.InsurePal.domain.useCases.saveUsuarioUseCase
+import edu.ucne.InsurePal.domain.useCases.ObtenerUsuarioUseCase
+import edu.ucne.InsurePal.domain.useCases.ObtenerUsuariosUseCase
+import edu.ucne.InsurePal.domain.useCases.SaveUsuarioUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,9 +18,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UsuarioViewModel @Inject constructor(
-    private val guardar : saveUsuarioUseCase,
-    private val obtener : obtenerUsuarioUseCase,
-    private val obtenerLista : obtenerUsuariosUseCase
+    private val guardar : SaveUsuarioUseCase,
+    private val obtener : ObtenerUsuarioUseCase,
+    private val obtenerLista : ObtenerUsuariosUseCase
 ) : ViewModel() {
     private val _state = MutableStateFlow(UsuarioUiState(isLoading = true))
     val state: StateFlow<UsuarioUiState> = _state.asStateFlow()

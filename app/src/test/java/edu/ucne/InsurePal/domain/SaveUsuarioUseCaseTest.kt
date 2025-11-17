@@ -2,7 +2,7 @@ package edu.ucne.InsurePal.domain
 
 import edu.ucne.InsurePal.data.Resource
 import edu.ucne.InsurePal.data.toRequest
-import edu.ucne.InsurePal.domain.useCases.saveUsuarioUseCase
+import edu.ucne.InsurePal.domain.useCases.SaveUsuarioUseCase
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -17,7 +17,7 @@ import org.junit.Test
 class SaveUsuarioUseCaseTest {
 
     private lateinit var repository: UsuarioRepository
-    private lateinit var useCase: saveUsuarioUseCase
+    private lateinit var useCase: SaveUsuarioUseCase
 
 
     private val testUsuario = Usuario(1, "testUser","123")
@@ -26,7 +26,7 @@ class SaveUsuarioUseCaseTest {
     @Before
     fun setUp() {
         repository = mockk()
-        useCase = saveUsuarioUseCase(repository)
+        useCase = SaveUsuarioUseCase(repository)
     }
 
     @After

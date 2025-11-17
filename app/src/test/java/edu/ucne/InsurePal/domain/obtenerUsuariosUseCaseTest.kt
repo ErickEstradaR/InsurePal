@@ -1,7 +1,7 @@
 import edu.ucne.InsurePal.data.Resource
 import edu.ucne.InsurePal.domain.Usuario
 import edu.ucne.InsurePal.domain.UsuarioRepository
-import edu.ucne.InsurePal.domain.useCases.obtenerUsuariosUseCase
+import edu.ucne.InsurePal.domain.useCases.ObtenerUsuariosUseCase
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -19,12 +19,12 @@ import org.junit.Test
 class ObtenerUsuariosUseCaseTest {
 
     private lateinit var repository: UsuarioRepository
-    private lateinit var useCase: obtenerUsuariosUseCase
+    private lateinit var useCase: ObtenerUsuariosUseCase
 
     @Before
     fun setUp() {
         repository = mockk()
-        useCase = obtenerUsuariosUseCase(repository)
+        useCase = ObtenerUsuariosUseCase(repository)
     }
 
     @After
