@@ -104,7 +104,7 @@ class UsuarioViewModelTest {
 
         assertEquals(emptyList<Usuario>(), viewModel.state.value.usuarios)
 
-        viewModel.onEvent(UsuarioEvent.crear(newUser))
+        viewModel.onEvent(UsuarioEvent.Crear(newUser))
         advanceUntilIdle()
 
         val state = viewModel.state.value
@@ -131,7 +131,7 @@ class UsuarioViewModelTest {
         advanceUntilIdle()
 
 
-        viewModel.onEvent(UsuarioEvent.crear(newUser))
+        viewModel.onEvent(UsuarioEvent.Crear(newUser))
         advanceUntilIdle()
 
 
@@ -151,9 +151,9 @@ class UsuarioViewModelTest {
         viewModel = UsuarioViewModel(guardarUseCase, obtenerUseCase, obtenerListaUseCase)
         advanceUntilIdle()
 
-        viewModel.onEvent(UsuarioEvent.onRegUsernameChange("regUser"))
-        viewModel.onEvent(UsuarioEvent.onRegPasswordChange("pass1"))
-        viewModel.onEvent(UsuarioEvent.onRegConfirmPasswordChange("pass2"))
+        viewModel.onEvent(UsuarioEvent.OnRegUsernameChange("regUser"))
+        viewModel.onEvent(UsuarioEvent.OnRegPasswordChange("pass1"))
+        viewModel.onEvent(UsuarioEvent.OnRegConfirmPasswordChange("pass2"))
 
         viewModel.onEvent(UsuarioEvent.registerNewUser)
         advanceUntilIdle()
@@ -169,7 +169,7 @@ class UsuarioViewModelTest {
         viewModel = UsuarioViewModel(guardarUseCase, obtenerUseCase, obtenerListaUseCase)
         advanceUntilIdle()
 
-        viewModel.onEvent(UsuarioEvent.onUsernameChange("nuevoUsuario"))
+        viewModel.onEvent(UsuarioEvent.OnUsernameChange("nuevoUsuario"))
 
         assertEquals("nuevoUsuario", viewModel.state.value.userName)
     }

@@ -95,7 +95,7 @@ fun UsuarioScreenContent(
 
         OutlinedTextField(
             value = uiState.userName,
-            onValueChange = { onEvent(UsuarioEvent.onUsernameChange(it)) },
+            onValueChange = { onEvent(UsuarioEvent.OnUsernameChange(it)) },
             label = { Text("Nombre de Usuario") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
@@ -106,7 +106,7 @@ fun UsuarioScreenContent(
 
         OutlinedTextField(
             value = uiState.password ?: "",
-            onValueChange = { onEvent(UsuarioEvent.onPasswordChange(it)) },
+            onValueChange = { onEvent(UsuarioEvent.OnPasswordChange(it)) },
             label = { Text("Contraseña") },
             modifier = Modifier.fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation(),

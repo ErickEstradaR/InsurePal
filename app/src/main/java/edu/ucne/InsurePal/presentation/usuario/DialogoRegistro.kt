@@ -28,7 +28,7 @@ fun DialogoRegistro(
             Column {
                 OutlinedTextField(
                     value = uiState.regUserName,
-                    onValueChange = { onEvent(UsuarioEvent.onRegUsernameChange(it)) },
+                    onValueChange = { onEvent(UsuarioEvent.OnRegUsernameChange(it)) },
                     label = { Text("Nombre de Usuario") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
@@ -38,7 +38,7 @@ fun DialogoRegistro(
 
                 OutlinedTextField(
                     value = uiState.regPassword,
-                    onValueChange = { onEvent(UsuarioEvent.onRegPasswordChange(it)) },
+                    onValueChange = { onEvent(UsuarioEvent.OnRegPasswordChange(it)) },
                     label = { Text("Contraseña") },
                     modifier = Modifier.fillMaxWidth(),
                     visualTransformation = PasswordVisualTransformation(),
@@ -49,7 +49,7 @@ fun DialogoRegistro(
 
                 OutlinedTextField(
                     value = uiState.regConfirmPassword,
-                    onValueChange = { onEvent(UsuarioEvent.onRegConfirmPasswordChange(it)) },
+                    onValueChange = { onEvent(UsuarioEvent.OnRegConfirmPasswordChange(it)) },
                     label = { Text("Confirmar Contraseña") },
                     modifier = Modifier.fillMaxWidth(),
                     visualTransformation = PasswordVisualTransformation(),

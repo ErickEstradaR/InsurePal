@@ -58,14 +58,14 @@ class UsuarioViewModel @Inject constructor(
 
     fun onEvent(event: UsuarioEvent) {
         when (event) {
-            is UsuarioEvent.crear -> crearUsuario(event.usuario)
+            is UsuarioEvent.Crear -> crearUsuario(event.usuario)
             is UsuarioEvent.actualizar -> updateUsuario(event.usuario)
-            is UsuarioEvent.obtener -> getUsuario(event.id)
+            is UsuarioEvent.Obtener -> getUsuario(event.id)
             is UsuarioEvent.cargar -> obtenerUsuarios()
-            is UsuarioEvent.onPasswordChange -> {
+            is UsuarioEvent.OnPasswordChange -> {
                 _state.value = _state.value.copy(password = event.password)
             }
-            is UsuarioEvent.onUsernameChange -> {
+            is UsuarioEvent.OnUsernameChange -> {
                 _state.value = _state.value.copy(userName = event.userName)
             }
             is UsuarioEvent.userMessageShown -> clearMessage()
@@ -125,13 +125,13 @@ class UsuarioViewModel @Inject constructor(
                     }
                 }
             }
-            is UsuarioEvent.onRegUsernameChange -> {
+            is UsuarioEvent.OnRegUsernameChange -> {
                 _state.update { it.copy(regUserName = event.userName) }
             }
-            is UsuarioEvent.onRegPasswordChange -> {
+            is UsuarioEvent.OnRegPasswordChange -> {
                 _state.update { it.copy(regPassword = event.password) }
             }
-            is UsuarioEvent.onRegConfirmPasswordChange -> {
+            is UsuarioEvent.OnRegConfirmPasswordChange -> {
                 _state.update { it.copy(regConfirmPassword = event.password) }
             }
         }
@@ -199,6 +199,7 @@ class UsuarioViewModel @Inject constructor(
                     }
                 }
                 else -> {
+                    Log.e("UsuarioViewModel", "Resultado: $result")
                 }
             }
         }
@@ -220,7 +221,7 @@ class UsuarioViewModel @Inject constructor(
                         it.copy(userMessage = "Error al actualizar el usuario")
                     }
                 }
-                else -> {}
+               else -> {}
             }
         }
     }
