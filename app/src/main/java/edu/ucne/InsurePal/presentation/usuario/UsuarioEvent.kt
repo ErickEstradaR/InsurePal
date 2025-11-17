@@ -5,12 +5,12 @@ import edu.ucne.InsurePal.domain.Usuario
 sealed interface UsuarioEvent
 {
     data object cargar : UsuarioEvent
-    data class onUsernameChange(val userName: String) : UsuarioEvent
-    data class onPasswordChange(val password: String) : UsuarioEvent
-    data class obtener(val id: Int?): UsuarioEvent
+    data class OnUsernameChange(val userName: String) : UsuarioEvent
+    data class OnPasswordChange(val password: String) : UsuarioEvent
+    data class Obtener(val id: Int?): UsuarioEvent
     object userMessageShown : UsuarioEvent
 
-    data class crear(val usuario: Usuario): UsuarioEvent
+    data class Crear(val usuario: Usuario): UsuarioEvent
     data class actualizar(val usuario: Usuario) : UsuarioEvent
 
     data object new: UsuarioEvent
@@ -19,7 +19,7 @@ sealed interface UsuarioEvent
     data object registerNewUser : UsuarioEvent
     data object showRegistrationDialog : UsuarioEvent
     data object hideRegistrationDialog : UsuarioEvent
-    data class onRegUsernameChange(val userName: String) : UsuarioEvent
-    data class onRegPasswordChange(val password: String) : UsuarioEvent
-    data class onRegConfirmPasswordChange(val password: String) : UsuarioEvent
+    data class OnRegUsernameChange(val userName: String) : UsuarioEvent
+    data class OnRegPasswordChange(val password: String) : UsuarioEvent
+    data class OnRegConfirmPasswordChange(val password: String) : UsuarioEvent
 }
