@@ -1,18 +1,18 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-    id("com.google.devtools.ksp") version "2.1.0-1.0.29"
-    id("com.google.dagger.hilt.android") version "2.57.2"
+    id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android")
     id("org.jetbrains.kotlin.plugin.compose")
     alias(libs.plugins.kotlinx.serialization)
 }
 
 android {
-    namespace = "edu.ucne.jugadorestictactoe"
+    namespace = "edu.ucne.InsurePal"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "edu.ucne.jugadorestictactoe"
+        applicationId = "edu.ucne.InsurePal"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
@@ -49,19 +49,29 @@ dependencies {
     implementation(libs.androidx.junit.ktx)
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.compose.material3)
-    annotationProcessor(libs.androidx.room.compiler)
+    implementation(libs.androidx.compose.ui.text.google.fonts)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.hilt.work)
     ksp(libs.androidx.hilt.compiler)
     implementation(libs.androidx.work.runtime.ktx)
-
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("org.mockito:mockito-core:5.10.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+    testImplementation("com.squareup.retrofit2:retrofit:2.9.0")
+    testImplementation("io.mockk:mockk:1.13.11")
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.6.8")
     implementation(libs.androidx.foundation)
 
-    //optional
+
     implementation(libs.androidx.room.ktx)
     implementation(libs.material3)
     implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.material.v131) // Usa la última versión
+    implementation(libs.androidx.material.v131)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
