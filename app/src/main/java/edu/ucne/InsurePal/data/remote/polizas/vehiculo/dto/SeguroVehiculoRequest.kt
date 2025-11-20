@@ -1,4 +1,4 @@
-package edu.ucne.InsurePal.data.remote.polizas.vehiculo
+package edu.ucne.InsurePal.data.remote.polizas.vehiculo.dto
 
 import java.time.LocalDate
 

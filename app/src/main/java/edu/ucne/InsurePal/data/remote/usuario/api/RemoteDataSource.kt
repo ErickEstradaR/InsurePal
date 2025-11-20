@@ -1,4 +1,4 @@
-package edu.ucne.InsurePal.data.remote.usuario
+package edu.ucne.InsurePal.data.remote.usuario.api
 
 import edu.ucne.InsurePal.data.Resource
 import edu.ucne.InsurePal.data.remote.usuario.dto.UsuarioRequest
