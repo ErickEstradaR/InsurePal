@@ -7,7 +7,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import edu.ucne.InsurePal.data.remote.usuario.UsuarioApiService
+import edu.ucne.InsurePal.data.remote.usuario.api.UsuarioApiService
 import edu.ucne.InsurePal.data.remote.usuario.UsuarioRepositoryImpl
 import edu.ucne.InsurePal.domain.usuario.UsuarioRepository
 import okhttp3.OkHttpClient
@@ -20,7 +20,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 @Module
 object Module {
-    const val BASE_URL = "https://gestionhuacalesapi.azurewebsites.net/"
+    const val BASE_URL = "https://insurepal.azurewebsites.net/"
 
     @Provides
     @Singleton
