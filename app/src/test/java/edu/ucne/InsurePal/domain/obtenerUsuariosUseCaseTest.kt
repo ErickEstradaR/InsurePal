@@ -1,7 +1,7 @@
 import edu.ucne.InsurePal.data.Resource
-import edu.ucne.InsurePal.domain.Usuario
-import edu.ucne.InsurePal.domain.UsuarioRepository
-import edu.ucne.InsurePal.domain.useCases.ObtenerUsuariosUseCase
+import edu.ucne.InsurePal.domain.usuario.Usuario
+import edu.ucne.InsurePal.domain.usuario.UsuarioRepository
+import edu.ucne.InsurePal.domain.usuario.useCases.ObtenerUsuariosUseCase
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

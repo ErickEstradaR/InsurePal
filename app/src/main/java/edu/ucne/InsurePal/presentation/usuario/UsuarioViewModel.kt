@@ -5,10 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.InsurePal.data.Resource
-import edu.ucne.InsurePal.domain.Usuario
-import edu.ucne.InsurePal.domain.useCases.ObtenerUsuarioUseCase
-import edu.ucne.InsurePal.domain.useCases.ObtenerUsuariosUseCase
-import edu.ucne.InsurePal.domain.useCases.SaveUsuarioUseCase
+import edu.ucne.InsurePal.domain.usuario.Usuario
+import edu.ucne.InsurePal.domain.usuario.useCases.ObtenerUsuarioUseCase
+import edu.ucne.InsurePal.domain.usuario.useCases.ObtenerUsuariosUseCase
+import edu.ucne.InsurePal.domain.usuario.useCases.SaveUsuarioUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

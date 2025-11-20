@@ -1,6 +1,6 @@
-package edu.ucne.InsurePal.domain.useCases
+package edu.ucne.InsurePal.domain.usuario.useCases
 
-import edu.ucne.InsurePal.domain.UsuarioRepository
+import edu.ucne.InsurePal.domain.usuario.UsuarioRepository
 import javax.inject.Inject
 
 class ObtenerUsuarioUseCase @Inject constructor(private val repo : UsuarioRepository) {

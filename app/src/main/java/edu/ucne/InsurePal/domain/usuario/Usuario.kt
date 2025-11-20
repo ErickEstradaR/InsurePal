@@ -1,4 +1,4 @@
-package edu.ucne.InsurePal.domain
+package edu.ucne.InsurePal.domain.usuario
 
 data class Usuario (
     val usuarioId : Int,

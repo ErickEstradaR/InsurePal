@@ -1,4 +1,4 @@
-package edu.ucne.InsurePal.domain
+package edu.ucne.InsurePal.domain.usuario
 
 import edu.ucne.InsurePal.data.Resource
 import edu.ucne.InsurePal.data.remote.usuario.dto.UsuarioRequest

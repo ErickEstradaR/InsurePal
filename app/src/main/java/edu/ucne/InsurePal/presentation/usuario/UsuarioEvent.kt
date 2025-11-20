@@ -1,6 +1,6 @@
 package edu.ucne.InsurePal.presentation.usuario
 
-import edu.ucne.InsurePal.domain.Usuario
+import edu.ucne.InsurePal.domain.usuario.Usuario
 
 sealed interface UsuarioEvent
 {
