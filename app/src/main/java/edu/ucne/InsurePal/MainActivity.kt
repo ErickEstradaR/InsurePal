@@ -9,7 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
-import edu.ucne.InsurePal.presentation.usuario.UsuarioScreen
+import edu.ucne.InsurePal.presentation.usuario.LoginScreen
 import edu.ucne.InsurePal.ui.theme.InsurePalTheme
 
 @AndroidEntryPoint
@@ -23,7 +23,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    UsuarioScreen()
+                    LoginScreen()
                 }
             }
         }
