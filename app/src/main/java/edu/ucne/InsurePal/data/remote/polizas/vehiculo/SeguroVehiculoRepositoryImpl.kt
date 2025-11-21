@@ -14,9 +14,9 @@ class SeguroVehiculoRepositoryImpl @Inject constructor(
     val remoteDataSource: RemoteDataSource
 ): SeguroVehiculoRepository {
 
-    override suspend fun getVehiculos(): Flow<Resource<List<SeguroVehiculo>>> = flow {
+    override suspend fun getVehiculos(usuarioId: Int): Flow<Resource<List<SeguroVehiculo>>> = flow {
         emit(Resource.Loading())
-        when (val result = remoteDataSource.getVehiculos()) {
+        when (val result = remoteDataSource.getVehiculos(usuarioId)) {
             is Resource.Success -> {
                 val list = result.data?.map { it.toDomain() } ?: emptyList()
                 emit(Resource.Success(list))
@@ -97,6 +97,4 @@ class SeguroVehiculoRepositoryImpl @Inject constructor(
             }
         }
     }
-
-
 }
