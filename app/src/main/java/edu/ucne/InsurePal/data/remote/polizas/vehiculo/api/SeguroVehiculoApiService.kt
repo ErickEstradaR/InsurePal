@@ -4,6 +4,7 @@ import edu.ucne.InsurePal.data.remote.polizas.vehiculo.dto.SeguroVehiculoRequest
 import edu.ucne.InsurePal.data.remote.polizas.vehiculo.dto.SeguroVehiculoResponse
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -21,5 +22,9 @@ interface SeguroVehiculoApiService {
 
     @PUT("api/Vehiculos/{id}")
     suspend fun putVehiculo(@Path("id") id:String, @Body seguroVehiculo: SeguroVehiculoRequest): Response<Unit>
+
+    @DELETE("api/Vehiculos/{id}")
+    suspend fun deleteVehiculo(@Path("id") id: String): Response<Unit>
+
 
 }
