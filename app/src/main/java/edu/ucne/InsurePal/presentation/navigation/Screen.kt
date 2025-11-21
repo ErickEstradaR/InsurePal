@@ -2,8 +2,7 @@ package edu.ucne.InsurePal.presentation.navigation
 
 import kotlinx.serialization.Serializable
 
-@Serializable
-sealed class Screen {
-    @Serializable
-    data object Login: Screen()
+sealed class Screen(val route: String) {
+    object Login : Screen("login")
+    object Home : Screen("home")
 }
