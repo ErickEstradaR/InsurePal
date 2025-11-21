@@ -11,7 +11,7 @@ import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface SeguroVehiculoApiService {
-    @GET("api/Vehiculos")
+    @GET("api/Vehiculos/Usuario/{usuarioId}")
     suspend fun getVehiculos(): Response<List<SeguroVehiculoResponse>>
 
     @GET("api/Vehiculos/{id}")
