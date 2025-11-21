@@ -1,12 +1,15 @@
 package edu.ucne.InsurePal.di
 
+import android.content.Context
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import edu.ucne.InsurePal.data.local.UserPreferences
 import edu.ucne.InsurePal.data.remote.usuario.api.UsuarioApiService
 import edu.ucne.InsurePal.data.remote.usuario.UsuarioRepositoryImpl
 import edu.ucne.InsurePal.domain.usuario.repository.UsuarioRepository
@@ -50,6 +53,13 @@ object Module {
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
     }
+
+    @Provides
+    @Singleton
+    fun provideUserPreferences(@ApplicationContext context: Context): UserPreferences {
+        return UserPreferences(context)
+    }
+
 
     @Provides
     @Singleton
