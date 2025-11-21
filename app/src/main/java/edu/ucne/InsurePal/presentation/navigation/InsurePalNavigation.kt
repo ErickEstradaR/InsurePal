@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import edu.ucne.InsurePal.presentation.home.InsuranceHomeScreen
+import edu.ucne.InsurePal.presentation.home.SeleccionSeguroScreen
 import edu.ucne.InsurePal.presentation.usuario.LoginScreen
 
 @Composable
@@ -31,6 +32,24 @@ fun InsurePalNavigation() {
 
         composable(Screen.Home.route) {
             InsuranceHomeScreen(
+                onActionClick = { action ->
+                    if (action == "Nuevo Seguro") {
+                        navController.navigate(Screen.SeleccionSeguro.route)
+                    }
+                }
+            )
+        }
+
+        composable(Screen.SeleccionSeguro.route) {
+            SeleccionSeguroScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onInsuranceSelected = { typeId ->
+                    if (typeId == "VEHICULO") {
+                        println("Seleccionó vehículo")
+                    }
+                }
             )
         }
     }
