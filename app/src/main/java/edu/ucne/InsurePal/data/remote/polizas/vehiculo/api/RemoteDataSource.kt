@@ -66,4 +66,17 @@ class RemoteDataSource @Inject constructor(
             Resource.Error(e.localizedMessage ?: "Error de red al obtener vehiculos")
         }
     }
+
+    suspend fun deleteVehiculo(id: String): Resource<Unit> {
+        return try {
+            val response = api.deleteVehiculo(id)
+            if (response.isSuccessful) {
+                Resource.Success(Unit)
+            } else {
+                Resource.Error("HTTP ${response.code()} ${response.message()}")
+            }
+        } catch (e: Exception) {
+            Resource.Error(e.localizedMessage ?: "Error de red")
+        }
+    }
 }
