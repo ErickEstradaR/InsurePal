@@ -156,8 +156,13 @@ class UsuarioViewModel @Inject constructor(
                                 }
                             }
                             user.password == password -> {
+
                                 _state.update {
-                                    it.copy(isLoading = false, userMessage = "Inicio de sesión exitoso")
+                                    it.copy(
+                                        isLoading = false,
+                                        isLoginSuccessful = true,
+                                        userMessage = "Inicio de sesión exitoso"
+                                    )
                                 }
                             }
                             else -> {
