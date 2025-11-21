@@ -28,7 +28,6 @@ class SaveUsuarioUseCase @Inject constructor(
                 is Resource.Loading -> Resource.Loading()
             }
         }
-
         return result
     }
 }
