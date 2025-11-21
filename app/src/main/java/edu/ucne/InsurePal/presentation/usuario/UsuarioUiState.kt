@@ -13,5 +13,7 @@ data class UsuarioUiState (
     val isDialogVisible: Boolean = false,
     val regUserName: String = "",
     val regPassword: String = "",
-    val regConfirmPassword: String = ""
+    val regConfirmPassword: String = "",
+
+    val isLoginSuccessful: Boolean = false
 )
