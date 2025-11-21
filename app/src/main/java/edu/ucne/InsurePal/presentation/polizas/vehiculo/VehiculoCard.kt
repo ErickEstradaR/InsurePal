@@ -1,4 +1,4 @@
-package edu.ucne.InsurePal.presentation.polizas
+package edu.ucne.InsurePal.presentation.polizas.vehiculo
 
 import android.content.res.Configuration
 import edu.ucne.InsurePal.domain.polizas.vehiculo.model.SeguroVehiculo
