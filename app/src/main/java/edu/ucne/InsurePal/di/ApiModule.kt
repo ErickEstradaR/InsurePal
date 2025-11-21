@@ -10,8 +10,11 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import edu.ucne.InsurePal.data.local.UserPreferences
+import edu.ucne.InsurePal.data.remote.polizas.vehiculo.SeguroVehiculoRepositoryImpl
+import edu.ucne.InsurePal.data.remote.polizas.vehiculo.api.SeguroVehiculoApiService
 import edu.ucne.InsurePal.data.remote.usuario.api.UsuarioApiService
 import edu.ucne.InsurePal.data.remote.usuario.UsuarioRepositoryImpl
+import edu.ucne.InsurePal.domain.polizas.vehiculo.repository.SeguroVehiculoRepository
 import edu.ucne.InsurePal.domain.usuario.repository.UsuarioRepository
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -71,6 +74,16 @@ object Module {
             .create(UsuarioApiService::class.java)
     }
 
+    @Provides
+    @Singleton
+    fun provideVehiculoApiService(moshi: Moshi): SeguroVehiculoApiService {
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(SeguroVehiculoApiService::class.java)
+    }
+
     @Module
     @InstallIn(SingletonComponent::class)
 
@@ -80,4 +93,9 @@ object Module {
         abstract fun bindUsuarioRepository(
             impl: UsuarioRepositoryImpl
         ): UsuarioRepository
+        @Binds
+        @Singleton
+        abstract fun bindVehiculoRepository(
+            impl: SeguroVehiculoRepositoryImpl
+        ): SeguroVehiculoRepository
     }}
