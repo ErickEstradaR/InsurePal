@@ -9,6 +9,9 @@ import javax.inject.Inject
 class RemoteDataSource @Inject constructor(
     private val api: UsuarioApiService
 ) {
+
+    private val errorDeRed:String = "Error de red"
+
     suspend fun save(request: UsuarioRequest): Resource<UsuarioResponse> {
         return try {
             val response = api.postUsuario(request)
@@ -24,7 +27,7 @@ class RemoteDataSource @Inject constructor(
                 Resource.Error("HTTP ${response.code()} ${response.message()}")
             }
         } catch (e: Exception) {
-            Resource.Error(e.localizedMessage ?: "Error de red")
+            Resource.Error(e.localizedMessage ?: errorDeRed)
         }
     }
 
@@ -37,7 +40,7 @@ class RemoteDataSource @Inject constructor(
                 Resource.Error("HTTP ${response.code()} ${response.message()}")
             }
         } catch (e: Exception) {
-            Resource.Error(e.localizedMessage ?: "Error de red")
+            Resource.Error(e.localizedMessage ?: errorDeRed)
         }
     }
 
