@@ -25,6 +25,4 @@ interface SeguroVehiculoApiService {
 
     @DELETE("api/Vehiculos/{id}")
     suspend fun deleteVehiculo(@Path("id") id: String): Response<Unit>
-
-
 }
