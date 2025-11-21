@@ -109,7 +109,6 @@ fun HomeHeader() {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column {
-            Text(text = "Hola, Carlos 👋", style = MaterialTheme.typography.titleMedium, color = Color.Gray)
             Text(
                 text = "Bienvenido de nuevo",
                 style = MaterialTheme.typography.bodyLarge,
@@ -251,7 +250,7 @@ fun PromoBanner() {
 )
 @Composable
 fun InsuranceHomeScreenPreview() {
-    InsurePalTheme() {
+    InsurePalTheme {
         InsuranceHomeScreen()
     }
 }
