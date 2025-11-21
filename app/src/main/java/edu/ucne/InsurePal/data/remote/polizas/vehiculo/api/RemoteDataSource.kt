@@ -53,7 +53,7 @@ class RemoteDataSource @Inject constructor(
         }
     }
 
-    suspend fun getVehiculos(): Resource<List<SeguroVehiculoResponse>> {
+    suspend fun getVehiculos(usuarioId: Int): Resource<List<SeguroVehiculoResponse>> {
         return try {
             val response = api.getVehiculos()
             if (response.isSuccessful) {
