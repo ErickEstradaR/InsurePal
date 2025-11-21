@@ -20,20 +20,32 @@ fun UsuarioResponse.toDomain() = Usuario(
 )
 
 fun SeguroVehiculoResponse.toDomain() = SeguroVehiculo(
-     idPoliza  = idPoliza,
-     name = name,
-     status = status,
-     expirationDate = expirationDate,
-     placa = placa,
-     modeloVehiculo= modeloVehiculo,
-     coverageType = coverageType
+    usuarioId = usuarioId,
+    idPoliza = idPoliza,
+    name = name,
+    marca = marca,
+    modelo = modelo,
+    anio = anio,
+    color = color,
+    placa = placa,
+    chasis = chasis,
+    valorMercado = valorMercado,
+    coverageType = coverageType,
+    status = status ?: "Cotizando",
+    expirationDate = expirationDate
 )
 
 fun SeguroVehiculo.toRequest(): SeguroVehiculoRequest = SeguroVehiculoRequest(
+    usuarioId = usuarioId,
     name = name,
-    status = status,
-    expirationDate = expirationDate,
+    marca = marca,
+    modelo = modelo,
+    anio = anio,
+    color = color,
     placa = placa,
-    modeloVehiculo= modeloVehiculo,
-    coverageType = coverageType
+    chasis = chasis,
+    valorMercado = valorMercado,
+    coverageType = coverageType,
+    status = status,
+    expirationDate = expirationDate
 )
