@@ -56,10 +56,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    viewModel: UsuarioViewModel = hiltViewModel()
+    viewModel: UsuarioViewModel = hiltViewModel(),
+    onLoginSuccess: () -> Unit
 ) {
     val uiState by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(key1 = uiState.isLoginSuccessful) {
+        if (uiState.isLoginSuccessful) {
+            onLoginSuccess()
+        }
+    }
 
     LaunchedEffect(key1 = uiState.userMessage) {
         uiState.userMessage?.let { message ->
