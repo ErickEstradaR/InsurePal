@@ -7,7 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import edu.ucne.InsurePal.presentation.home.InsuranceHomeScreen
 import edu.ucne.InsurePal.presentation.home.SeleccionSeguroScreen
-import edu.ucne.InsurePal.presentation.polizas.vehiculo.registro.VehiculoRegistroScreen
+import edu.ucne.InsurePal.presentation.polizas.vehiculo.VehiculoRegistroScreen
 import edu.ucne.InsurePal.presentation.usuario.LoginScreen
 
 @Composable
