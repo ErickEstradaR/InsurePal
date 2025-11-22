@@ -17,5 +17,8 @@ data class VehiculoUiState(
     val placa: String = "",
     val chasis: String = "",
     val valorMercado: String = "",
-    val coverageType: String = "Full Cobertura"
+    val coverageType: String = "Full Cobertura",
+
+    val marcasDisponibles: List<String> = emptyList(),
+    val modelosDisponibles: List<String> = emptyList()
 )
