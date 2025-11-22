@@ -7,16 +7,23 @@ import edu.ucne.InsurePal.data.Resource
 import edu.ucne.InsurePal.data.local.UserPreferences
 import edu.ucne.InsurePal.data.remote.polizas.vehiculo.dto.SeguroVehiculoRequest
 import edu.ucne.InsurePal.domain.polizas.vehiculo.repository.SeguroVehiculoRepository
+import edu.ucne.InsurePal.domain.polizas.vehiculo.useCases.CalcularValorVehiculoUseCase
+import edu.ucne.InsurePal.domain.polizas.vehiculo.useCases.ObtenerMarcasUseCase
+import edu.ucne.InsurePal.domain.polizas.vehiculo.useCases.SaveSeguroVehiculoUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class VehiculoRegistroViewModel @Inject constructor(
     private val repository: SeguroVehiculoRepository,
-    private val userPreferences: UserPreferences
+    private val userPreferences: UserPreferences,
+    private val guardar : SaveSeguroVehiculoUseCase,
+    private val getMarcas: ObtenerMarcasUseCase,
+    private val calcularValor : CalcularValorVehiculoUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(VehiculoUiState())
@@ -28,14 +35,34 @@ class VehiculoRegistroViewModel @Inject constructor(
                 _state.update { it.copy(usuarioId = id) }
             }
         }
+        cargarMarcas()
     }
 
     fun onEvent(event: VehiculoEvent) {
         when(event) {
             is VehiculoEvent.OnNameChanged -> _state.update { it.copy(name = event.name) }
-            is VehiculoEvent.OnMarcaChanged -> _state.update { it.copy(marca = event.marca) }
-            is VehiculoEvent.OnModeloChanged -> _state.update { it.copy(modelo = event.modelo) }
-            is VehiculoEvent.OnAnioChanged -> _state.update { it.copy(anio = event.anio) }
+            is VehiculoEvent.OnMarcaChanged -> {
+                _state.update { currentState ->
+                    val modelosFiltrados = getMarcas()
+                        .find { it.nombre == event.marca }
+                        ?.modelos?.map { it.nombre } ?: emptyList()
+
+                    currentState.copy(
+                        marca = event.marca,
+                        modelo = "",
+                        modelosDisponibles = modelosFiltrados,
+                        valorMercado = ""
+                    )
+                }
+            }
+            is VehiculoEvent.OnModeloChanged -> {
+                _state.update { it.copy(modelo = event.modelo) }
+                calcularPrecio()
+            }
+            is VehiculoEvent.OnAnioChanged -> {
+                _state.update { it.copy(anio = event.anio) }
+                calcularPrecio()
+            }
             is VehiculoEvent.OnColorChanged -> _state.update { it.copy(color = event.color) }
             is VehiculoEvent.OnPlacaChanged -> _state.update { it.copy(placa = event.placa) }
             is VehiculoEvent.OnChasisChanged -> _state.update { it.copy(chasis = event.chasis) }
@@ -75,10 +102,11 @@ class VehiculoRegistroViewModel @Inject constructor(
                 valorMercado = uiState.valorMercado.toDoubleOrNull() ?: 0.0,
                 coverageType = uiState.coverageType,
                 status = "Cotizando",
-                expirationDate = null
+                expirationDate = LocalDate.now().toString()
             )
 
             val result = repository.postVehiculo(request)
+
 
             when(result) {
                 is Resource.Success -> {
@@ -89,6 +117,32 @@ class VehiculoRegistroViewModel @Inject constructor(
                 }
                 is Resource.Loading -> {
                     _state.update { it.copy(isLoading = true) }
+                }
+            }
+        }
+    }
+
+    private fun cargarMarcas() {
+        val marcas = getMarcas().map { it.nombre }
+        _state.update { it.copy(marcasDisponibles = marcas) }
+    }
+
+    private fun calcularPrecio() {
+        val currentState = _state.value
+
+        if (currentState.marca.isNotBlank() &&
+            currentState.modelo.isNotBlank() &&
+            currentState.anio.isNotBlank()) {
+
+            val precioCalculado = calcularValor(
+                marca = currentState.marca,
+                modelo = currentState.modelo,
+                anio = currentState.anio
+            )
+
+            if (precioCalculado > 0) {
+                _state.update {
+                    it.copy(valorMercado = String.format("%.2f", precioCalculado))
                 }
             }
         }
