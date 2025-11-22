@@ -16,7 +16,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import edu.ucne.InsurePal.ui.theme.InsurePalTheme
-import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -151,7 +150,7 @@ private val sampleAutoPolicyActive = SeguroVehiculo(
     valorMercado = 1500000.0,
     coverageType = "Full Cobertura",
     status = "Activo",
-    expirationDate = LocalDate.now().plusMonths(5)
+    expirationDate = ""
 )
 
 @Preview(name = "Light Mode", group = "AutoCards", showBackground = true)
