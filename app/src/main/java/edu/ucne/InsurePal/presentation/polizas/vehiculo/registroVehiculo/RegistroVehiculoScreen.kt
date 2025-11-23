@@ -7,8 +7,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,20 +21,24 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import edu.ucne.InsurePal.presentation.polizas.vehiculo.registroVehiculo.VehiculoEvent
+import edu.ucne.InsurePal.presentation.polizas.vehiculo.registroVehiculo.VehiculoRegistroViewModel
+import edu.ucne.InsurePal.presentation.polizas.vehiculo.registroVehiculo.VehiculoUiState
 import edu.ucne.InsurePal.ui.theme.InsurePalTheme
 
 @Composable
 fun VehiculoRegistroScreen(
     viewModel: VehiculoRegistroViewModel = hiltViewModel(),
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToCotizacion: (String) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     LaunchedEffect(key1 = state.isSuccess) {
-        if (state.isSuccess) {
-            Toast.makeText(context, "Vehículo registrado correctamente", Toast.LENGTH_LONG).show()
-            onNavigateBack()
+        if (state.isSuccess && state.vehiculoIdCreado != null) {
+            Toast.makeText(context, "Vehículo registrado. Generando cotización...", Toast.LENGTH_SHORT).show()
+            onNavigateToCotizacion(state.vehiculoIdCreado!!)
         }
     }
 
@@ -76,21 +80,25 @@ fun VehiculoRegistroContent(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
+            ExtendedFloatingActionButton(
                 onClick = { onEvent(VehiculoEvent.OnGuardarClick) },
                 containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            ) {
-                if (state.isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Icon(Icons.Default.Save, contentDescription = "Guardar")
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                icon = {
+                    if (state.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(Icons.Default.AttachMoney, contentDescription = "Cotizar")
+                    }
+                },
+                text = {
+                    Text(if (state.isLoading) "Cotizando..." else "Cotizar")
                 }
-            }
+            )
         }
     ) { paddingValues ->
 
@@ -131,7 +139,6 @@ fun VehiculoRegistroContent(
                     onItemSelected = { onEvent(VehiculoEvent.OnMarcaChanged(it)) },
                     modifier = Modifier.weight(1f)
                 )
-
 
                 AppDropdown(
                     label = "Modelo",
@@ -190,7 +197,6 @@ fun VehiculoRegistroContent(
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters)
             )
 
-
             OutlinedTextField(
                 value = state.valorMercado,
                 onValueChange = { },
@@ -222,7 +228,7 @@ fun VehiculoRegistroContent(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                val coberturas = listOf("Full Cobertura", "Ley", "Daños a Terceros")
+                val coberturas = listOf("Cobertura Full", "Ley", "Daños a Terceros")
 
                 coberturas.forEach { tipo ->
                     FilterChip(
@@ -253,30 +259,6 @@ fun VehiculoRegistroScreenPreview() {
     InsurePalTheme {
         VehiculoRegistroContent(
             state = VehiculoUiState(),
-            onEvent = {},
-            onNavigateBack = {}
-        )
-    }
-}
-
-@Preview(name = "Formulario Lleno y Cargando", showSystemUi = true)
-@Composable
-fun VehiculoRegistroScreenFilledPreview() {
-    InsurePalTheme {
-        VehiculoRegistroContent(
-            state = VehiculoUiState(
-                isLoading = true,
-                name = "El negrito",
-                marca = "Toyota",
-                modelo = "Corolla",
-                anio = "2023",
-                color = "Rojo",
-                placa = "A-123456",
-                valorMercado = "1500000",
-                coverageType = "Full Cobertura",
-                marcasDisponibles = listOf("Toyota", "Honda"),
-                modelosDisponibles = listOf("Corolla", "Camry")
-            ),
             onEvent = {},
             onNavigateBack = {}
         )
