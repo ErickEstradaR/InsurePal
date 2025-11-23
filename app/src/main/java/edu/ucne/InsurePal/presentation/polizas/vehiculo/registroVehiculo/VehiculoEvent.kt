@@ -1,4 +1,4 @@
-package edu.ucne.InsurePal.presentation.polizas.vehiculo
+package edu.ucne.InsurePal.presentation.polizas.vehiculo.registroVehiculo
 
 sealed interface VehiculoEvent {
 
@@ -15,4 +15,7 @@ sealed interface VehiculoEvent {
 
     data object OnGuardarClick : VehiculoEvent
     data object OnMessageShown : VehiculoEvent
+
+    data object OnExitoNavegacion : VehiculoEvent
+
 }
