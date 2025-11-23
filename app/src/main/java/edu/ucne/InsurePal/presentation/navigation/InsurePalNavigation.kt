@@ -2,11 +2,14 @@ package edu.ucne.InsurePal.presentation.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import edu.ucne.InsurePal.presentation.home.InsuranceHomeScreen
 import edu.ucne.InsurePal.presentation.home.SeleccionSeguroScreen
+import edu.ucne.InsurePal.presentation.polizas.cotizacion.CotizacionVehiculoScreen
 import edu.ucne.InsurePal.presentation.polizas.vehiculo.VehiculoRegistroScreen
 import edu.ucne.InsurePal.presentation.usuario.LoginScreen
 
@@ -56,12 +59,33 @@ fun InsurePalNavigation() {
         composable(Screen.VehiculoRegistro.route) {
             VehiculoRegistroScreen(
                 onNavigateBack = {
-
                     navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Home.route) { inclusive = true }
                     }
+                },
+                onNavigateToCotizacion = { vehiculoId ->
+                    navController.navigate(Screen.CotizacionDetalle.passId(vehiculoId))
+                }
+            )
+        }
+
+        composable(
+            route = Screen.CotizacionDetalle.route,
+            arguments = listOf(
+                navArgument("vehiculoId") {
+                    type = NavType.StringType
+                }
+            )
+        ) {
+            CotizacionVehiculoScreen(
+                onNavigateToPayment = {
+                    // TODO: Navegar a pago
+                },
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }
     }
-}
+    }
+
