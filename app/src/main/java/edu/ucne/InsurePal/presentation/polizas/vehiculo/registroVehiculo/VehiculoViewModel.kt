@@ -1,4 +1,4 @@
-package edu.ucne.InsurePal.presentation.polizas.vehiculo
+package edu.ucne.InsurePal.presentation.polizas.vehiculo.registroVehiculo
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -71,6 +71,11 @@ class VehiculoRegistroViewModel @Inject constructor(
 
             VehiculoEvent.OnMessageShown -> _state.update { it.copy(error = null) }
             VehiculoEvent.OnGuardarClick -> guardarVehiculo()
+
+            VehiculoEvent.OnExitoNavegacion -> _state.update {
+                it.copy(isSuccess = false, vehiculoIdCreado = null)
+            }
+
         }
     }
 
@@ -104,16 +109,24 @@ class VehiculoRegistroViewModel @Inject constructor(
                 status = "Cotizando",
                 expirationDate = LocalDate.now().toString()
             )
-
+            //ToDo: Corregir para usar UseCase
             val result = repository.postVehiculo(request)
 
 
             when(result) {
                 is Resource.Success -> {
-                    _state.update { it.copy(isLoading = false, isSuccess = true) }
+                     val idCreado = result.data?.idPoliza?.toString() ?: ""
+
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            isSuccess = true,
+                            vehiculoIdCreado = idCreado
+                        )
+                    }
                 }
                 is Resource.Error -> {
-                    _state.update { it.copy(isLoading = false, error = result.message ?: "Error al guardar vehículo") }
+                    _state.update { it.copy(isLoading = false, error = result.message ?: "Error al guardar") }
                 }
                 is Resource.Loading -> {
                     _state.update { it.copy(isLoading = true) }
