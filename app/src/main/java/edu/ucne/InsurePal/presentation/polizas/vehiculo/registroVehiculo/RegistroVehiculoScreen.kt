@@ -39,6 +39,8 @@ fun VehiculoRegistroScreen(
         if (state.isSuccess && state.vehiculoIdCreado != null) {
             Toast.makeText(context, "Vehículo registrado. Generando cotización...", Toast.LENGTH_SHORT).show()
             onNavigateToCotizacion(state.vehiculoIdCreado!!)
+
+            viewModel.onEvent(VehiculoEvent.OnExitoNavegacion)
         }
     }
 
