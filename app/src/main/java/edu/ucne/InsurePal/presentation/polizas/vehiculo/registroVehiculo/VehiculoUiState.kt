@@ -1,4 +1,4 @@
-package edu.ucne.InsurePal.presentation.polizas.vehiculo
+package edu.ucne.InsurePal.presentation.polizas.vehiculo.registroVehiculo
 
 data class VehiculoUiState(
     val isLoading: Boolean = false,
@@ -7,6 +7,8 @@ data class VehiculoUiState(
 
 
     val usuarioId: Int? = null,
+
+    val vehiculoIdCreado: String? = null,
 
 
     val name: String = "",
