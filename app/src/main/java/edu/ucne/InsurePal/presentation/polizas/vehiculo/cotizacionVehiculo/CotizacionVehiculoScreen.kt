@@ -1,4 +1,4 @@
-package edu.ucne.InsurePal.presentation.polizas.cotizacion
+package edu.ucne.InsurePal.presentation.polizas.vehiculo.cotizacionVehiculo
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -22,9 +22,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import edu.ucne.InsurePal.presentation.polizas.vehiculo.cotizacionVehiculo.CotizacionVehiculoEvent
-import edu.ucne.InsurePal.presentation.polizas.vehiculo.cotizacionVehiculo.CotizacionVehiculoUiState
-import edu.ucne.InsurePal.presentation.polizas.vehiculo.cotizacionVehiculo.CotizacionVehiculoViewModel
 import edu.ucne.InsurePal.ui.theme.InsurePalTheme
 import java.text.NumberFormat
 import java.util.Locale
@@ -37,11 +34,16 @@ fun CotizacionVehiculoScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    val onBackAction = {
+        viewModel.onEvent(CotizacionVehiculoEvent.OnVolverClick)
+        onNavigateBack()
+    }
+
     CotizacionVehiculoContent(
         state = state,
         onEvent = viewModel::onEvent,
         onNavigateToPayment = onNavigateToPayment,
-        onNavigateBack = onNavigateBack
+        onNavigateBack = onBackAction
     )
 }
 
