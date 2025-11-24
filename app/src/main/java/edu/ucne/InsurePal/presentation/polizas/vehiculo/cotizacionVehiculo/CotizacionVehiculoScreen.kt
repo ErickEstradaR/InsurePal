@@ -29,7 +29,7 @@ import java.util.Locale
 @Composable
 fun CotizacionVehiculoScreen(
     viewModel: CotizacionVehiculoViewModel = hiltViewModel(),
-    onNavigateToPayment: () -> Unit,
+    onNavigateToPayment: (Double) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -52,7 +52,7 @@ fun CotizacionVehiculoScreen(
 fun CotizacionVehiculoContent(
     state: CotizacionVehiculoUiState,
     onEvent: (CotizacionVehiculoEvent) -> Unit,
-    onNavigateToPayment: () -> Unit,
+    onNavigateToPayment: (Double) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -72,7 +72,6 @@ fun CotizacionVehiculoContent(
             )
         },
         bottomBar = {
-            // Barra de acciones inferior
             Surface(
                 tonalElevation = 3.dp,
                 shadowElevation = 4.dp
@@ -83,7 +82,6 @@ fun CotizacionVehiculoContent(
                         .padding(16.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // Botón Cancelar
                     OutlinedButton(
                         onClick = onNavigateBack,
                         modifier = Modifier
@@ -93,12 +91,10 @@ fun CotizacionVehiculoContent(
                     ) {
                         Text("Cancelar")
                     }
-
-                    // Botón Aceptar (Pagar)
                     Button(
                         onClick = {
                             onEvent(CotizacionVehiculoEvent.OnContinuarPagoClick)
-                            onNavigateToPayment()
+                            onNavigateToPayment(state.totalPagar)
                         },
                         modifier = Modifier
                             .weight(1f)
