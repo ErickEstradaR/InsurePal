@@ -1,27 +1,36 @@
 package edu.ucne.InsurePal.presentation.navigation
+import kotlinx.serialization.Serializable
 
 
+sealed interface Screen {
 
-sealed class Screen(val route: String) {
-    object Login : Screen("login")
-    object Home : Screen("home")
+    @Serializable
+    data object Login : Screen
 
-    object SeleccionSeguro : Screen("seleccion_seguro")
+    @Serializable
+    data object Home : Screen
 
-    object MisVehiculos : Screen("mis_vehiculos")
+    @Serializable
+    data object SeleccionSeguro : Screen
 
-    object VehiculoRegistro : Screen("vehiculo_registro")
+    @Serializable
+    data object MisVehiculos : Screen
 
-    data object CotizacionDetalle : Screen("cotizacion_detalle/{vehiculoId}") {
-        fun passId(vehiculoId: String): String {
-            return "cotizacion_detalle/$vehiculoId"
-        }
-    }
+    @Serializable
+    data object VehiculoRegistro : Screen
 
-    data object Pago : Screen("pago_screen/{polizaId}/{monto}") {
-        fun passArgs(polizaId: String, monto: Double): String {
-            return "pago_screen/$polizaId/$monto"
-        }
-    }
+    @Serializable
+    data object HistorialPagos : Screen
 
+    @Serializable
+    data class CotizacionDetalle(
+        val vehiculoId: String
+    ) : Screen
+
+    @Serializable
+    data class Pago(
+        val polizaId: String,
+        val monto: Double,
+        val descripcion: String
+    ) : Screen
 }
