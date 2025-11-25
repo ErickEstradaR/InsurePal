@@ -3,8 +3,8 @@ package edu.ucne.InsurePal.data.remote.polizas.vida
 import edu.ucne.InsurePal.data.Resource
 import edu.ucne.InsurePal.data.toDomain
 import edu.ucne.InsurePal.data.toRequest
-import edu.ucne.InsurePal.domain.polizas.vida.SeguroVida
-import edu.ucne.InsurePal.domain.polizas.vida.SeguroVidaRepository
+import edu.ucne.InsurePal.domain.polizas.vida.model.SeguroVida
+import edu.ucne.InsurePal.domain.polizas.vida.repository.SeguroVidaRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

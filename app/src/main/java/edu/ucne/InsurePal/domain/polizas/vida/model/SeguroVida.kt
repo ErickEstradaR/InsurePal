@@ -1,4 +1,4 @@
-package edu.ucne.InsurePal.domain.polizas.vida
+package edu.ucne.InsurePal.domain.polizas.vida.model
 
 data class SeguroVida(
     val id: String,

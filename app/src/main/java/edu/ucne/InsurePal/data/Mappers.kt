@@ -10,7 +10,7 @@ import edu.ucne.InsurePal.data.remote.usuario.dto.UsuarioResponse
 import edu.ucne.InsurePal.domain.pago.model.EstadoPago
 import edu.ucne.InsurePal.domain.pago.model.Pago
 import edu.ucne.InsurePal.domain.polizas.vehiculo.model.SeguroVehiculo
-import edu.ucne.InsurePal.domain.polizas.vida.SeguroVida
+import edu.ucne.InsurePal.domain.polizas.vida.model.SeguroVida
 import edu.ucne.InsurePal.domain.usuario.model.Usuario
 import java.time.LocalDateTime
 

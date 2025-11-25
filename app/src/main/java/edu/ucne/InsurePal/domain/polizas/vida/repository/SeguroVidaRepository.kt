@@ -1,6 +1,7 @@
-package edu.ucne.InsurePal.domain.polizas.vida
+package edu.ucne.InsurePal.domain.polizas.vida.repository
 
 import edu.ucne.InsurePal.data.Resource
+import edu.ucne.InsurePal.domain.polizas.vida.model.SeguroVida
 import kotlinx.coroutines.flow.Flow
 
 interface SeguroVidaRepository {
