@@ -11,6 +11,7 @@ import dagger.hilt.components.SingletonComponent
 import edu.ucne.InsurePal.data.local.UserPreferences
 import edu.ucne.InsurePal.data.remote.pago.PagoApiService
 import edu.ucne.InsurePal.data.remote.polizas.vehiculo.api.SeguroVehiculoApiService
+import edu.ucne.InsurePal.data.remote.polizas.vida.SeguroVidaApiService
 import edu.ucne.InsurePal.data.remote.usuario.api.UsuarioApiService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -88,5 +89,15 @@ object Module {
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(SeguroVehiculoApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideVidaApiService(moshi: Moshi): SeguroVidaApiService {
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(SeguroVidaApiService::class.java)
     }
 }
