@@ -11,6 +11,9 @@ sealed interface Screen {
     data object Home : Screen
 
     @Serializable
+    data object SeguroVida : Screen
+
+    @Serializable
     data object SeleccionSeguro : Screen
 
     @Serializable
