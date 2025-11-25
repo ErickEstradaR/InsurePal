@@ -1,15 +1,14 @@
 package edu.ucne.InsurePal.presentation.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
+import androidx.navigation.toRoute // <--- IMPORTANTE: Necesario para extraer argumentos
 import edu.ucne.InsurePal.presentation.home.InsuranceHomeScreen
 import edu.ucne.InsurePal.presentation.home.SeleccionSeguroScreen
 import edu.ucne.InsurePal.presentation.pago.PagoScreen
+import edu.ucne.InsurePal.presentation.pago.listaPago.HistorialPagosScreen
 import edu.ucne.InsurePal.presentation.polizas.vehiculo.cotizacionVehiculo.CotizacionVehiculoScreen
 import edu.ucne.InsurePal.presentation.polizas.vehiculo.VehiculoRegistroScreen
 import edu.ucne.InsurePal.presentation.usuario.LoginScreen
@@ -17,115 +16,94 @@ import edu.ucne.InsurePal.presentation.usuario.LoginScreen
 @Composable
 fun InsurePalNavigation() {
     val navController = rememberNavController()
-    val context = LocalContext.current
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Login.route
+        startDestination = Screen.Login
     ) {
 
-        composable(Screen.Login.route) {
+        // 1. LOGIN
+        composable<Screen.Login> {
             LoginScreen(
                 onLoginSuccess = {
-
-                    navController.navigate(Screen.Home.route) {
-                          popUpTo(Screen.Login.route) { inclusive = true }
+                    navController.navigate(Screen.Home) {
+                        popUpTo(Screen.Login) { inclusive = true }
                     }
                 }
             )
         }
 
-        composable(Screen.Home.route) {
+
+        composable<Screen.Home> {
             InsuranceHomeScreen(
                 onActionClick = { action ->
-                    if (action == "Nuevo Seguro") {
-                        navController.navigate(Screen.SeleccionSeguro.route)
+                    when (action) {
+                        "Nuevo Seguro" -> navController.navigate(Screen.SeleccionSeguro)
+                        "Mis Pagos" -> navController.navigate(Screen.HistorialPagos)
                     }
                 }
             )
         }
 
-        composable(Screen.SeleccionSeguro.route) {
+        composable<Screen.SeleccionSeguro> {
             SeleccionSeguroScreen(
-                onNavigateBack = {
-                    navController.popBackStack()
-                },
+                onNavigateBack = { navController.popBackStack() },
                 onInsuranceSelected = { typeId ->
                     if (typeId == "VEHICULO") {
-                        navController.navigate(Screen.VehiculoRegistro.route)
+                        navController.navigate(Screen.VehiculoRegistro)
                     }
                 }
             )
         }
-        composable(Screen.VehiculoRegistro.route) {
+
+        composable<Screen.VehiculoRegistro> {
             VehiculoRegistroScreen(
                 onNavigateBack = {
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Home.route) { inclusive = true }
+                    navController.navigate(Screen.Home) {
+                        popUpTo(Screen.Home) { inclusive = true }
                     }
                 },
                 onNavigateToCotizacion = { vehiculoId ->
-                    navController.navigate(Screen.CotizacionDetalle.passId(vehiculoId))
+                    navController.navigate(Screen.CotizacionDetalle(vehiculoId = vehiculoId))
                 }
             )
         }
 
-        composable(
-            route = Screen.CotizacionDetalle.route,
-            arguments = listOf(
-                navArgument("vehiculoId") {
-                    type = NavType.StringType
-                }
-            )
-        ) {
-            CotizacionVehiculoScreen(
-                onNavigateToPayment = {
-                    // TODO: Navegar a pago
-                },
-                onNavigateBack = {
-                    navController.popBackStack()
-                }
-            )
-        }
-
-        composable(
-            route = Screen.CotizacionDetalle.route,
-            arguments = listOf(
-                navArgument("vehiculoId") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val vehiculoId = backStackEntry.arguments?.getString("vehiculoId") ?: ""
+        composable<Screen.CotizacionDetalle> { backStackEntry ->
+            val args = backStackEntry.toRoute<Screen.CotizacionDetalle>()
 
             CotizacionVehiculoScreen(
-                onNavigateToPayment = { montoTotal ->
-                    navController.navigate(Screen.Pago.passArgs(vehiculoId, montoTotal))
+                onNavigateToPayment = { montoRecibido, descripcionRecibida ->
+
+                    navController.navigate(
+                        Screen.Pago(
+                            polizaId = args.vehiculoId,
+                            monto = montoRecibido,
+                            descripcion = descripcionRecibida
+                        )
+                    )
                 },
-                onNavigateBack = {
-                    navController.popBackStack()
-                }
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
-        composable(
-            route = Screen.Pago.route,
-            arguments = listOf(
-                navArgument("polizaId") { type = NavType.StringType },
-                navArgument("monto") { type = NavType.StringType }
-            )
-        ) {
+        composable<Screen.Pago> { backStackEntry ->
+            val args = backStackEntry.toRoute<Screen.Pago>()
+
             PagoScreen(
-                onNavigateBack = {
-                    navController.popBackStack()
-                },
+                onNavigateBack = { navController.popBackStack() },
                 onPaymentSuccess = {
-
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Home.route) { inclusive = true }
+                    navController.navigate(Screen.HistorialPagos) {
+                        popUpTo(Screen.Home)
                     }
                 }
+            )
+        }
+
+        composable<Screen.HistorialPagos> {
+            HistorialPagosScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }
 }
-
-
