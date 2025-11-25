@@ -11,6 +11,7 @@ import edu.ucne.InsurePal.presentation.pago.PagoScreen
 import edu.ucne.InsurePal.presentation.pago.listaPago.HistorialPagosScreen
 import edu.ucne.InsurePal.presentation.polizas.vehiculo.cotizacionVehiculo.CotizacionVehiculoScreen
 import edu.ucne.InsurePal.presentation.polizas.vehiculo.VehiculoRegistroScreen
+import edu.ucne.InsurePal.presentation.polizas.vida.RegistroSeguroVidaScreen
 import edu.ucne.InsurePal.presentation.usuario.LoginScreen
 
 @Composable
@@ -96,6 +97,23 @@ fun InsurePalNavigation() {
                     navController.navigate(Screen.HistorialPagos) {
                         popUpTo(Screen.Home)
                     }
+                }
+            )
+        }
+
+        composable<Screen.SeguroVida> {
+            RegistroSeguroVidaScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToPago = { idCreado, primaCalculada, descripcion ->
+                    navController.navigate(
+                        Screen.Pago(
+                            polizaId = "VIDA-$idCreado",
+                            monto = primaCalculada,
+                            descripcion = descripcion
+                        )
+                    )
                 }
             )
         }
