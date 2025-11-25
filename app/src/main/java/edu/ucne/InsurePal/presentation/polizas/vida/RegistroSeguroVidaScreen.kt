@@ -34,7 +34,7 @@ import java.util.Locale
 
 
 @Composable
-fun SeguroVidaScreen(
+fun RegistroSeguroVidaScreen(
     viewModel: SeguroVidaViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
     onNavigateToPago: (String, Double, String) -> Unit
