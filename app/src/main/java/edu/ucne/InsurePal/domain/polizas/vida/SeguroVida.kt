@@ -1,7 +1,7 @@
 package edu.ucne.InsurePal.domain.polizas.vida
 
 data class SeguroVida(
-    val id: Int = 0,
+    val id: String,
     val usuarioId: Int,
 
     val nombresAsegurado: String,
