@@ -55,7 +55,7 @@ fun InsuranceHomeScreen(
 
     Scaffold(
         topBar = { HomeHeader() },
-        containerColor = MaterialTheme.colorScheme.background // COLOR DINÁMICO DEL TEMA
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -71,7 +71,7 @@ fun InsuranceHomeScreen(
                     text = "¿Qué deseas proteger hoy?",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground // COLOR DINÁMICO
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
 
@@ -128,7 +128,7 @@ fun HomeHeader() {
             Icon(
                 imageVector = Icons.Outlined.Notifications,
                 contentDescription = "Alertas",
-                tint = MaterialTheme.colorScheme.onSurface // COLOR DINÁMICO
+                tint = MaterialTheme.colorScheme.onSurface
             )
         }
     }
@@ -138,7 +138,7 @@ fun HomeHeader() {
 fun PolicyCard(policy: Policy) {
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer // COLOR DINÁMICO (Tarjeta elevada)
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(16.dp),
@@ -156,7 +156,7 @@ fun PolicyCard(policy: Policy) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Icono de la póliza
+
                 Box(
                     modifier = Modifier
                         .background(policy.color.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
@@ -169,7 +169,6 @@ fun PolicyCard(policy: Policy) {
                     )
                 }
 
-                // Chip de estado dinámico
                 val chipContainerColor = if (policy.status == "Activo")
                     MaterialTheme.colorScheme.primaryContainer
                 else
@@ -196,12 +195,12 @@ fun PolicyCard(policy: Policy) {
                     text = policy.name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface // COLOR DINÁMICO
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = policy.id,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant // COLOR DINÁMICO (Gris del tema)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
