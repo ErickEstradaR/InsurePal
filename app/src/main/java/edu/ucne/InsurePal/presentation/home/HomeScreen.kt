@@ -1,6 +1,7 @@
 package edu.ucne.InsurePal.presentation.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -31,7 +32,8 @@ import edu.ucne.InsurePal.ui.theme.InsurePalTheme
 @Composable
 fun InsuranceHomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
-    onActionClick: (String) -> Unit
+    onActionClick: (String) -> Unit,
+    onPolicyClick: (String, String) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -67,7 +69,6 @@ fun InsuranceHomeScreen(
             item {
                 SectionTitle("Mis Pólizas")
 
-                // Lógica de carga y lista vacía
                 if (state.isLoading) {
                     Box(modifier = Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
@@ -90,7 +91,15 @@ fun InsuranceHomeScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         items(state.policies) { policy ->
-                            PolicyCard(policy)
+                            Box(modifier = Modifier.clickable {
+                                val type = when(policy) {
+                                    is VehiclePolicyUi -> "VEHICULO"
+                                    is LifePolicyUi -> "VIDA"
+                                }
+                                onPolicyClick(policy.id, type)
+                            }) {
+                                PolicyCard(policy)
+                            }
                         }
                     }
                 }
