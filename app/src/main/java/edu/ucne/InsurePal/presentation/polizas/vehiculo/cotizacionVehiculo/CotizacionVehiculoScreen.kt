@@ -161,7 +161,7 @@ fun CotizacionVehiculoContent(
                     }
 
                     InfoSectionCard(
-                        title = "Desglose de Prima (Anual)",
+                        title = "Desglose de Prima (Mensual)",
                         icon = Icons.Default.AttachMoney,
                         containerColor = MaterialTheme.colorScheme.surfaceContainer
                     ) {
