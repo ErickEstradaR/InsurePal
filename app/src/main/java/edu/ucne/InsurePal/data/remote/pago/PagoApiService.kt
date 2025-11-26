@@ -10,8 +10,6 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface PagoApiService {
-
-
     @POST("api/Pagos")
     suspend fun procesarPago(
         @Body request: PagoRequest
