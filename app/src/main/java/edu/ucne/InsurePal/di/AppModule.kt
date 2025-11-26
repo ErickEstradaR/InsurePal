@@ -8,7 +8,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
-import edu.ucne.InsurePal.data.local.pago.PagoDao
 import edu.ucne.InsurePal.data.database.PagoDb
 
 
