@@ -20,7 +20,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val getVehiculosUseCase: ObtenerVehiculosUseCase,
+    private val obtenerSeguroVehiculos: ObtenerVehiculosUseCase,
     private val getSegurosVidaUseCase: GetSegurosVidaUseCase,
     private val userPreferences: UserPreferences
 ) : ViewModel() {
@@ -47,7 +47,7 @@ class HomeViewModel @Inject constructor(
 
     private suspend fun observarPolizas(userId: Int) {
         combine(
-            getVehiculosUseCase(userId),
+            obtenerSeguroVehiculos(userId),
             getSegurosVidaUseCase(userId)
         ) { resultVehiculos, resultVida ->
 
