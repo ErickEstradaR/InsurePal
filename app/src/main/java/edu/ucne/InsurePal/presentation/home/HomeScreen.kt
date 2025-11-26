@@ -14,7 +14,9 @@ import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -25,14 +27,14 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.InsurePal.presentation.home.uiModels.LifePolicyUi
 import edu.ucne.InsurePal.presentation.home.uiModels.PolicyUiModel
 import edu.ucne.InsurePal.presentation.home.uiModels.VehiclePolicyUi
 import edu.ucne.InsurePal.presentation.pago.formateo.formatearMoneda
 import edu.ucne.InsurePal.ui.theme.InsurePalTheme
-import java.text.NumberFormat
-import java.util.Locale
+
 
 data class QuickAction(
     val title: String,
@@ -46,7 +48,8 @@ fun InsuranceHomeScreen(
     onPolicyClick: (String, String) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val snackbarHostState = remember { SnackbarHostState() }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -60,6 +63,15 @@ fun InsuranceHomeScreen(
         }
     }
 
+    LaunchedEffect(state.error) {
+        state.error?.let { errorMsg ->
+            snackbarHostState.showSnackbar(
+                message = errorMsg,
+                withDismissAction = true
+            )
+        }
+    }
+
     val actions = listOf(
         QuickAction("Reportar Siniestro", Icons.Default.Warning),
         QuickAction("Pedir Asistencia", Icons.Default.SupportAgent),
@@ -69,6 +81,7 @@ fun InsuranceHomeScreen(
 
     Scaffold(
         topBar = { HomeHeader() },
+        snackbarHost = { SnackbarHost(snackbarHostState) }, 
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         LazyColumn(
@@ -113,7 +126,11 @@ fun InsuranceHomeScreen(
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        items(state.policies) { policy ->
+                        // 3. KEY IMPORTANTE: Ayuda a Compose a identificar cambios (crear/borrar)
+                        items(
+                            items = state.policies,
+                            key = { it.id }
+                        ) { policy ->
                             Box(modifier = Modifier.clickable {
                                 val type = when(policy) {
                                     is VehiclePolicyUi -> "VEHICULO"
