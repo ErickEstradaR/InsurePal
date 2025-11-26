@@ -90,7 +90,7 @@ class DetallePolizaViewModel @Inject constructor(
 
     private suspend fun cargarVida() {
 
-        val result = getVidaUseCase(policyId.removePrefix("VIDA-"))
+        val result = getVidaUseCase(policyId)
 
         when(result) {
             is Resource.Success -> {
