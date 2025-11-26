@@ -14,5 +14,7 @@ data class SeguroVehiculoRequest (
     val valorMercado: Double,
     val coverageType: String,
     val status: String = "Cotizando",
-    val expirationDate: String? = ""
+    val expirationDate: String? = "",
+    val esPagado : Boolean = false,
+    val fechaPago: String? = null
 )
