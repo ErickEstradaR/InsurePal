@@ -39,7 +39,9 @@ fun SeguroVehiculoResponse.toDomain() = SeguroVehiculo(
     valorMercado = valorMercado,
     coverageType = coverageType,
     status = status ?: "Cotizando",
-    expirationDate = expirationDate
+    expirationDate = expirationDate,
+    esPagado = esPagado,
+    fechaPago = fechaPago
 )
 
 fun SeguroVehiculo.toRequest(): SeguroVehiculoRequest = SeguroVehiculoRequest(
@@ -54,7 +56,9 @@ fun SeguroVehiculo.toRequest(): SeguroVehiculoRequest = SeguroVehiculoRequest(
     valorMercado = valorMercado,
     coverageType = coverageType,
     status = status,
-    expirationDate = expirationDate
+    expirationDate = expirationDate,
+    esPagado = esPagado,
+    fechaPago = fechaPago
 )
 
  fun PagoEntity.toDomain(): Pago {
