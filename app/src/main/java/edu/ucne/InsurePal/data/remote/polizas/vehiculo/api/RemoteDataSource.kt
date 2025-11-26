@@ -55,7 +55,7 @@ class RemoteDataSource @Inject constructor(
 
     suspend fun getVehiculos(usuarioId: Int): Resource<List<SeguroVehiculoResponse>> {
         return try {
-            val response = api.getVehiculos()
+            val response = api.getVehiculos(usuarioId)
             if (response.isSuccessful) {
                 response.body()?.let { Resource.Success(it) }
                     ?: Resource.Error("Respuesta vacía al obtener los vehiculos")
