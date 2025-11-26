@@ -41,6 +41,9 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+    fun refresh() {
+        cargarDatos()
+    }
 
     private suspend fun observarPolizas(userId: Int) {
         combine(
