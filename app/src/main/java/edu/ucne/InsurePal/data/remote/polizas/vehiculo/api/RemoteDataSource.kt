@@ -8,6 +8,7 @@ import javax.inject.Inject
 class RemoteDataSource @Inject constructor(
     private val api: SeguroVehiculoApiService
 ) {
+    private val errorDeRed:String = "Error de red"
     suspend fun save(request: SeguroVehiculoRequest): Resource<SeguroVehiculoResponse> {
         return try {
             val response = api.postVehiculo(request)
@@ -23,7 +24,7 @@ class RemoteDataSource @Inject constructor(
                 Resource.Error("HTTP ${response.code()} ${response.message()}")
             }
         } catch (e: Exception) {
-            Resource.Error(e.localizedMessage ?: "Error de red")
+            Resource.Error(e.localizedMessage ?: errorDeRed)
         }
     }
 
@@ -36,7 +37,7 @@ class RemoteDataSource @Inject constructor(
                 Resource.Error("HTTP ${response.code()} ${response.message()}")
             }
         } catch (e: Exception) {
-            Resource.Error(e.localizedMessage ?: "Error de red")
+            Resource.Error(e.localizedMessage ?: errorDeRed)
         }
     }
 
@@ -63,7 +64,7 @@ class RemoteDataSource @Inject constructor(
                 Resource.Error("HTTP ${response.code()} al obtener lista de vehiculos: ${response.message()}")
             }
         } catch (e: Exception) {
-            Resource.Error(e.localizedMessage ?: "Error de red al obtener vehiculos")
+            Resource.Error(e.localizedMessage ?: errorDeRed)
         }
     }
 
