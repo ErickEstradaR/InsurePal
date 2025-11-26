@@ -13,21 +13,31 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.InsurePal.presentation.home.uiModels.LifePolicyUi
 import edu.ucne.InsurePal.presentation.home.uiModels.PolicyUiModel
-import edu.ucne.InsurePal.presentation.home.uiModels.QuickAction
 import edu.ucne.InsurePal.presentation.home.uiModels.VehiclePolicyUi
 import edu.ucne.InsurePal.presentation.pago.formateo.formatearMoneda
 import edu.ucne.InsurePal.ui.theme.InsurePalTheme
+import java.text.NumberFormat
+import java.util.Locale
+
+data class QuickAction(
+    val title: String,
+    val icon: ImageVector
+)
 
 @Composable
 fun InsuranceHomeScreen(
@@ -36,6 +46,19 @@ fun InsuranceHomeScreen(
     onPolicyClick: (String, String) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.refresh()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     val actions = listOf(
         QuickAction("Reportar Siniestro", Icons.Default.Warning),
@@ -139,7 +162,7 @@ fun HomeHeader() {
             )
         }
         IconButton(
-            onClick = { /* TODO: Abrir notificaciones */ },
+            onClick = { },
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape)
                 .size(48.dp)
@@ -366,8 +389,5 @@ fun PromoBanner() {
 @Composable
 fun InsuranceHomeScreenPreview() {
     InsurePalTheme {
-        // Tendrías que crear un HomeContent separado si quieres preview,
-        // similar a lo que hicimos con SeguroVida.
-        // Por ahora, el preview fallará si se usa hiltViewModel() directamente.
     }
 }
