@@ -258,7 +258,7 @@ fun CotizacionBottomBar(
         ) {
             Column {
                 Text(
-                    text = "Prima Anual Estimada",
+                    text = "Prima Mensual",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
