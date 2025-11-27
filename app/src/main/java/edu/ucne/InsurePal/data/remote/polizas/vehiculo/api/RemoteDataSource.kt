@@ -1,6 +1,7 @@
 package edu.ucne.InsurePal.data.remote.polizas.vehiculo.api
 
 import edu.ucne.InsurePal.data.Resource
+import edu.ucne.InsurePal.data.remote.polizas.vehiculo.dto.MarcaVehiculoDto
 import edu.ucne.InsurePal.data.remote.polizas.vehiculo.dto.SeguroVehiculoRequest
 import edu.ucne.InsurePal.data.remote.polizas.vehiculo.dto.SeguroVehiculoResponse
 import javax.inject.Inject
@@ -65,6 +66,20 @@ class RemoteDataSource @Inject constructor(
             }
         } catch (e: Exception) {
             Resource.Error(e.localizedMessage ?: "Error de red al obtener vehiculos")
+        }
+    }
+
+    suspend fun getMarcas(): Resource<List<MarcaVehiculoDto>> {
+        return try {
+            val response = api.getMarcas()
+            if (response.isSuccessful) {
+                response.body()?.let { Resource.Success(it) }
+                    ?: Resource.Success(emptyList())
+            } else {
+                Resource.Error("HTTP ${response.code()} ${response.message()}")
+            }
+        } catch (e: Exception) {
+            Resource.Error(e.localizedMessage ?: errorNetwork)
         }
     }
 
