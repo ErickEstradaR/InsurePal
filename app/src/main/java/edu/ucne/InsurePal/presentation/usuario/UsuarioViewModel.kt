@@ -158,7 +158,7 @@ class UsuarioViewModel @Inject constructor(
                                 }
                             }
                             user.password == password -> {
-                                user.usuarioId?.let { id ->
+                                user.usuarioId.let { id ->
                                     userPreferences.saveUser(id, user.userName)
                                     Log.d("InsurePal_Test", "Guardando ID: $id y Nombre: ${user.userName}")
                                 }
