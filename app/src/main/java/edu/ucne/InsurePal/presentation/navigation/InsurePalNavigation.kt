@@ -5,7 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import edu.ucne.InsurePal.presentation.AdminScreen
+import edu.ucne.InsurePal.presentation.admin.AdminScreen
 import edu.ucne.InsurePal.presentation.detallePoliza.DetallePolizaScreen
 import edu.ucne.InsurePal.presentation.home.InsuranceHomeScreen
 import edu.ucne.InsurePal.presentation.home.SeleccionSeguroScreen
