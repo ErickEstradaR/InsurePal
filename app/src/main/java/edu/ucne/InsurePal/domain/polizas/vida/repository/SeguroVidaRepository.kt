@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface SeguroVidaRepository {
 
+    fun getAllSegurosVida(): Flow<Resource<List<SeguroVida>>>
     fun getSegurosVida(usuarioId : Int): Flow<Resource<List<SeguroVida>>>
 
     suspend fun getSeguroVidaById(id: String): Resource<SeguroVida>
