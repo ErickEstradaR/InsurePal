@@ -50,21 +50,26 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     viewModel: UsuarioViewModel = hiltViewModel(),
-    onLoginSuccess: () -> Unit
+    onLoginSuccess: () -> Unit,
+    onAdminLogin: () -> Unit
 ) {
     val uiState by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(key1 = uiState.isLoginSuccessful) {
         if (uiState.isLoginSuccessful) {
-            onLoginSuccess()
+            if (uiState.isAdmin) {
+                onAdminLogin()
+            } else {
+                onLoginSuccess()
+            }
         }
     }
 
