@@ -9,6 +9,10 @@ sealed interface Screen {
 
     @Serializable
     data object Admin : Screen
+    @Serializable
+    data object ListaVida : Screen
+    @Serializable
+    data object ListaVehiculo : Screen
 
     @Serializable
     data object Home : Screen
