@@ -132,6 +132,14 @@ fun InsurePalNavigation() {
 
         composable<Screen.Admin> {
             AdminScreen(
+                onNavigateToVehicles = {
+
+                    navController.navigate(Screen.ListaVehiculo)
+                },
+                onNavigateToLife = {
+
+                    navController.navigate(Screen.ListaVida)
+                },
                 onLogout = {
                     navController.navigate(Screen.Login) {
                         popUpTo(0) { inclusive = true }
