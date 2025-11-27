@@ -1,5 +1,6 @@
 package edu.ucne.InsurePal.presentation.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -48,6 +49,8 @@ class HomeViewModel @Inject constructor(
             getSegurosVidaUseCase(userId)
         ) { resultVehiculos, resultVida ->
 
+            Log.d("DEBUG_POLIZAS", "Vehiculos: ${resultVehiculos::class.simpleName} - Data: ${resultVehiculos.data?.size}")
+            Log.d("DEBUG_POLIZAS", "Vida: ${resultVida::class.simpleName} - Data: ${resultVida.data?.size}")
             val listaCombinada = mutableListOf<PolicyUiModel>()
             var isLoading = false
             var error: String? = null
