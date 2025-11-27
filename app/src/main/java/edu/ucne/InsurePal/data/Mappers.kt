@@ -1,6 +1,8 @@
 package edu.ucne.InsurePal.data
 
 import edu.ucne.InsurePal.data.local.pago.PagoEntity
+import edu.ucne.InsurePal.data.remote.polizas.vehiculo.dto.MarcaVehiculoDto
+import edu.ucne.InsurePal.data.remote.polizas.vehiculo.dto.ModeloVehiculoDto
 import edu.ucne.InsurePal.data.remote.polizas.vehiculo.dto.SeguroVehiculoRequest
 import edu.ucne.InsurePal.data.remote.polizas.vehiculo.dto.SeguroVehiculoResponse
 import edu.ucne.InsurePal.data.remote.polizas.vida.SeguroVidaRequest
@@ -9,6 +11,8 @@ import edu.ucne.InsurePal.data.remote.usuario.dto.UsuarioRequest
 import edu.ucne.InsurePal.data.remote.usuario.dto.UsuarioResponse
 import edu.ucne.InsurePal.domain.pago.model.EstadoPago
 import edu.ucne.InsurePal.domain.pago.model.Pago
+import edu.ucne.InsurePal.domain.polizas.vehiculo.model.MarcaVehiculo
+import edu.ucne.InsurePal.domain.polizas.vehiculo.model.ModeloVehiculo
 import edu.ucne.InsurePal.domain.polizas.vehiculo.model.SeguroVehiculo
 import edu.ucne.InsurePal.domain.polizas.vida.model.SeguroVida
 import edu.ucne.InsurePal.domain.usuario.model.Usuario
@@ -108,5 +112,14 @@ fun SeguroVehiculo.toRequest(): SeguroVehiculoRequest = SeguroVehiculoRequest(
     parentesco = parentesco,
     montoCobertura = montoCobertura,
     prima = prima
+)
 
+fun MarcaVehiculoDto.toDomain() = MarcaVehiculo(
+    nombre = nombre,
+    modelos = modelos.map { it.toDomain() }
+)
+
+fun ModeloVehiculoDto.toDomain() = ModeloVehiculo(
+    nombre = nombre,
+    precioBase = precioBase
 )
