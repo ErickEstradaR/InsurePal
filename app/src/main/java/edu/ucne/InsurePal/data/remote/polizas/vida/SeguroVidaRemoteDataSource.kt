@@ -2,6 +2,7 @@ package edu.ucne.InsurePal.data.remote.polizas.vida
 
 
 import edu.ucne.InsurePal.data.Resource
+import edu.ucne.InsurePal.data.remote.polizas.vehiculo.dto.SeguroVehiculoResponse
 import javax.inject.Inject
 
 class SeguroVidaRemoteDataSource @Inject constructor(
@@ -20,6 +21,19 @@ class SeguroVidaRemoteDataSource @Inject constructor(
             }
         } catch (e: Exception) {
             Resource.Error(e.localizedMessage ?: errorNetwork)
+        }
+    }
+    suspend fun getAllSegurosVida(): Resource<List<SeguroVidaResponse>> {
+        return try {
+            val response = api.getAllSegurosVida()
+            if (response.isSuccessful) {
+                response.body()?.let { Resource.Success(it) }
+                    ?: Resource.Error("La lista de seguros está vacía")
+            } else {
+                Resource.Error("HTTP ${response.code()} al obtener todos los seguros: ${response.message()}")
+            }
+        } catch (e: Exception) {
+            Resource.Error(e.localizedMessage ?: "Error de red al obtener todos los seguros")
         }
     }
 
