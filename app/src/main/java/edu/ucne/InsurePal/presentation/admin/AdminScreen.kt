@@ -1,285 +1,312 @@
 package edu.ucne.InsurePal.presentation.admin
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.DirectionsCar
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.DirectionsCar
+import androidx.compose.material.icons.outlined.HealthAndSafety
+import androidx.compose.material.icons.outlined.Pending
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import edu.ucne.InsurePal.presentation.home.uiModels.LifePolicyUi
-import edu.ucne.InsurePal.presentation.home.uiModels.PolicyUiModel
-import edu.ucne.InsurePal.presentation.home.uiModels.VehiclePolicyUi
+import java.text.NumberFormat
+import java.util.Locale
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminScreen(
     viewModel: AdminViewModel = hiltViewModel(),
+    onNavigateToVehicles: () -> Unit,
+    onNavigateToLife: () -> Unit,
     onLogout: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
-
-    if (state.isDetailVisible && state.selectedPolicy != null) {
-        PolicyDetailDialog(
-            policy = state.selectedPolicy!!,
-            onDismiss = { viewModel.onEvent(AdminEvent.OnDismissDetail) }
-        )
-    }
+    val scrollState = rememberScrollState()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Panel Administrativo", fontWeight = FontWeight.Bold) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ),
-                actions = {
-                    IconButton(onClick = { viewModel.onEvent(AdminEvent.LoadDashboard) }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Recargar")
+                title = {
+                    Column {
+                        Text("Panel de Control", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                        Text("Bienvenido, Administrador", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                     }
-                    IconButton(onClick = {
-                        viewModel.onEvent(AdminEvent.OnLogout)
-                        onLogout()
-                    }) {
-                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Salir")
+                },
+                actions = {
+                    IconButton(onClick = { viewModel.loadDashboardData() }) {
+                        Icon(Icons.Default.Refresh, "Recargar")
+                    }
+                    IconButton(onClick = onLogout) {
+                        Icon(Icons.AutoMirrored.Filled.Logout, "Salir", tint = MaterialTheme.colorScheme.error)
                     }
                 }
             )
         }
     ) { padding ->
-        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-            if (state.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (state.policies.isEmpty()) {
-                EmptyState(modifier = Modifier.align(Alignment.Center))
-            } else {
-                LazyColumn(
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    item { DashboardSummary(state.policies) }
-
-                    item {
-                        Text(
-                            "Pólizas Recientes",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-                        )
-                    }
-
-                    items(state.policies) { policy ->
-                        PolicyCardItem(
-                            policy = policy,
-                            onClick = { viewModel.onEvent(AdminEvent.OnSelectPolicy(policy.id)) }
-                        )
-                    }
-                }
+        if (state.isLoading) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
             }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 16.dp)
+                    .verticalScroll(scrollState),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                Spacer(modifier = Modifier.height(8.dp))
 
-            // Error Snackbar/Text
-            if (state.errorMessage != null) {
-                Text(
-                    text = state.errorMessage!!,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp)
-                )
+                TotalBalanceCard(state.totalCoverageValue, state.totalPolicies)
+
+                Text("Métricas Generales", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                StatsGrid(state)
+
+                Text("Distribución de Cartera", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                PortfolioDistributionCard(state.totalVehicles, state.totalLife)
+
+                Text("Gestión de Pólizas", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    ModuleCard(
+                        title = "Vehículos",
+                        icon = Icons.Outlined.DirectionsCar,
+                        color = Color(0xFF2196F3),
+                        count = state.totalVehicles,
+                        onClick = onNavigateToVehicles,
+                        modifier = Modifier.weight(1f)
+                    )
+                    ModuleCard(
+                        title = "Seguros Vida",
+                        icon = Icons.Outlined.HealthAndSafety,
+                        color = Color(0xFFE91E63),
+                        count = state.totalLife,
+                        onClick = onNavigateToLife,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+            }
+        }
+    }
+}
+
+
+@Composable
+fun TotalBalanceCard(amount: Double, totalCount: Int) {
+    val format = NumberFormat.getCurrencyInstance(Locale.US)
+
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary),
+        shape = RoundedCornerShape(24.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(24.dp)
+        ) {
+            Text("Valor Total Asegurado", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f))
+            Text(
+                text = format.format(amount),
+                style = MaterialTheme.typography.displaySmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.Folder, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("$totalCount pólizas registradas en el sistema", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimary)
             }
         }
     }
 }
 
 @Composable
-fun PolicyCardItem(policy: PolicyUiModel, onClick: () -> Unit) {
+fun StatsGrid(state: AdminUiState) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            StatCard(
+                title = "Activas",
+                value = state.activeCount.toString(),
+                icon = Icons.Outlined.CheckCircle,
+                color = Color(0xFF4CAF50),
+                modifier = Modifier.weight(1f)
+            )
+            StatCard(
+                title = "Pendientes",
+                value = state.pendingCount.toString(),
+                icon = Icons.Outlined.Pending,
+                color = Color(0xFFFF9800),
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+fun StatCard(title: String, value: String, icon: ImageVector, color: Color, modifier: Modifier = Modifier) {
     Card(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        modifier = modifier,
+        colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(2.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        shape = RoundedCornerShape(16.dp)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Icono con fondo circular del color del tipo de seguro
-            Surface(
-                shape = CircleShape,
-                color = policy.color.copy(alpha = 0.1f),
-                modifier = Modifier.size(48.dp)
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(color.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(policy.icon, contentDescription = null, tint = policy.color)
-                }
+                Icon(icon, contentDescription = null, tint = color)
             }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = policy.title,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = policy.color,
-                    fontWeight = FontWeight.Bold
-                )
-
-                // Generamos la descripción localmente según el tipo
-                val description = when(policy) {
-                    is VehiclePolicyUi -> "${policy.vehicleModel} - ${policy.plate}"
-                    is LifePolicyUi -> "${policy.insuredName} - $${policy.coverageAmount}"
-                    // Fallback para seguridad si agregas más tipos en el futuro
-                    else -> policy.id
-                }
-
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium
-                )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                Text(text = value, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                Text(text = title, style = MaterialTheme.typography.labelMedium, color = Color.Gray)
             }
-
-            StatusBadge(status = policy.status)
         }
     }
 }
 
 @Composable
-fun StatusBadge(status: String) {
-    val color = if (status == "Activo") Color(0xFF4CAF50) else Color(0xFFFF9800)
-    Surface(
-        color = color.copy(alpha = 0.15f),
-        shape = RoundedCornerShape(50),
+fun PortfolioDistributionCard(vehicles: Int, life: Int) {
+    val total = vehicles + life
+    val vehiclePercent = if (total > 0) vehicles.toFloat() / total else 0f
+    val lifePercent = if (total > 0) life.toFloat() / total else 0f
+
+    Card(
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(2.dp),
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp)
     ) {
-        Text(
-            text = status,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-            style = MaterialTheme.typography.labelSmall,
-            color = color,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
-
-@Composable
-fun DashboardSummary(policies: List<PolicyUiModel>) {
-    val vehiclesCount = policies.count { it is VehiclePolicyUi }
-    val lifeCount = policies.count { it is LifePolicyUi }
-
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        SummaryCard("Vehículos", vehiclesCount, Icons.Default.DirectionsCar, Color(0xFF2196F3), Modifier.weight(1f))
-        SummaryCard("Vida", lifeCount, Icons.Default.Favorite, Color(0xFFE91E63), Modifier.weight(1f))
-    }
-}
-
-@Composable
-fun SummaryCard(title: String, count: Int, icon: ImageVector, color: Color, modifier: Modifier) {
-    Card(modifier = modifier, colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(2.dp)) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Icon(icon, contentDescription = null, tint = color)
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = count.toString(), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-            Text(text = title, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
-        }
-    }
-}
-
-@Composable
-fun EmptyState(modifier: Modifier = Modifier) {
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(64.dp), tint = Color.LightGray)
-        Text("No se encontraron registros", color = Color.Gray)
-    }
-}
-
-@Composable
-fun PolicyDetailDialog(policy: PolicyUiModel, onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = onDismiss) {
-        Card(
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            modifier = Modifier.fillMaxWidth()
+        Row(
+            modifier = Modifier.padding(24.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(modifier = Modifier.padding(24.dp)) {
-                // Cabecera del Dialog
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(policy.icon, contentDescription = null, tint = policy.color)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Detalle ${policy.title}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                }
-                HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(100.dp)) {
+                DonutChart(
+                    proportions = listOf(vehiclePercent, lifePercent),
+                    colors = listOf(Color(0xFF2196F3), Color(0xFFE91E63))
+                )
+                Text("${total}", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
+            }
 
-                // Campos Comunes
-                DetailRow("ID Ref:", policy.id)
-                DetailRow("Estado:", policy.status)
+            Spacer(modifier = Modifier.width(24.dp))
 
-                when (policy) {
-                    is VehiclePolicyUi -> {
-                        DetailRow("Vehículo:", policy.vehicleModel)
-                        DetailRow("Placa:", policy.plate)
-                    }
-                    is LifePolicyUi -> {
-                        DetailRow("Asegurado:", policy.insuredName)
-                        DetailRow("Cobertura:", "$${policy.coverageAmount}")
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-                Button(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
-                    Text("Cerrar")
-                }
+            Column {
+                LegendItem("Vehículos", "$vehicles", Color(0xFF2196F3))
+                Spacer(modifier = Modifier.height(8.dp))
+                LegendItem("Vida", "$life", Color(0xFFE91E63))
             }
         }
     }
 }
 
 @Composable
-fun DetailRow(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+fun ModuleCard(
+    title: String,
+    icon: ImageVector,
+    color: Color,
+    count: Int,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        onClick = onClick,
+        modifier = modifier.height(140.dp),
+        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.1f)),
+        shape = RoundedCornerShape(20.dp)
     ) {
-        Text(text = label, fontWeight = FontWeight.Bold, color = Color.Gray)
-        Text(text = value, fontWeight = FontWeight.Medium)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(Color.White, shape = RoundedCornerShape(50)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(icon, contentDescription = null, tint = color)
+                }
+                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = color)
+            }
+
+            Column {
+                Text(count.toString(), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = color)
+                Text(title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = color.copy(alpha = 0.8f))
+            }
+        }
+    }
+}
+
+@Composable
+fun LegendItem(label: String, value: String, color: Color) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(modifier = Modifier.size(12.dp).background(color, RoundedCornerShape(2.dp)))
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text = label, style = MaterialTheme.typography.bodyMedium, color = Color.Gray, modifier = Modifier.weight(1f))
+        Text(text = value, fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
+fun DonutChart(
+    proportions: List<Float>,
+    colors: List<Color>,
+    modifier: Modifier = Modifier.fillMaxSize()
+) {
+    Canvas(modifier = modifier) {
+        var startAngle = -90f
+        val strokeWidth = 30f
+
+        proportions.forEachIndexed { index, proportion ->
+            val sweepAngle = proportion * 360f
+            drawArc(
+                color = colors.getOrElse(index) { Color.Gray },
+                startAngle = startAngle,
+                sweepAngle = sweepAngle,
+                useCenter = false,
+                topLeft = Offset(strokeWidth / 2, strokeWidth / 2),
+                size = Size(size.width - strokeWidth, size.height - strokeWidth),
+                style = Stroke(width = strokeWidth, cap = StrokeCap.Butt)
+            )
+            startAngle += sweepAngle
+        }
     }
 }
