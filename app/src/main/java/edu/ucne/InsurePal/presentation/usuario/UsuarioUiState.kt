@@ -15,5 +15,6 @@ data class UsuarioUiState (
     val regPassword: String = "",
     val regConfirmPassword: String = "",
 
-    val isLoginSuccessful: Boolean = false
+    val isLoginSuccessful: Boolean = false,
+    val isAdmin: Boolean = false,
 )
