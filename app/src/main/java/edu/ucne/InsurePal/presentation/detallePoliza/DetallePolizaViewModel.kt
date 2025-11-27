@@ -146,7 +146,6 @@ class DetallePolizaViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            // 1. Obtener el vehículo actual
             val resultGet = vehiculoRepository.getVehiculo(policyId)
 
             if (resultGet is Resource.Success<*>) {
