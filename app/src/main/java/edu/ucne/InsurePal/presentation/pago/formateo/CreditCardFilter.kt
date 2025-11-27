@@ -7,30 +7,28 @@ import androidx.compose.ui.text.input.VisualTransformation
 
 object CreditCardFilter : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
-        val trimmed = if (text.text.length >= 16) text.text.substring(0..15) else text.text
+        val trimmed = text.text.take(16)
+
         var out = ""
         for (i in trimmed.indices) {
             out += trimmed[i]
             if (i % 4 == 3 && i < 15) out += " "
         }
 
-        val creditCardOffsetTranslator = object : OffsetMapping {
-            override fun originalToTransformed(offset: Int): Int {
-                if (offset <= 3) return offset
-                if (offset <= 7) return offset + 1
-                if (offset <= 11) return offset + 2
-                if (offset <= 16) return offset + 3
-                return 19
-            }
+        return TransformedText(AnnotatedString(out), CreditCardOffsetTranslator)
+    }
+}
 
-            override fun transformedToOriginal(offset: Int): Int {
-                if (offset <= 4) return offset
-                if (offset <= 9) return offset - 1
-                if (offset <= 14) return offset - 2
-                if (offset <= 19) return offset - 3
-                return 16
-            }
-        }
-        return TransformedText(AnnotatedString(out), creditCardOffsetTranslator)
+private object CreditCardOffsetTranslator : OffsetMapping {
+    override fun originalToTransformed(offset: Int): Int {
+        if (offset <= 0) return 0
+        if (offset >= 16) return 19
+        return offset + (offset / 4)
+    }
+
+    override fun transformedToOriginal(offset: Int): Int {
+        if (offset <= 0) return 0
+        if (offset >= 19) return 16
+        return offset - (offset / 5)
     }
 }
