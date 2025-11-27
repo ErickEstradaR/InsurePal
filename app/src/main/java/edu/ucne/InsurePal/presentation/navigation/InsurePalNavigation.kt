@@ -5,6 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import edu.ucne.InsurePal.presentation.AdminScreen
 import edu.ucne.InsurePal.presentation.detallePoliza.DetallePolizaScreen
 import edu.ucne.InsurePal.presentation.home.InsuranceHomeScreen
 import edu.ucne.InsurePal.presentation.home.SeleccionSeguroScreen
@@ -24,11 +25,15 @@ fun InsurePalNavigation() {
         startDestination = Screen.Login
     ) {
 
-        // 1. LOGIN
         composable<Screen.Login> {
             LoginScreen(
                 onLoginSuccess = {
                     navController.navigate(Screen.Home) {
+                        popUpTo(Screen.Login) { inclusive = true }
+                    }
+                },
+                onAdminLogin = {
+                    navController.navigate(Screen.Admin) {
                         popUpTo(Screen.Login) { inclusive = true }
                     }
                 }
@@ -121,6 +126,16 @@ fun InsurePalNavigation() {
                             descripcion = descripcion
                         )
                     )
+                }
+            )
+        }
+
+        composable<Screen.Admin> {
+            AdminScreen(
+                onLogout = {
+                    navController.navigate(Screen.Login) {
+                        popUpTo(0) { inclusive = true }
+                    }
                 }
             )
         }
