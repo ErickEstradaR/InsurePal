@@ -257,7 +257,7 @@ val unspecified_scheme = ColorFamily(
 @Composable
 fun InsurePalTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false,
+    dynamicColor: Boolean = true,
     content: @Composable() () -> Unit
 ) {
   val colorScheme = when {

@@ -81,7 +81,7 @@ fun InsuranceHomeScreen(
 
     Scaffold(
         topBar = { HomeHeader() },
-        snackbarHost = { SnackbarHost(snackbarHostState) }, 
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         LazyColumn(
