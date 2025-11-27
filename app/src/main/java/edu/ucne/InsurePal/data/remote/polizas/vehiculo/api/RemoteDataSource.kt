@@ -29,6 +29,20 @@ class RemoteDataSource @Inject constructor(
         }
     }
 
+    suspend fun getAllVehiculos(): Resource<List<SeguroVehiculoResponse>> {
+        return try {
+            val response = api.getAllVehiculos()
+            if (response.isSuccessful) {
+                response.body()?.let { Resource.Success(it) }
+                    ?: Resource.Error("La lista de vehículos está vacía")
+            } else {
+                Resource.Error("HTTP ${response.code()} al obtener todos los vehículos: ${response.message()}")
+            }
+        } catch (e: Exception) {
+            Resource.Error(e.localizedMessage ?: "Error de red al obtener todos los vehículos")
+        }
+    }
+
     suspend fun update(id: String, request: SeguroVehiculoRequest): Resource<Unit> {
         return try {
             val response = api.putVehiculo(id, request)
