@@ -70,6 +70,23 @@ class SeguroVehiculoRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun getAllVehiculos(): Flow<Resource<List<SeguroVehiculo>>> = flow {
+        emit(Resource.Loading())
+
+        when (val result = remoteDataSource.getAllVehiculos()) {
+            is Resource.Success -> {
+                val list = result.data?.map { it.toDomain() } ?: emptyList()
+                emit(Resource.Success(list))
+            }
+            is Resource.Error -> {
+                emit(Resource.Error(result.message ?: "Error al cargar la lista completa"))
+            }
+            is Resource.Loading -> {
+                emit(Resource.Loading())
+            }
+        }
+    }
+
     override suspend fun putVehiculo(id: String, seguro: SeguroVehiculo): Resource<Unit> {
 
         val requestDto = seguro.toRequest()
