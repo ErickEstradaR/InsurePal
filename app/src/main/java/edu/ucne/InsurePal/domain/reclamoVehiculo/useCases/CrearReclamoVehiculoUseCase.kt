@@ -1,0 +1,26 @@
+package edu.ucne.InsurePal.domain.reclamoVehiculo.useCases
+
+import edu.ucne.InsurePal.data.Resource
+import edu.ucne.InsurePal.domain.reclamoVehiculo.model.ReclamoVehiculo
+import edu.ucne.InsurePal.domain.reclamoVehiculo.repository.ReclamoVehiculoRepository
+import jakarta.inject.Inject
+import java.io.File
+
+class CrearReclamoVehiculoUseCase @Inject constructor(
+    private val repository: ReclamoVehiculoRepository
+) {
+    suspend operator fun invoke(
+        polizaId: String,
+        usuarioId: Int,
+        descripcion: String,
+        direccion: String,
+        tipoIncidente: String,
+        fechaIncidente: String,
+        imagen: File
+    ): Resource<ReclamoVehiculo> {
+
+        return repository.crearReclamoVehiculo(
+            polizaId, usuarioId, descripcion, direccion, tipoIncidente, fechaIncidente, imagen
+        )
+    }
+}
