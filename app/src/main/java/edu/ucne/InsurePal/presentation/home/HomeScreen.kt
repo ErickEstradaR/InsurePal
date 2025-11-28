@@ -9,9 +9,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -29,11 +31,13 @@ import edu.ucne.InsurePal.presentation.home.uiModels.VehiclePolicyUi
 import edu.ucne.InsurePal.presentation.pago.formateo.formatearMoneda
 import edu.ucne.InsurePal.ui.theme.InsurePalTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InsuranceHomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     onActionClick: (String) -> Unit,
-    onPolicyClick: (String, String) -> Unit
+    onPolicyClick: (String, String) -> Unit,
+    onLogout: () -> Unit // Nuevo parámetro
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -45,84 +49,98 @@ fun InsuranceHomeScreen(
     )
 
     Scaffold(
-        topBar = { HomeHeader() },
+        topBar = { HomeHeader(onLogout) }, // Pasamos el evento
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        LazyColumn(
+
+        PullToRefreshBox(
+            isRefreshing = state.isLoading,
+            onRefresh = { viewModel.refresh() },
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
 
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "¿Qué deseas proteger hoy?",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "¿Qué deseas proteger hoy?",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
 
-            item {
-                SectionTitle("Mis Pólizas")
-
-                if (state.isLoading) {
-                    Box(modifier = Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
-                } else if (state.policies.isEmpty()) {
-                    Card(
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
-                    ) {
-                        Text(
-                            text = "No tienes pólizas activas aún.",
-                            modifier = Modifier.padding(24.dp),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                } else {
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        items(state.policies) { policy ->
-                            Box(modifier = Modifier.clickable {
-                                val type = when(policy) {
-                                    is VehiclePolicyUi -> "VEHICULO"
-                                    is LifePolicyUi -> "VIDA"
+                item {
+                    SectionTitle("Mis Pólizas")
+                    if (state.isLoading && state.policies.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(150.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    } else if (state.policies.isEmpty()) {
+                        Card(
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                        ) {
+                            Text(
+                                text = "No tienes pólizas activas aún.",
+                                modifier = Modifier.padding(24.dp),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    } else {
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            items(state.policies) { policy ->
+                                Box(modifier = Modifier.clickable {
+                                    val type = when(policy) {
+                                        is VehiclePolicyUi -> "VEHICULO"
+                                        is LifePolicyUi -> "VIDA"
+                                    }
+                                    onPolicyClick(policy.id, type)
+                                }) {
+                                    PolicyCard(policy)
                                 }
-                                onPolicyClick(policy.id, type)
-                            }) {
-                                PolicyCard(policy)
                             }
                         }
                     }
                 }
-            }
 
-            item {
-                SectionTitle("Acciones Rápidas")
-                QuickActionsGrid(
-                    actions = actions,
-                    onItemClick = onActionClick
-                )
-            }
+                item {
+                    SectionTitle("Acciones Rápidas")
+                    QuickActionsGrid(
+                        actions = actions,
+                        onItemClick = onActionClick
+                    )
+                }
 
-            item {
-                PromoBanner()
-                Spacer(modifier = Modifier.height(32.dp))
+                item {
+                    PromoBanner()
+                    Spacer(modifier = Modifier.height(32.dp))
+                }
             }
         }
     }
 }
 
 @Composable
-fun HomeHeader() {
+fun HomeHeader(onLogout: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -138,17 +156,35 @@ fun HomeHeader() {
                 fontWeight = FontWeight.SemiBold
             )
         }
-        IconButton(
-            onClick = { /* TODO: Abrir notificaciones */ },
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape)
-                .size(48.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Notifications,
-                contentDescription = "Alertas",
-                tint = MaterialTheme.colorScheme.onSurface
-            )
+
+        // Agrupamos notificaciones y logout
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            IconButton(
+                onClick = { /* TODO: Abrir notificaciones */ },
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape)
+                    .size(48.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Notifications,
+                    contentDescription = "Alertas",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            // Botón de Logout igual al de AdminScreen
+            IconButton(
+                onClick = onLogout,
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape)
+                    .size(48.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Logout,
+                    contentDescription = "Cerrar Sesión",
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
         }
     }
 }
@@ -241,9 +277,17 @@ fun PolicyCard(policy: PolicyUiModel) {
 
 @Composable
 fun StatusChip(status: String) {
-    val isActive = status == "Activo"
-    val containerColor = if (isActive) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.errorContainer
-    val contentColor = if (isActive) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onErrorContainer
+    val containerColor = when(status) {
+        "Activo" -> MaterialTheme.colorScheme.primaryContainer
+        "Pendiente" -> MaterialTheme.colorScheme.secondaryContainer
+        else -> MaterialTheme.colorScheme.surfaceVariant
+    }
+
+    val contentColor = when(status) {
+        "Activo" -> MaterialTheme.colorScheme.onPrimaryContainer
+        "Pendiente" -> MaterialTheme.colorScheme.onSecondaryContainer
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
 
     SuggestionChip(
         onClick = {},
@@ -360,14 +404,9 @@ fun PromoBanner() {
     }
 }
 
-
-
 @Preview(showBackground = true, showSystemUi = true, name = "Modo Claro")
 @Composable
 fun InsuranceHomeScreenPreview() {
     InsurePalTheme {
-        // Tendrías que crear un HomeContent separado si quieres preview,
-        // similar a lo que hicimos con SeguroVida.
-        // Por ahora, el preview fallará si se usa hiltViewModel() directamente.
     }
 }
