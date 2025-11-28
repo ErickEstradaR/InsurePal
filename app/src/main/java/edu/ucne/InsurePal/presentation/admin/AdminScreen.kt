@@ -1,4 +1,5 @@
 package edu.ucne.InsurePal.presentation.admin
+
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -32,8 +33,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import java.text.NumberFormat
 import java.util.Locale
 
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminScreen(
@@ -51,7 +50,7 @@ fun AdminScreen(
                 title = {
                     Column {
                         Text("Panel de Control", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                        Text("Bienvenido, Administrador", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                        Text("Bienvenido, Administrador", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 },
                 actions = {
@@ -96,7 +95,7 @@ fun AdminScreen(
                     ModuleCard(
                         title = "Vehículos",
                         icon = Icons.Outlined.DirectionsCar,
-                        color = Color(0xFF2196F3),
+                        color = MaterialTheme.colorScheme.primary, // Color Material (Azul por defecto)
                         count = state.totalVehicles,
                         onClick = onNavigateToVehicles,
                         modifier = Modifier.weight(1f)
@@ -104,7 +103,7 @@ fun AdminScreen(
                     ModuleCard(
                         title = "Seguros Vida",
                         icon = Icons.Outlined.HealthAndSafety,
-                        color = Color(0xFFE91E63),
+                        color = MaterialTheme.colorScheme.tertiary, // Color Material (Rosa/Terciario por defecto)
                         count = state.totalLife,
                         onClick = onNavigateToLife,
                         modifier = Modifier.weight(1f)
@@ -116,7 +115,6 @@ fun AdminScreen(
         }
     }
 }
-
 
 @Composable
 fun TotalBalanceCard(amount: Double, totalCount: Int) {
@@ -155,14 +153,14 @@ fun StatsGrid(state: AdminUiState) {
                 title = "Activas",
                 value = state.activeCount.toString(),
                 icon = Icons.Outlined.CheckCircle,
-                color = Color(0xFF4CAF50),
+                color = MaterialTheme.colorScheme.primary, // Verde/Principal en tema
                 modifier = Modifier.weight(1f)
             )
             StatCard(
                 title = "Pendientes",
                 value = state.pendingCount.toString(),
                 icon = Icons.Outlined.Pending,
-                color = Color(0xFFFF9800),
+                color = MaterialTheme.colorScheme.error, // Naranja/Error para resaltar atención
                 modifier = Modifier.weight(1f)
             )
         }
@@ -173,7 +171,7 @@ fun StatsGrid(state: AdminUiState) {
 fun StatCard(title: String, value: String, icon: ImageVector, color: Color, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(2.dp),
         shape = RoundedCornerShape(16.dp)
     ) {
@@ -193,7 +191,7 @@ fun StatCard(title: String, value: String, icon: ImageVector, color: Color, modi
             Spacer(modifier = Modifier.width(12.dp))
             Column {
                 Text(text = value, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                Text(text = title, style = MaterialTheme.typography.labelMedium, color = Color.Gray)
+                Text(text = title, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
@@ -205,8 +203,11 @@ fun PortfolioDistributionCard(vehicles: Int, life: Int) {
     val vehiclePercent = if (total > 0) vehicles.toFloat() / total else 0f
     val lifePercent = if (total > 0) life.toFloat() / total else 0f
 
+    val vehicleColor = MaterialTheme.colorScheme.primary
+    val lifeColor = MaterialTheme.colorScheme.tertiary
+
     Card(
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(2.dp),
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp)
@@ -218,17 +219,17 @@ fun PortfolioDistributionCard(vehicles: Int, life: Int) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.size(100.dp)) {
                 DonutChart(
                     proportions = listOf(vehiclePercent, lifePercent),
-                    colors = listOf(Color(0xFF2196F3), Color(0xFFE91E63))
+                    colors = listOf(vehicleColor, lifeColor)
                 )
-                Text("${total}", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
+                Text("$total", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
             }
 
             Spacer(modifier = Modifier.width(24.dp))
 
             Column {
-                LegendItem("Vehículos", "$vehicles", Color(0xFF2196F3))
+                LegendItem("Vehículos", "$vehicles", vehicleColor)
                 Spacer(modifier = Modifier.height(8.dp))
-                LegendItem("Vida", "$life", Color(0xFFE91E63))
+                LegendItem("Vida", "$life", lifeColor)
             }
         }
     }
@@ -259,7 +260,7 @@ fun ModuleCard(
                 Box(
                     modifier = Modifier
                         .size(40.dp)
-                        .background(Color.White, shape = RoundedCornerShape(50)),
+                        .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(50)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(icon, contentDescription = null, tint = color)
@@ -280,7 +281,7 @@ fun LegendItem(label: String, value: String, color: Color) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(modifier = Modifier.size(12.dp).background(color, RoundedCornerShape(2.dp)))
         Spacer(modifier = Modifier.width(8.dp))
-        Text(text = label, style = MaterialTheme.typography.bodyMedium, color = Color.Gray, modifier = Modifier.weight(1f))
+        Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
         Text(text = value, fontWeight = FontWeight.Bold)
     }
 }
@@ -291,6 +292,8 @@ fun DonutChart(
     colors: List<Color>,
     modifier: Modifier = Modifier.fillMaxSize()
 ) {
+    val inactiveColor = MaterialTheme.colorScheme.surfaceVariant
+
     Canvas(modifier = modifier) {
         var startAngle = -90f
         val strokeWidth = 30f
@@ -298,7 +301,7 @@ fun DonutChart(
         proportions.forEachIndexed { index, proportion ->
             val sweepAngle = proportion * 360f
             drawArc(
-                color = colors.getOrElse(index) { Color.Gray },
+                color = colors.getOrElse(index) { inactiveColor },
                 startAngle = startAngle,
                 sweepAngle = sweepAngle,
                 useCenter = false,
