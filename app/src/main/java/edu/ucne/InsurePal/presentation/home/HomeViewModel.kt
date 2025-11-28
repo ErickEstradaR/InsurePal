@@ -29,15 +29,29 @@ class HomeViewModel @Inject constructor(
     private val _state = MutableStateFlow(HomeUiState())
     val state = _state.asStateFlow()
 
+    // 1. Creamos un gatillo para el refresh. Cada vez que cambie este número, se recargará todo.
+    private val refreshTrigger = MutableStateFlow(0)
+
     init {
         cargarDatos()
     }
 
+    fun refresh() {
+        refreshTrigger.update { it + 1 }
+    }
+
     private fun cargarDatos() {
         viewModelScope.launch {
-            userPreferences.userId.collectLatest { userId ->
+            combine(
+                userPreferences.userId,
+                refreshTrigger
+            ) { userId, _ ->
+                userId
+            }.collectLatest { userId ->
                 if (userId != null && userId > 0) {
                     observarPolizas(userId)
+                } else {
+                    _state.update { it.copy(policies = emptyList()) }
                 }
             }
         }
@@ -51,6 +65,7 @@ class HomeViewModel @Inject constructor(
 
             Log.d("DEBUG_POLIZAS", "Vehiculos: ${resultVehiculos::class.simpleName} - Data: ${resultVehiculos.data?.size}")
             Log.d("DEBUG_POLIZAS", "Vida: ${resultVida::class.simpleName} - Data: ${resultVida.data?.size}")
+
             val listaCombinada = mutableListOf<PolicyUiModel>()
             var isLoading = false
             var error: String? = null
@@ -62,7 +77,7 @@ class HomeViewModel @Inject constructor(
                     val uiModels = resultVehiculos.data?.map { v ->
                         VehiclePolicyUi(
                             id = v.idPoliza ?: "",
-                            status = if (v.esPagado) "Activo" else "Pendiente",
+                            status = v.status,
                             vehicleModel = "${v.marca} ${v.modelo} ${v.anio}",
                             plate = v.placa
                         )
