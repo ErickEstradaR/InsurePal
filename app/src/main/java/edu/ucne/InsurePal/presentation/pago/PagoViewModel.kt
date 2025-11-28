@@ -7,15 +7,24 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.InsurePal.data.Resource
 import edu.ucne.InsurePal.domain.pago.model.TarjetaCredito
 import edu.ucne.InsurePal.domain.pago.useCase.ProcesarPagoUseCase
+import edu.ucne.InsurePal.domain.polizas.vehiculo.useCases.GetVehiculoUseCase
+import edu.ucne.InsurePal.domain.polizas.vehiculo.useCases.UpdateSeguroUseCase
+import edu.ucne.InsurePal.domain.polizas.vida.useCases.GetSeguroVidaByIdUseCase
+import edu.ucne.InsurePal.domain.polizas.vida.useCases.UpdateSeguroVidaUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class PagoViewModel @Inject constructor(
     private val procesarPago: ProcesarPagoUseCase,
+    private val getVehiculoUseCase: GetVehiculoUseCase,
+    private val updateSeguroUseCase: UpdateSeguroUseCase,
+    private val getSeguroVidaUseCase: GetSeguroVidaByIdUseCase,
+    private val updateSeguroVidaUseCase: UpdateSeguroVidaUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -23,14 +32,10 @@ class PagoViewModel @Inject constructor(
     val state = _state.asStateFlow()
 
     private val polizaId: String = savedStateHandle.get<String>("polizaId") ?: ""
-
     private val monto: Double = savedStateHandle.get<Double>("monto") ?: 0.0
-
     private val descripcion: String = savedStateHandle.get<String>("descripcion") ?: "Pago de Póliza"
 
     init {
-
-
         _state.update { it.copy(polizaId = polizaId, montoAPagar = monto) }
     }
 
@@ -40,9 +45,7 @@ class PagoViewModel @Inject constructor(
             is PagoEvent.OnFechaChange -> _state.update { it.copy(fechaVencimiento = event.fecha) }
             is PagoEvent.OnCvvChange -> _state.update { it.copy(cvv = event.cvv) }
             is PagoEvent.OnTitularChange -> _state.update { it.copy(titular = event.nombre) }
-
             PagoEvent.OnDialogDismiss -> _state.update { it.copy(mensajeError = null) }
-
             PagoEvent.OnPagarClick -> realizarPagoDirecto()
         }
     }
@@ -65,21 +68,62 @@ class PagoViewModel @Inject constructor(
                 cvv = uiState.cvv
             )
 
-            val result = procesarPago(
+            val resultPago = procesarPago(
                 polizaId = uiState.polizaId,
                 monto = uiState.montoAPagar,
                 tarjeta = tarjeta
             )
 
-            when(result) {
+            when(resultPago) {
                 is Resource.Success -> {
+                    activarPoliza(uiState.polizaId)
                     _state.update { it.copy(isLoading = false, isSuccess = true) }
                 }
                 is Resource.Error -> {
-                    _state.update { it.copy(isLoading = false, mensajeError = result.message) }
+                    _state.update { it.copy(isLoading = false, mensajeError = resultPago.message) }
                 }
                 is Resource.Loading -> _state.update { it.copy(isLoading = true) }
             }
+        }
+    }
+
+    private suspend fun activarPoliza(id: String) {
+        if (id.startsWith("VIDA-")) {
+            activarSeguroVida(id)
+        } else {
+            activarSeguroVehiculo(id)
+        }
+    }
+
+    private suspend fun activarSeguroVida(idCompuesto: String) {
+        val resultGet = getSeguroVidaUseCase(idCompuesto)
+
+        if (resultGet is Resource.Success && resultGet.data != null) {
+            val vidaActual = resultGet.data!!
+
+            val vidaActualizada = vidaActual.copy(
+                esPagado = true,
+                fechaPago = LocalDate.now().toString(),
+            )
+
+            updateSeguroVidaUseCase(idCompuesto, vidaActualizada)
+        }
+    }
+
+    private suspend fun activarSeguroVehiculo(id: String) {
+        val resultGet = getVehiculoUseCase(id)
+
+        if (resultGet is Resource.Success && resultGet.data != null) {
+            val vehiculoActual = resultGet.data!!
+
+            val vehiculoActualizado = vehiculoActual.copy(
+                status = "Activo",
+                esPagado = true,
+                fechaPago = LocalDate.now().toString(),
+                expirationDate = LocalDate.now().plusMonths(1).toString()
+            )
+
+            updateSeguroUseCase(id, vehiculoActualizado)
         }
     }
 }
