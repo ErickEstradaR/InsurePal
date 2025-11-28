@@ -15,6 +15,7 @@ import edu.ucne.InsurePal.presentation.pago.PagoScreen
 import edu.ucne.InsurePal.presentation.pago.listaPago.HistorialPagosScreen
 import edu.ucne.InsurePal.presentation.polizas.vehiculo.cotizacionVehiculo.CotizacionVehiculoScreen
 import edu.ucne.InsurePal.presentation.polizas.vehiculo.VehiculoRegistroScreen
+import edu.ucne.InsurePal.presentation.polizas.vehiculo.reclamoVehiculo.ReclamoScreen
 import edu.ucne.InsurePal.presentation.polizas.vida.RegistroSeguroVidaScreen
 import edu.ucne.InsurePal.presentation.usuario.LoginScreen
 
@@ -174,7 +175,27 @@ fun InsurePalNavigation() {
                             descripcion = descripcion
                         )
                     )
+                },
+
+
+                onNavigateToReclamo = { idPoliza, idUsuario ->
+                    navController.navigate(
+                        Screen.ReclamoVehiculo(
+                            polizaId = idPoliza,
+                            usuarioId = idUsuario
+                        )
+                    )
                 }
+            )
+        }
+
+        composable<Screen.ReclamoVehiculo> { backStackEntry ->
+            val args = backStackEntry.toRoute<Screen.ReclamoVehiculo>()
+
+            ReclamoScreen(
+                polizaId = args.polizaId,
+                usuarioId = args.usuarioId,
+                navigateBack = { navController.popBackStack() }
             )
         }
 
