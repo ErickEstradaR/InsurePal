@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.InsurePal.data.Resource
 import edu.ucne.InsurePal.domain.polizas.vehiculo.repository.SeguroVehiculoRepository
+import edu.ucne.InsurePal.domain.polizas.vehiculo.useCases.CalcularPrimaUseCase
 import edu.ucne.InsurePal.domain.polizas.vehiculo.useCases.EliminarSeguroVehiculoUseCase
 import edu.ucne.InsurePal.domain.polizas.vehiculo.useCases.GetVehiculoUseCase
 import edu.ucne.InsurePal.domain.polizas.vida.useCases.DeleteSeguroVidaUseCase
@@ -23,7 +24,8 @@ class DetallePolizaViewModel @Inject constructor(
     private val eliminarVehiculoUseCase: EliminarSeguroVehiculoUseCase,
     private val vehiculoRepository: SeguroVehiculoRepository,
     private val getVidaUseCase: GetSeguroVidaByIdUseCase,
-    private val eliminarVidaUseCase: DeleteSeguroVidaUseCase
+    private val eliminarVidaUseCase: DeleteSeguroVidaUseCase,
+    private val calcularPrimaUseCase: CalcularPrimaUseCase // Inyección del nuevo UseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DetallePolizaUiState())
@@ -63,21 +65,25 @@ class DetallePolizaViewModel @Inject constructor(
             is Resource.Success -> {
                 val v = result.data
                 if (v != null) {
+                    val desglose = calcularPrimaUseCase(v.valorMercado, v.coverageType)
+                    val precioTotal = desglose.total
+
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            policyId = v.idPoliza ?:"",
+                            policyId = v.idPoliza ?: "",
                             title = "${v.marca} ${v.modelo}",
                             subtitle = "${v.anio} • ${v.color}",
-                            status = v.status,
-                            price = v.valorMercado,
+                            status = v.status ?: "Pendiente",
+                            price = precioTotal,
                             isPaid = v.esPagado,
                             coverageType = v.coverageType,
                             details = mapOf(
                                 "Placa" to v.placa,
                                 "Chasis" to v.chasis,
                                 "Tipo Cobertura" to v.coverageType,
-                                "Vigencia" to (v.expirationDate ?: "Pendiente")
+                                "Valor Vehículo" to "RD$ ${v.valorMercado}",
+                                "Vigencia" to (v.expirationDate ?: "Pendiente"),
                             )
                         )
                     }
@@ -90,7 +96,7 @@ class DetallePolizaViewModel @Inject constructor(
 
     private suspend fun cargarVida() {
 
-        val result = getVidaUseCase(policyId.removePrefix("VIDA-"))
+        val result = getVidaUseCase(policyId)
 
         when(result) {
             is Resource.Success -> {
