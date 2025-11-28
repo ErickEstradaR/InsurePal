@@ -87,7 +87,7 @@ class SeguroVehiculoRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun putVehiculo(id: String, seguro: SeguroVehiculo): Resource<Unit> {
+    override suspend fun putVehiculo(id: String?, seguro: SeguroVehiculo): Resource<Unit> {
 
         val requestDto = seguro.toRequest()
 

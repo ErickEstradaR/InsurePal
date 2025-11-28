@@ -28,7 +28,7 @@ interface SeguroVehiculoApiService {
     suspend fun postVehiculo(@Body seguroVehiculo: SeguroVehiculoRequest): Response<SeguroVehiculoResponse>
 
     @PUT("api/Vehiculos/{id}")
-    suspend fun putVehiculo(@Path("id") id:String, @Body seguroVehiculo: SeguroVehiculoRequest): Response<Unit>
+    suspend fun putVehiculo(@Path("id") id: String?, @Body seguroVehiculo: SeguroVehiculoRequest): Response<Unit>
 
     @DELETE("api/Vehiculos/{id}")
     suspend fun deleteVehiculo(@Path("id") id: String): Response<Unit>
