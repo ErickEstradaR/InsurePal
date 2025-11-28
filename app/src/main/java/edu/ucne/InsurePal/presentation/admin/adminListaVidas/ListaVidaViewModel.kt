@@ -77,7 +77,7 @@ class ListaVidaViewModel @Inject constructor(
         if (query.isBlank()) return list
         return list.filter {
             it.nombresAsegurado.contains(query, ignoreCase = true) ||
-                    it.nombresAsegurado.contains(query, ignoreCase = true)
+                    it.cedulaAsegurado.contains(query, ignoreCase = true)
         }
     }
 }
