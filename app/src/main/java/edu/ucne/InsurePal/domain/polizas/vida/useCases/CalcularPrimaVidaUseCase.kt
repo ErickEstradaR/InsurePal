@@ -15,29 +15,32 @@ class CalcularPrimaVidaUseCase @Inject constructor() {
         montoCobertura: Double
     ): Double {
 
-
         val edad = calcularEdad(fechaNacimiento)
-        if (edad < 18) return 0.0 // No aseguramos menores
+
+        if (edad < 18) return 0.0
 
         var tasa = 0.005
 
+        // Factores de Edad
         if (edad > 30) tasa += 0.002
         if (edad > 45) tasa += 0.005
         if (edad > 60) tasa += 0.015
 
         if (esFumador) {
-            tasa *= 1.30
+            tasa *= 1.30 // +30%
         }
 
         when (ocupacion.lowercase()) {
-            "bombero", "policia", "militar", "construccion" -> tasa *= 1.50
-            "chofer", "mecánico" -> tasa *= 1.20
-            else -> { /* Oficinista, Estudiante, etc. mantiene tasa igual */ }
+            "bombero", "policia", "militar", "construccion" -> tasa *= 1.50 // +50% Riesgo Alto
+            "chofer", "mecánico" -> tasa *= 1.20 // +20% Riesgo Medio
+            else -> { /* Oficinista, Estudiante, etc. (Riesgo Bajo) */ }
         }
 
         val primaAnual = montoCobertura * tasa
 
-        return primaAnual
+        val primaMensual = primaAnual / 12
+
+        return primaMensual
     }
 
     private fun calcularEdad(fechaString: String): Int {
