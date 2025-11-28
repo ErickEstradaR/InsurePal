@@ -20,7 +20,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Payment
-import androidx.compose.material.icons.filled.Warning // Import necesario para el icono de reclamo
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -52,15 +52,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import edu.ucne.InsurePal.presentation.pago.formateo.formatearMoneda
+// Asegúrate de importar tu función de utilidad aquí:
+// import edu.ucne.InsurePal.utils.formatearMoneda
 import edu.ucne.InsurePal.ui.theme.InsurePalTheme
-import java.text.NumberFormat
-import java.util.Locale
 
 private const val COBERTURA_FULL = "Cobertura Full"
 
@@ -68,7 +68,8 @@ private const val COBERTURA_FULL = "Cobertura Full"
 fun DetallePolizaScreen(
     viewModel: DetallePolizaViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
-    onNavigateToPago: (Double, String) -> Unit
+    onNavigateToPago: (Double, String) -> Unit,
+    onNavigateToReclamo: (String, Int) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -88,6 +89,7 @@ fun DetallePolizaScreen(
         onEvent = viewModel::onEvent,
         onNavigateBack = onNavigateBack,
         onNavigateToPago = onNavigateToPago,
+        onNavigateToReclamo = onNavigateToReclamo,
         snackbarHostState = snackbarHostState,
         policyType = viewModel.policyType
     )
@@ -100,6 +102,7 @@ fun PolicyDetailContent(
     onEvent: (DetallePolizaEvent) -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateToPago: (Double, String) -> Unit,
+    onNavigateToReclamo: (String, Int) -> Unit,
     snackbarHostState: SnackbarHostState,
     policyType: String
 ) {
@@ -136,6 +139,7 @@ fun PolicyDetailContent(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 HeaderCard(state)
+
                 if (isPendingApproval) {
                     Card(
                         colors = CardDefaults.cardColors(
@@ -163,7 +167,6 @@ fun PolicyDetailContent(
                     }
                 }
 
-
                 Card(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     elevation = CardDefaults.cardElevation(2.dp)
@@ -190,9 +193,11 @@ fun PolicyDetailContent(
                 Spacer(modifier = Modifier.weight(1f))
 
                 if (policyType == "VEHICULO") {
-                     if (state.isPaid) {
+                    if (state.isPaid) {
                         Button(
-                            onClick = { /* TODO: Navegar a pantalla de reclamo */ },
+                            onClick = {
+                                onNavigateToReclamo(state.policyId, state.usuarioId)
+                            },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.errorContainer,
@@ -205,9 +210,9 @@ fun PolicyDetailContent(
                             Text("Realizar Reclamo")
                         }
                     }
-
                 }
 
+                // Botón de Pago
                 if (!state.isPaid) {
                     if (!isPendingApproval) {
                         Button(
@@ -215,19 +220,28 @@ fun PolicyDetailContent(
                                 onNavigateToPago(state.price, "Pago de ${state.title}")
                             },
                             modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
+                            // CAMBIO: Color dinámico del tema en lugar de estático
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            ),
                             shape = MaterialTheme.shapes.medium
                         ) {
                             Icon(Icons.Default.Payment, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Pagar RD$ ${formatMoney(state.price)}")
+                            Text("Pagar ${formatearMoneda(state.price)}")
                         }
                     }
                 } else {
                     Button(
                         onClick = {},
                         modifier = Modifier.fillMaxWidth(),
-                        shape = MaterialTheme.shapes.medium
+                        shape = MaterialTheme.shapes.medium,
+                        // CAMBIO: Uso de secondary para acciones secundarias post-pago
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
                     ) {
                         Icon(Icons.Default.Download, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
@@ -320,22 +334,28 @@ fun HeaderCard(state: DetallePolizaUiState) {
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
+
+                // CAMBIO: Lógica de colores dinámica
+                val statusContainerColor = if (state.isPaid) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                val statusContentColor = if (state.isPaid) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onError
+
                 Surface(
-                    color = if (state.isPaid) Color(0xFF4CAF50) else MaterialTheme.colorScheme.error,
+                    color = statusContainerColor,
                     shape = CircleShape
                 ) {
                     Text(
                         text = state.status,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color.White,
+                        color = statusContentColor,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
+            // CAMBIO: formatearMoneda
             Text(
-                text = "Prima: RD$ ${formatMoney(state.price)}",
+                text = "Prima: ${formatearMoneda(state.price)}",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -355,9 +375,7 @@ fun DetailRow(label: String, value: String) {
     }
 }
 
-fun formatMoney(amount: Double): String {
-    return NumberFormat.getNumberInstance(Locale.US).format(amount)
-}
+// Se eliminó la función formatMoney local para usar la importada
 
 @Preview(name = "Detalle Vehículo Pendiente", showSystemUi = true)
 @Composable
@@ -381,6 +399,7 @@ fun PolicyDetailVehiclePreview() {
             onEvent = {},
             onNavigateBack = {},
             onNavigateToPago = { _, _ -> },
+            onNavigateToReclamo = { _, _ -> }, // Mock navigation
             snackbarHostState = remember { SnackbarHostState() },
             policyType = "VEHICULO"
         )
@@ -408,6 +427,7 @@ fun PolicyDetailLifePreview() {
             onEvent = {},
             onNavigateBack = {},
             onNavigateToPago = { _, _ -> },
+            onNavigateToReclamo = { _, _ -> }, // Mock navigation
             snackbarHostState = remember { SnackbarHostState() },
             policyType = "VIDA"
         )
