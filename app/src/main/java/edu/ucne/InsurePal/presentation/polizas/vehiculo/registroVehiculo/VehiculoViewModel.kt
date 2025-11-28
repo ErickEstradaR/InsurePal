@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.InsurePal.data.Resource
 import edu.ucne.InsurePal.data.local.UserPreferences
-import edu.ucne.InsurePal.data.remote.polizas.vehiculo.dto.SeguroVehiculoRequest
 import edu.ucne.InsurePal.domain.polizas.vehiculo.model.MarcaVehiculo
 import edu.ucne.InsurePal.domain.polizas.vehiculo.model.SeguroVehiculo
 import edu.ucne.InsurePal.domain.polizas.vehiculo.repository.SeguroVehiculoRepository
@@ -109,7 +108,7 @@ class VehiculoRegistroViewModel @Inject constructor(
                 chasis = uiState.chasis,
                 valorMercado = uiState.valorMercado.toDoubleOrNull() ?: 0.0,
                 coverageType = uiState.coverageType,
-                status = "Cotizando",
+                status = "Pendiente de aprobación",
                 expirationDate = LocalDate.now().toString(),
                 esPagado = false,
                 fechaPago = null
