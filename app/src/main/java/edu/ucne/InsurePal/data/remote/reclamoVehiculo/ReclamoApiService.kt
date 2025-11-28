@@ -17,13 +17,12 @@ interface ReclamosApiService {
     @Multipart
     @POST("api/reclamos")
     suspend fun crearReclamo(
-        @Part("poliza_id") polizaId: RequestBody,
-        @Part("usuario_id") usuarioId: RequestBody,
-        @Part("descripcion") descripcion: RequestBody,
-        @Part("direccion") direccion: RequestBody,
-        @Part("tipo_incidente") tipoIncidente: RequestBody,
-        @Part("fecha_incidente") fechaIncidente: RequestBody,
-
+        @Part("PolizaId") polizaId: RequestBody,
+        @Part("UsuarioId") usuarioId: RequestBody,
+        @Part("Descripcion") descripcion: RequestBody,
+        @Part("Direccion") direccion: RequestBody,
+        @Part("TipoIncidente") tipoIncidente: RequestBody,
+        @Part("FechaIncidente") fechaIncidente: RequestBody,
         @Part imagen: MultipartBody.Part
     ): Response<ReclamoResponse>
 
