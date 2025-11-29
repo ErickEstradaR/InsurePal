@@ -101,7 +101,7 @@ class HomeViewModel @Inject constructor(
                 }
             }
 
-            Triple(isLoading, error, listaCombinada)
+            Triple(isLoading, error, listaCombinada.toList())
 
         }.collect { (loading, error, lista) ->
             _state.update {
