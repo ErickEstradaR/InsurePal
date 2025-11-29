@@ -45,7 +45,6 @@ fun ReclamoScreen(
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
-    // Manejo de Efectos Secundarios (Toasts y Navegación)
     LaunchedEffect(state.esExitoso) {
         if (state.esExitoso) {
             Toast.makeText(context, "Reclamo enviado correctamente", Toast.LENGTH_LONG).show()
@@ -86,35 +85,31 @@ fun ReclamoScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-            // --- Sección: Datos del Incidente ---
             Text(
                 text = "Detalles del Incidente",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary
             )
 
-            // Selector de Tipo de Incidente (Dropdown)
             TipoIncidenteDropdown(
                 selectedOption = state.tipoIncidente,
                 onOptionSelected = { viewModel.onEvent(ReclamoEvent.TipoIncidenteChanged(it)) }
             )
 
-            // Campo Fecha (Solo lectura, se podría agregar DatePicker real aquí)
+
             OutlinedTextField(
-                value = state.fechaIncidente.take(10), // Mostramos solo YYYY-MM-DD
+                value = state.fechaIncidente.take(10),
                 onValueChange = {},
                 label = { Text("Fecha del suceso") },
-                readOnly = true,
                 leadingIcon = { Icon(Icons.Default.CalendarToday, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
                     disabledTextColor = MaterialTheme.colorScheme.onSurface,
                     disabledBorderColor = MaterialTheme.colorScheme.outline
                 ),
-                enabled = false // Deshabilitado para edición manual
+                enabled = true
             )
 
-            // Campo Dirección
             OutlinedTextField(
                 value = state.direccion,
                 onValueChange = { viewModel.onEvent(ReclamoEvent.DireccionChanged(it)) },
@@ -129,7 +124,20 @@ fun ReclamoScreen(
                 singleLine = true
             )
 
-            // Campo Descripción
+            OutlinedTextField(
+                value = state.numCuenta,
+                onValueChange = { viewModel.onEvent(ReclamoEvent.NumCuentaChanged(it)) },
+                label = { Text("Número de Cuenta") },
+                placeholder = { Text("Aqui depositaremos") },
+                leadingIcon = { Icon(Icons.Default.Money, contentDescription = null) },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Sentences,
+                    imeAction = ImeAction.Next
+                ),
+                singleLine = true
+            )
+
             OutlinedTextField(
                 value = state.descripcion,
                 onValueChange = { viewModel.onEvent(ReclamoEvent.DescripcionChanged(it)) },
