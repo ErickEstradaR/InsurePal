@@ -16,8 +16,8 @@ import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,24 +25,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.InsurePal.domain.polizas.vehiculo.model.SeguroVehiculo
 import java.text.NumberFormat
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun VehicleListScreen(
     viewModel: VehicleListViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit
 ) {
-    val state by viewModel.state.collectAsState()
-
+    val state by viewModel.state.collectAsStateWithLifecycle()
     if (state.isDetailVisible && state.selectedVehicle != null) {
         VehicleDetailDialog(
             vehicle = state.selectedVehicle!!,
             onDismiss = { viewModel.onEvent(ListaVehiculoEvent.OnDismissDetail) },
             onApprove = {
-                // Al aprobar, cambiamos el estado a "Pendiente de pago" para que el usuario proceda
                 viewModel.onEvent(ListaVehiculoEvent.OnUpdateStatus(state.selectedVehicle!!, "Pendiente de pago"))
             },
             onReject = {
@@ -51,6 +50,20 @@ fun VehicleListScreen(
         )
     }
 
+    VehicleListContent(
+        state = state,
+        onEvent = viewModel::onEvent,
+        onNavigateBack = onNavigateBack
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun VehicleListContent(
+    state: ListaVehiculoUiState,
+    onEvent: (ListaVehiculoEvent) -> Unit,
+    onNavigateBack: () -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -71,67 +84,93 @@ fun VehicleListScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(Color(0xFFF5F5F5))
+                .background(MaterialTheme.colorScheme.background) // Uso del tema
         ) {
             SearchBar(
                 query = state.searchQuery,
-                onQueryChange = { viewModel.onEvent(ListaVehiculoEvent.OnSearchQueryChange(it)) }
+                onQueryChange = { onEvent(ListaVehiculoEvent.OnSearchQueryChange(it)) }
             )
 
-            // --- SECCIÓN DE FILTROS ---
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                FilterChip(
-                    selected = state.showPendingOnly,
-                    onClick = { viewModel.onEvent(ListaVehiculoEvent.OnTogglePendingFilter) },
-                    label = { Text("Solo Pendientes") },
-                    leadingIcon = if (state.showPendingOnly) {
-                        { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp)) }
-                    } else {
-                        { Icon(Icons.Default.FilterList, contentDescription = null, modifier = Modifier.size(18.dp)) }
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                )
-            }
-            // ---------------------------
+            FilterSection(
+                showPendingOnly = state.showPendingOnly,
+                onToggleFilter = { onEvent(ListaVehiculoEvent.OnTogglePendingFilter) }
+            )
 
-            if (state.isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            } else if (state.filteredVehicles.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            // Se extrae la lógica de decisión (Loading vs Empty vs List)
+            VehicleListContainer(
+                isLoading = state.isLoading,
+                vehicles = state.filteredVehicles,
+                showPendingOnly = state.showPendingOnly,
+                onSelectVehicle = { onEvent(ListaVehiculoEvent.OnSelectVehicle(it)) }
+            )
+        }
+    }
+}
+
+@Composable
+fun FilterSection(
+    showPendingOnly: Boolean,
+    onToggleFilter: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        FilterChip(
+            selected = showPendingOnly,
+            onClick = onToggleFilter,
+            label = { Text("Solo Pendientes") },
+            leadingIcon = {
+                Icon(
+                    imageVector = if (showPendingOnly) Icons.Default.Check else Icons.Default.FilterList,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+            },
+            colors = FilterChipDefaults.filterChipColors(
+                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        )
+    }
+}
+
+@Composable
+fun VehicleListContainer(
+    isLoading: Boolean,
+    vehicles: List<SeguroVehiculo>,
+    showPendingOnly: Boolean,
+    onSelectVehicle: (SeguroVehiculo) -> Unit
+) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        if (isLoading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        } else if (vehicles.isEmpty()) {
+            Text(
+                text = if (showPendingOnly) "No hay vehículos pendientes" else "No se encontraron vehículos",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        } else {
+            LazyColumn(
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                item {
                     Text(
-                        if (state.showPendingOnly) "No hay vehículos pendientes" else "No se encontraron vehículos",
-                        color = Color.Gray
+                        text = "${vehicles.size} Resultados",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 8.dp)
                     )
                 }
-            } else {
-                LazyColumn(
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    item {
-                        Text(
-                            "${state.filteredVehicles.size} Resultados",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color.Gray,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                    }
-                    items(state.filteredVehicles) { vehicle ->
-                        VehicleItemCard(
-                            vehicle = vehicle,
-                            onClick = { viewModel.onEvent(ListaVehiculoEvent.OnSelectVehicle(vehicle)) }
-                        )
-                    }
+                items(vehicles) { vehicle ->
+                    VehicleItemCard(
+                        vehicle = vehicle,
+                        onClick = { onSelectVehicle(vehicle) }
+                    )
                 }
             }
         }
@@ -157,8 +196,8 @@ fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
         },
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface
         ),
         singleLine = true
     )
@@ -168,7 +207,7 @@ fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
 fun VehicleItemCard(vehicle: SeguroVehiculo, onClick: () -> Unit) {
     Card(
         onClick = onClick,
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(2.dp),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -187,7 +226,7 @@ fun VehicleItemCard(vehicle: SeguroVehiculo, onClick: () -> Unit) {
                     Icon(
                         Icons.Default.DirectionsCar,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
             }
@@ -203,12 +242,12 @@ fun VehicleItemCard(vehicle: SeguroVehiculo, onClick: () -> Unit) {
                 Text(
                     text = vehicle.placa,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = vehicle.anio,
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             StatusChip(status = vehicle.status)
@@ -218,14 +257,15 @@ fun VehicleItemCard(vehicle: SeguroVehiculo, onClick: () -> Unit) {
 
 @Composable
 fun StatusChip(status: String) {
-    val color = when(status) {
-        "Aprobado", "Pendiente de pago" -> Color(0xFF4CAF50)
-        "Rechazado" -> Color(0xFFF44336)
-        else -> Color(0xFFFF9800)
+    // Uso colores semánticos o personalizados seguros
+    val (color, containerColor) = when(status) {
+        "Aprobado", "Pendiente de pago" -> Pair(Color(0xFF2E7D32), Color(0xFFE8F5E9)) // Verdes
+        "Rechazado" -> Pair(MaterialTheme.colorScheme.error, MaterialTheme.colorScheme.errorContainer)
+        else -> Pair(Color(0xFFEF6C00), Color(0xFFFFF3E0)) // Naranja
     }
 
     Surface(
-        color = color.copy(alpha = 0.1f),
+        color = containerColor,
         shape = RoundedCornerShape(50),
         border = BorderStroke(1.dp, color.copy(alpha = 0.5f))
     ) {
@@ -246,80 +286,87 @@ fun VehicleDetailDialog(
     onApprove: () -> Unit,
     onReject: () -> Unit
 ) {
-    val format = NumberFormat.getCurrencyInstance(Locale.US)
+    val format = remember { NumberFormat.getCurrencyInstance(Locale.US) }
 
     Dialog(onDismissRequest = onDismiss) {
         Card(
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.DirectionsCar, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Revisión Administrativa", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                }
-
+                DialogHeader()
                 HorizontalDivider()
 
-                DetailItemRow("Póliza ID", vehicle.idPoliza)
-                DetailItemRow("Placa", vehicle.placa)
-                DetailItemRow("Vehículo", "${vehicle.marca} ${vehicle.modelo} ${vehicle.anio}")
-                DetailItemRow("Color", vehicle.color)
-                DetailItemRow("Chasis", vehicle.chasis)
-                DetailItemRow("Cobertura", vehicle.coverageType)
-                DetailItemRow("Valor Mercado", format.format(vehicle.valorMercado))
-
-                // --- CAMBIO: Mostrar Status real ---
-                DetailItemRow("Estado Actual", vehicle.status)
-
-                // Pago sigue siendo un dato relevante aunque no defina el status visual por sí solo
-                DetailItemRow("Pago Realizado", if (vehicle.esPagado) "Sí" else "No")
+                // Sección de detalles
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    DetailItemRow("Póliza ID", vehicle.idPoliza)
+                    DetailItemRow("Placa", vehicle.placa)
+                    DetailItemRow("Vehículo", "${vehicle.marca} ${vehicle.modelo} ${vehicle.anio}")
+                    DetailItemRow("Color", vehicle.color)
+                    DetailItemRow("Chasis", vehicle.chasis)
+                    DetailItemRow("Cobertura", vehicle.coverageType)
+                    DetailItemRow("Valor Mercado", format.format(vehicle.valorMercado))
+                    DetailItemRow("Estado Actual", vehicle.status)
+                    DetailItemRow("Pago Realizado", if (vehicle.esPagado) "Sí" else "No")
+                }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Botones de Acción Administrativa
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    OutlinedButton(
-                        onClick = onReject,
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error
-                        ),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Rechazar")
-                    }
-
-                    Button(
-                        onClick = onApprove,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF4CAF50)
-                        ),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Aprobar")
-                    }
-                }
-
-                TextButton(
-                    onClick = onDismiss,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Cancelar / Cerrar", color = Color.Gray)
-                }
+                DialogActions(onReject, onApprove, onDismiss)
             }
         }
+    }
+}
+
+@Composable
+fun DialogHeader() {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(Icons.Default.DirectionsCar, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        Spacer(modifier = Modifier.width(8.dp))
+        Text("Revisión Administrativa", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
+fun DialogActions(onReject: () -> Unit, onApprove: () -> Unit, onDismiss: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        OutlinedButton(
+            onClick = onReject,
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = MaterialTheme.colorScheme.error
+            ),
+            modifier = Modifier.weight(1f)
+        ) {
+            Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.width(4.dp))
+            Text("Rechazar")
+        }
+
+        Button(
+            onClick = onApprove,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF4CAF50) // Mantener verde específico para acción de éxito
+            ),
+            modifier = Modifier.weight(1f)
+        ) {
+            Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.width(4.dp))
+            Text("Aprobar")
+        }
+    }
+
+    TextButton(
+        onClick = onDismiss,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text("Cancelar / Cerrar", color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -329,9 +376,9 @@ fun DetailItemRow(label: String, value: String?) {
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text = label, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+        Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         if (value != null) {
-            Text(text = value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+            Text(text = value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
         }
     }
 }
