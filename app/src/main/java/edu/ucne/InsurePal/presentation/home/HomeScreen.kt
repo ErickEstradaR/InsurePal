@@ -43,7 +43,7 @@ fun InsuranceHomeScreen(
 
     val actions = listOf(
         QuickAction("Mis Reclamos", Icons.Default.Warning),
-        QuickAction("Reportar deceso", Icons.Default.HealthAndSafety),
+        QuickAction("Reportar Deceso", Icons.Default.HealthAndSafety),
         QuickAction("Mis Pagos", Icons.Default.CreditCard),
         QuickAction("Nuevo Seguro", Icons.Default.AddCircle)
     )
