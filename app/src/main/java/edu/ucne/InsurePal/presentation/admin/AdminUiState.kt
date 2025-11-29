@@ -9,6 +9,10 @@ data class AdminUiState (
     val totalLife: Int = 0,
     val activeCount: Int = 0,
     val pendingCount: Int = 0,
-    val totalCoverageValue: Double = 0.0
+    val totalCoverageValue: Double = 0.0,
+    val totalClaims: Int = 0,
+    val vehicleClaimsCount: Int = 0,
+    val lifeClaimsCount: Int = 0,
+    val pendingClaimsCount: Int = 0
 )
 
