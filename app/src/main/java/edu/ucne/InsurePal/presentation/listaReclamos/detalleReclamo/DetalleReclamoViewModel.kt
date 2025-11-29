@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.InsurePal.data.Resource
+import edu.ucne.InsurePal.domain.reclamoVehiculo.useCases.CambiarEstadoReclamoUseCase
 import edu.ucne.InsurePal.domain.reclamoVehiculo.useCases.GetReclamoVehiculoByIdUseCase
 import edu.ucne.InsurePal.presentation.listaReclamos.UiModels.TipoReclamo
 import jakarta.inject.Inject
@@ -16,14 +17,14 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class DetalleReclamoViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val getReclamoVehiculoUseCase: GetReclamoVehiculoByIdUseCase
+    private val getReclamoVehiculoUseCase: GetReclamoVehiculoByIdUseCase,
+    private val cambiarEstadoUseCase: CambiarEstadoReclamoUseCase
     // private val getReclamoVidaUseCase: GetReclamoVidaByIdUseCase // Inyectar en el futuro
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DetalleReclamoUiState())
     val state = _state.asStateFlow()
 
-    // Obtenemos el ID directamente de los argumentos de navegación
     private val reclamoId: String = savedStateHandle.get<String>("reclamoId") ?: ""
 
     init {
@@ -32,13 +33,17 @@ class DetalleReclamoViewModel @Inject constructor(
 
     fun onEvent(event: DetalleReclamoEvent) {
         when(event) {
-            DetalleReclamoEvent.OnErrorDismiss -> {
-                _state.update { it.copy(error = null) }
-            }
-            DetalleReclamoEvent.OnReintentar -> {
-                detectarTipoYCargar()
-            }
+            DetalleReclamoEvent.OnErrorDismiss -> _state.update { it.copy(error = null) }
+            DetalleReclamoEvent.OnReintentar -> detectingTipoYCargar()
+
+
+            DetalleReclamoEvent.OnAprobar -> cambiarEstado("APROBADO", null)
+            is DetalleReclamoEvent.OnRechazar -> cambiarEstado("RECHAZADO", event.motivo)
         }
+    }
+
+    private fun detectingTipoYCargar() {
+        detectarTipoYCargar()
     }
 
     private fun detectarTipoYCargar() {
@@ -79,6 +84,32 @@ class DetalleReclamoViewModel @Inject constructor(
                     isLoading = false,
                     error = "Visualización de reclamos de Vida aún no implementada"
                 )
+            }
+        }
+    }
+
+    private fun cambiarEstado(nuevoEstado: String, motivo: String?) {
+        viewModelScope.launch {
+            _state.update { it.copy(isUpdating = true) }
+
+            val id = _state.value.reclamoVehiculo?.id ?: return@launch
+
+            val result = cambiarEstadoUseCase(id, nuevoEstado, motivo)
+
+            when (result) {
+                is Resource.Success -> {
+                    _state.update {
+                        it.copy(
+                            isUpdating = false,
+                            reclamoVehiculo = result.data, // Actualizamos la UI con el nuevo estado que viene del backend
+                            exitoOperacion = "Reclamo $nuevoEstado correctamente"
+                        )
+                    }
+                }
+                is Resource.Error -> {
+                    _state.update { it.copy(isUpdating = false, error = result.message) }
+                }
+                else -> {}
             }
         }
     }
