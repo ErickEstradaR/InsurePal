@@ -11,6 +11,9 @@ class ReclamoVehiculo (
     val fechaIncidente: String,
     val imagenUrl: String?,
 
+    val numCuenta: String,
+
+
     val status: String,
     val motivoRechazo: String?,
     val fechaCreacion: String
