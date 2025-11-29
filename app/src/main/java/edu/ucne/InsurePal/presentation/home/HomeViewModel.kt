@@ -29,7 +29,6 @@ class HomeViewModel @Inject constructor(
     private val _state = MutableStateFlow(HomeUiState())
     val state = _state.asStateFlow()
 
-    // 1. Creamos un gatillo para el refresh. Cada vez que cambie este número, se recargará todo.
     private val refreshTrigger = MutableStateFlow(0)
 
     init {
