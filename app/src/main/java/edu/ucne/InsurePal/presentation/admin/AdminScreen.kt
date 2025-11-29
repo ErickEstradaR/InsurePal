@@ -9,17 +9,16 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.CarCrash
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.DirectionsCar
 import androidx.compose.material.icons.outlined.HealthAndSafety
-import androidx.compose.material.icons.outlined.Pending
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -39,6 +38,8 @@ fun AdminScreen(
     viewModel: AdminViewModel = hiltViewModel(),
     onNavigateToVehicles: () -> Unit,
     onNavigateToLife: () -> Unit,
+    onNavigateToVehicleClaims: () -> Unit,
+    onNavigateToLifeClaims: () -> Unit,
     onLogout: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
@@ -81,12 +82,6 @@ fun AdminScreen(
 
                 TotalBalanceCard(state.totalCoverageValue, state.totalPolicies)
 
-                Text("Métricas Generales", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                StatsGrid(state)
-
-                Text("Distribución de Cartera", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                PortfolioDistributionCard(state.totalVehicles, state.totalLife)
-
                 Text("Gestión de Pólizas", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -95,7 +90,7 @@ fun AdminScreen(
                     ModuleCard(
                         title = "Vehículos",
                         icon = Icons.Outlined.DirectionsCar,
-                        color = MaterialTheme.colorScheme.primary, // Color Material (Azul por defecto)
+                        color = MaterialTheme.colorScheme.primary,
                         count = state.totalVehicles,
                         onClick = onNavigateToVehicles,
                         modifier = Modifier.weight(1f)
@@ -103,9 +98,35 @@ fun AdminScreen(
                     ModuleCard(
                         title = "Seguros Vida",
                         icon = Icons.Outlined.HealthAndSafety,
-                        color = MaterialTheme.colorScheme.tertiary, // Color Material (Rosa/Terciario por defecto)
+                        color = MaterialTheme.colorScheme.tertiary,
                         count = state.totalLife,
                         onClick = onNavigateToLife,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                Text("Distribución de Cartera", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                PortfolioDistributionCard(state.totalVehicles, state.totalLife)
+
+                Text("Gestión de Reclamos", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    ModuleCard(
+                        title = "Reclamos Veh.",
+                        icon = Icons.Default.CarCrash,
+                        color = MaterialTheme.colorScheme.error,
+                        count = 0,
+                        onClick = onNavigateToVehicleClaims,
+                        modifier = Modifier.weight(1f)
+                    )
+                    ModuleCard(
+                        title = "Reclamos Vida",
+                        icon = Icons.Default.MedicalServices,
+                        color = MaterialTheme.colorScheme.secondary,
+                        count = 0,
+                        onClick = onNavigateToLifeClaims,
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -140,58 +161,6 @@ fun TotalBalanceCard(amount: Double, totalCount: Int) {
                 Icon(Icons.Default.Folder, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(4.dp))
                 Text("$totalCount pólizas registradas en el sistema", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimary)
-            }
-        }
-    }
-}
-
-@Composable
-fun StatsGrid(state: AdminUiState) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            StatCard(
-                title = "Activas",
-                value = state.activeCount.toString(),
-                icon = Icons.Outlined.CheckCircle,
-                color = MaterialTheme.colorScheme.primary, // Verde/Principal en tema
-                modifier = Modifier.weight(1f)
-            )
-            StatCard(
-                title = "Pendientes",
-                value = state.pendingCount.toString(),
-                icon = Icons.Outlined.Pending,
-                color = MaterialTheme.colorScheme.error, // Naranja/Error para resaltar atención
-                modifier = Modifier.weight(1f)
-            )
-        }
-    }
-}
-
-@Composable
-fun StatCard(title: String, value: String, icon: ImageVector, color: Color, modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(2.dp),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(color.copy(alpha = 0.15f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(icon, contentDescription = null, tint = color)
-            }
-            Spacer(modifier = Modifier.width(12.dp))
-            Column {
-                Text(text = value, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                Text(text = title, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
