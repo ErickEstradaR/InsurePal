@@ -139,7 +139,8 @@ fun ReclamoResponse.toDomain(): ReclamoVehiculo {
         imagenUrl = this.imagenUrl,
         status = this.status,
         motivoRechazo = this.motivoRechazo,
-        fechaCreacion = this.fechaCreacion
+        fechaCreacion = this.fechaCreacion,
+        numCuenta = numCuenta
     )
 }
 
