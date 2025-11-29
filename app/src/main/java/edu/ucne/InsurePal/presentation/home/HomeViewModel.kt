@@ -1,12 +1,13 @@
 package edu.ucne.InsurePal.presentation.home
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.InsurePal.data.Resource
 import edu.ucne.InsurePal.data.local.UserPreferences
+import edu.ucne.InsurePal.domain.polizas.vehiculo.model.SeguroVehiculo
 import edu.ucne.InsurePal.domain.polizas.vehiculo.useCases.ObtenerVehiculosUseCase
+import edu.ucne.InsurePal.domain.polizas.vida.model.SeguroVida
 import edu.ucne.InsurePal.domain.polizas.vida.useCases.GetSegurosVidaUseCase
 import edu.ucne.InsurePal.presentation.home.uiModels.LifePolicyUi
 import edu.ucne.InsurePal.presentation.home.uiModels.PolicyUiModel
@@ -61,48 +62,7 @@ class HomeViewModel @Inject constructor(
             getVehiculosUseCase(userId),
             getSegurosVidaUseCase(userId)
         ) { resultVehiculos, resultVida ->
-
-            Log.d("DEBUG_POLIZAS", "Vehiculos: ${resultVehiculos::class.simpleName} - Data: ${resultVehiculos.data?.size}")
-            Log.d("DEBUG_POLIZAS", "Vida: ${resultVida::class.simpleName} - Data: ${resultVida.data?.size}")
-
-            val listaCombinada = mutableListOf<PolicyUiModel>()
-            var isLoading = false
-            var error: String? = null
-
-            when(resultVehiculos) {
-                is Resource.Loading -> isLoading = true
-                is Resource.Error -> error = resultVehiculos.message
-                is Resource.Success -> {
-                    val uiModels = resultVehiculos.data?.map { v ->
-                        VehiclePolicyUi(
-                            id = v.idPoliza ?: "",
-                            status = v.status,
-                            vehicleModel = "${v.marca} ${v.modelo} ${v.anio}",
-                            plate = v.placa
-                        )
-                    }
-                    if (uiModels != null) listaCombinada.addAll(uiModels)
-                }
-            }
-
-            when(resultVida) {
-                is Resource.Loading -> isLoading = true
-                is Resource.Error -> if(error == null) error = resultVida.message
-                is Resource.Success -> {
-                    val uiModels = resultVida.data?.map { v ->
-                        LifePolicyUi(
-                            id = v.id,
-                            status = if (v.esPagado) "Activo" else "Pendiente",
-                            insuredName = v.nombresAsegurado,
-                            coverageAmount = v.montoCobertura
-                        )
-                    }
-                    if (uiModels != null) listaCombinada.addAll(uiModels)
-                }
-            }
-
-            Triple(isLoading, error, listaCombinada.toList())
-
+            processPolicyData(resultVehiculos, resultVida)
         }.collect { (loading, error, lista) ->
             _state.update {
                 it.copy(
@@ -112,5 +72,51 @@ class HomeViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    private fun processPolicyData(
+        resultVehiculos: Resource<List<SeguroVehiculo>>,
+        resultVida: Resource<List<SeguroVida>>
+    ): Triple<Boolean, String?, List<PolicyUiModel>> {
+        val isLoading = resultVehiculos is Resource.Loading || resultVida is Resource.Loading
+
+        val error = resultVehiculos.message ?: resultVida.message
+
+        val listaVehiculos = if (resultVehiculos is Resource.Success) {
+            mapVehiclesToUi(resultVehiculos.data)
+        } else emptyList()
+
+        val listaVida = if (resultVida is Resource.Success) {
+            mapLifeToUi(resultVida.data)
+        } else emptyList()
+
+        return Triple(isLoading, error, listaVehiculos + listaVida)
+    }
+
+
+    private fun mapVehiclesToUi(
+        data: List<SeguroVehiculo>?
+    ): List<PolicyUiModel> {
+        return data?.map { v ->
+            VehiclePolicyUi(
+                id = v.idPoliza ?: "",
+                status = v.status,
+                vehicleModel = "${v.marca} ${v.modelo} ${v.anio}",
+                plate = v.placa
+            )
+        } ?: emptyList()
+    }
+
+    private fun mapLifeToUi(
+        data: List<SeguroVida>?
+    ): List<PolicyUiModel> {
+        return data?.map { v ->
+            LifePolicyUi(
+                id = v.id,
+                status = if (v.esPagado) "Activo" else "Pendiente",
+                insuredName = v.nombresAsegurado,
+                coverageAmount = v.montoCobertura
+            )
+        } ?: emptyList()
     }
 }
