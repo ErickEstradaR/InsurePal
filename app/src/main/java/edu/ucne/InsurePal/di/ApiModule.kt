@@ -13,6 +13,7 @@ import edu.ucne.InsurePal.data.remote.pago.PagoApiService
 import edu.ucne.InsurePal.data.remote.polizas.vehiculo.api.SeguroVehiculoApiService
 import edu.ucne.InsurePal.data.remote.polizas.vida.SeguroVidaApiService
 import edu.ucne.InsurePal.data.remote.reclamoVehiculo.ReclamosApiService
+import edu.ucne.InsurePal.data.remote.reclamoVida.ReclamoVidaApiService
 import edu.ucne.InsurePal.data.remote.usuario.api.UsuarioApiService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -80,6 +81,16 @@ object Module {
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(ReclamosApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideReclamoVidaApiService(moshi: Moshi): ReclamoVidaApiService {
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(ReclamoVidaApiService::class.java)
     }
 
     @Provides
