@@ -16,6 +16,8 @@ sealed interface Screen {
     @Serializable
     data class ReclamoVehiculo(val polizaId: String, val usuarioId: Int) : Screen
     @Serializable
+    data object ReclamoVida : Screen
+    @Serializable
     data object Home : Screen
     @Serializable
     data class DetalleReclamo(val reclamoId: String, val isAdmin: Boolean = false) : Screen
