@@ -27,7 +27,7 @@ class ListaReclamosVidasViewModel @Inject constructor(
     fun onEvent(event: ListaReclamosVidasEvent) {
         when (event) {
             ListaReclamosVidasEvent.OnCargar -> cargarReclamos()
-            is ListaReclamosVidasEvent.OnReclamoClick -> {
+            is ListaReclamosVidasEvent.OnReclamoClick -> {//navega al reclamo
             }
             ListaReclamosVidasEvent.OnErrorDismiss -> {
                 _state.update { it.copy(error = null) }
