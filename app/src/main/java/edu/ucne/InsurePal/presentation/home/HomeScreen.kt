@@ -28,7 +28,6 @@ import edu.ucne.InsurePal.presentation.home.uiModels.LifePolicyUi
 import edu.ucne.InsurePal.presentation.home.uiModels.PolicyUiModel
 import edu.ucne.InsurePal.presentation.home.uiModels.QuickAction
 import edu.ucne.InsurePal.presentation.home.uiModels.VehiclePolicyUi
-// Asegúrate de tener esta función de utilidad o ajusta el import
 import edu.ucne.InsurePal.presentation.pago.formateo.formatearMoneda
 import edu.ucne.InsurePal.ui.theme.InsurePalTheme
 
@@ -42,10 +41,9 @@ fun InsuranceHomeScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    // Definimos las acciones, asegurando que "Mis Reclamos" esté presente
     val actions = listOf(
         QuickAction("Mis Reclamos", Icons.Default.Warning),
-        QuickAction("Pedir Asistencia", Icons.Default.SupportAgent),
+        QuickAction("Reportar deceso", Icons.Default.HealthAndSafety),
         QuickAction("Mis Pagos", Icons.Default.CreditCard),
         QuickAction("Nuevo Seguro", Icons.Default.AddCircle)
     )
@@ -191,7 +189,7 @@ fun HomeHeader(onLogout: () -> Unit) {
 
 @Composable
 fun PolicyCard(policy: PolicyUiModel) {
-    val brandColor = policy.color ?: MaterialTheme.colorScheme.primary
+    val brandColor = policy.color
 
     Card(
         colors = CardDefaults.cardColors(
