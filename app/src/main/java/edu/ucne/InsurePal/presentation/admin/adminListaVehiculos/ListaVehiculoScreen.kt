@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import edu.ucne.InsurePal.domain.polizas.vehiculo.model.SeguroVehiculo
 import java.text.NumberFormat
 import java.util.Locale
@@ -211,7 +211,7 @@ fun VehicleItemCard(vehicle: SeguroVehiculo, onClick: () -> Unit) {
                     color = Color.Gray
                 )
             }
-            StatusChip(status = vehicle.status ?: "Pendiente")
+            StatusChip(status = vehicle.status)
         }
     }
 }
@@ -275,7 +275,7 @@ fun VehicleDetailDialog(
                 DetailItemRow("Valor Mercado", format.format(vehicle.valorMercado))
 
                 // --- CAMBIO: Mostrar Status real ---
-                DetailItemRow("Estado Actual", vehicle.status ?: "Pendiente")
+                DetailItemRow("Estado Actual", vehicle.status)
 
                 // Pago sigue siendo un dato relevante aunque no defina el status visual por sí solo
                 DetailItemRow("Pago Realizado", if (vehicle.esPagado) "Sí" else "No")

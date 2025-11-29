@@ -22,7 +22,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.InsurePal.presentation.polizas.vehiculo.AppDropdown
 import edu.ucne.InsurePal.ui.theme.InsurePalTheme
@@ -222,7 +222,7 @@ fun SeguroVidaContent(
                 isError = state.errorMontoCobertura != null,
                 supportingText = {
                     if (state.errorMontoCobertura != null) {
-                        Text(state.errorMontoCobertura!!)
+                        Text(state.errorMontoCobertura)
                     } else {
                         Text("El monto que recibirá su beneficiario.")
                     }

@@ -11,6 +11,8 @@ import edu.ucne.InsurePal.presentation.admin.adminListaVidas.ListaVidaScreen
 import edu.ucne.InsurePal.presentation.detallePoliza.DetallePolizaScreen
 import edu.ucne.InsurePal.presentation.home.InsuranceHomeScreen
 import edu.ucne.InsurePal.presentation.home.SeleccionSeguroScreen
+import edu.ucne.InsurePal.presentation.listaReclamos.ListaReclamosScreen
+import edu.ucne.InsurePal.presentation.listaReclamos.detalleReclamo.DetalleReclamoScreen
 import edu.ucne.InsurePal.presentation.pago.PagoScreen
 import edu.ucne.InsurePal.presentation.pago.listaPago.HistorialPagosScreen
 import edu.ucne.InsurePal.presentation.polizas.vehiculo.cotizacionVehiculo.CotizacionVehiculoScreen
@@ -50,6 +52,7 @@ fun InsurePalNavigation() {
                     when (action) {
                         "Nuevo Seguro" -> navController.navigate(Screen.SeleccionSeguro)
                         "Mis Pagos" -> navController.navigate(Screen.HistorialPagos)
+                        "Mis Reclamos" -> navController.navigate(Screen.ListaReclamos)
                     }
                 },
                 onPolicyClick = { id, type ->
@@ -74,6 +77,14 @@ fun InsurePalNavigation() {
                         navController.navigate(Screen.SeguroVida)
                     }
                 }
+            )
+        }
+
+        composable<Screen.DetalleReclamo> { backStackEntry ->
+             val args = backStackEntry.toRoute<Screen.DetalleReclamo>()
+
+            DetalleReclamoScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
@@ -176,8 +187,6 @@ fun InsurePalNavigation() {
                         )
                     )
                 },
-
-
                 onNavigateToReclamo = { idPoliza, idUsuario ->
                     navController.navigate(
                         Screen.ReclamoVehiculo(
@@ -185,6 +194,16 @@ fun InsurePalNavigation() {
                             usuarioId = idUsuario
                         )
                     )
+                }
+            )
+        }
+
+        composable<Screen.ListaReclamos> {
+            ListaReclamosScreen(
+                onNavigateBack = { navController.popBackStack()
+                },
+                onReclamoClick = { reclamoId ->
+                    navController.navigate(Screen.DetalleReclamo(reclamoId))
                 }
             )
         }

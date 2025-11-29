@@ -99,7 +99,7 @@ class PagoViewModel @Inject constructor(
         val resultGet = getSeguroVidaUseCase(idCompuesto)
 
         if (resultGet is Resource.Success && resultGet.data != null) {
-            val vidaActual = resultGet.data!!
+            val vidaActual = resultGet.data
 
             val vidaActualizada = vidaActual.copy(
                 esPagado = true,
@@ -114,7 +114,7 @@ class PagoViewModel @Inject constructor(
         val resultGet = getVehiculoUseCase(id)
 
         if (resultGet is Resource.Success && resultGet.data != null) {
-            val vehiculoActual = resultGet.data!!
+            val vehiculoActual = resultGet.data
 
             val vehiculoActualizado = vehiculoActual.copy(
                 status = "Activo",

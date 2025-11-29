@@ -32,7 +32,8 @@ class AdminViewModel @Inject constructor(
         when(event) {
             AdminEvent.LoadDashboard -> loadDashboardData()
             AdminEvent.OnLogout -> {  }
-            else -> {}
+            AdminEvent.OnDismissDetail -> {}
+            is AdminEvent.OnSelectPolicy -> {}
         }
     }
 
@@ -60,7 +61,7 @@ class AdminViewModel @Inject constructor(
                 val activeV = vehiculos.count { it.esPagado }
                 val activeL = vida.count { it.esPagado }
 
-                val totalCoverage = vida.sumOf { it.montoCobertura ?: 0.0 } +
+                val totalCoverage = vida.sumOf { it.montoCobertura } +
                         vehiculos.sumOf { it.valorMercado }
                 AdminUiState(
                     isLoading = false,

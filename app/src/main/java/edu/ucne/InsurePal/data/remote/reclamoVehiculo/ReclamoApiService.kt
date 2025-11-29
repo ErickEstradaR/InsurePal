@@ -32,13 +32,13 @@ interface ReclamosApiService {
         @Body request: ReclamoUpdateRequest
     ): Response<ReclamoResponse>
 
-    @GET("api/v1/reclamos")
+    @GET("api/reclamos")
     suspend fun obtenerReclamos(
         @Query("usuario_id") usuarioId: Int? = null
     ): Response<List<ReclamoResponse>>
 
 
-    @GET("api/v1/reclamos/{id}")
+    @GET("api/reclamos/{id}")
     suspend fun obtenerReclamoPorId(
         @Path("id") reclamoId: String
     ): Response<ReclamoResponse>

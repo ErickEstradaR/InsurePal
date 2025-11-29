@@ -28,6 +28,7 @@ import edu.ucne.InsurePal.presentation.home.uiModels.LifePolicyUi
 import edu.ucne.InsurePal.presentation.home.uiModels.PolicyUiModel
 import edu.ucne.InsurePal.presentation.home.uiModels.QuickAction
 import edu.ucne.InsurePal.presentation.home.uiModels.VehiclePolicyUi
+// Asegúrate de tener esta función de utilidad o ajusta el import
 import edu.ucne.InsurePal.presentation.pago.formateo.formatearMoneda
 import edu.ucne.InsurePal.ui.theme.InsurePalTheme
 
@@ -37,19 +38,20 @@ fun InsuranceHomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     onActionClick: (String) -> Unit,
     onPolicyClick: (String, String) -> Unit,
-    onLogout: () -> Unit // Nuevo parámetro
+    onLogout: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    // Definimos las acciones, asegurando que "Mis Reclamos" esté presente
     val actions = listOf(
-        QuickAction("Reportar Siniestro", Icons.Default.Warning),
+        QuickAction("Mis Reclamos", Icons.Default.Warning),
         QuickAction("Pedir Asistencia", Icons.Default.SupportAgent),
         QuickAction("Mis Pagos", Icons.Default.CreditCard),
         QuickAction("Nuevo Seguro", Icons.Default.AddCircle)
     )
 
     Scaffold(
-        topBar = { HomeHeader(onLogout) }, // Pasamos el evento
+        topBar = { HomeHeader(onLogout) },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
 
@@ -157,7 +159,6 @@ fun HomeHeader(onLogout: () -> Unit) {
             )
         }
 
-        // Agrupamos notificaciones y logout
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             IconButton(
                 onClick = { /* TODO: Abrir notificaciones */ },
@@ -172,7 +173,6 @@ fun HomeHeader(onLogout: () -> Unit) {
                 )
             }
 
-            // Botón de Logout igual al de AdminScreen
             IconButton(
                 onClick = onLogout,
                 modifier = Modifier
@@ -257,7 +257,7 @@ fun PolicyCard(policy: PolicyUiModel) {
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "Cobertura: RD$ ${formatearMoneda(policy.coverageAmount)}",
+                            text = "Cobertura: ${formatearMoneda(policy.coverageAmount)}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -408,5 +408,6 @@ fun PromoBanner() {
 @Composable
 fun InsuranceHomeScreenPreview() {
     InsurePalTheme {
+        // Preview content
     }
 }
