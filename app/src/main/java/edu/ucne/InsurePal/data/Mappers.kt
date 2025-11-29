@@ -174,6 +174,7 @@ fun ReclamoVidaResponse.toDomain(): ReclamoVida {
     )
 }
 
+@JvmName("toDomainReclamoVida")
 fun List<ReclamoVidaResponse>.toDomain(): List<ReclamoVida> {
     return this.map { it.toDomain() }
 }
