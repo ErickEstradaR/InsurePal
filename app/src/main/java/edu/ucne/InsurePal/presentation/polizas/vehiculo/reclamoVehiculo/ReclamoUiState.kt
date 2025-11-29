@@ -11,6 +11,7 @@ data class ReclamoUiState(
     val direccion: String = "",
     val tipoIncidente: String = "",
     val fechaIncidente: String = "",
+    val numCuenta:String = "",
 
     val fotoEvidencia: File? = null,
 
