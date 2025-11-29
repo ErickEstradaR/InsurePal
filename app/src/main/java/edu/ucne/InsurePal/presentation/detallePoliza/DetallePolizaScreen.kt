@@ -227,19 +227,8 @@ fun PolicyActionsSection(
             Spacer(modifier = Modifier.width(8.dp))
             Text("Pagar ${formatearMoneda(state.price)}")
         }
-    } else if (state.isPaid) {
-        // Este bloque corresponde al 'else' original del primer IF
-        Button(
-            onClick = {},
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.medium,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-            )
-        ) {
-            // Botón vacío (placeholder) como estaba en el original
-        }
+    } else {
+        Spacer(modifier = Modifier.height(8.dp))
     }
 
     OutlinedButton(
