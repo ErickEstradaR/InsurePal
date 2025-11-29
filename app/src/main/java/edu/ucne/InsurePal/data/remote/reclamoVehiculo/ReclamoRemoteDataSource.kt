@@ -23,6 +23,8 @@ class ReclamoRemoteDataSource @Inject constructor(
             val dirRb = request.direccion.toRequestBody(textType)
             val tipoRb = request.tipoIncidente.toRequestBody(textType)
             val fechaRb = request.fechaIncidente.toRequestBody(textType)
+            val numCuentaRb = request.numCuenta.toRequestBody(textType)
+
 
             val fileRequest = archivoImagen.asRequestBody("image/*".toMediaTypeOrNull())
             val imagenPart = MultipartBody.Part.createFormData("imagen", archivoImagen.name, fileRequest)
@@ -34,6 +36,7 @@ class ReclamoRemoteDataSource @Inject constructor(
                 direccion = dirRb,
                 tipoIncidente = tipoRb,
                 fechaIncidente = fechaRb,
+                numCuenta = numCuentaRb,
                 imagen = imagenPart
             )
 
@@ -52,7 +55,6 @@ class ReclamoRemoteDataSource @Inject constructor(
         }
     }
 
-    // 2. Obtener Reclamos (Admin ve todos, Usuario ve los suyos si pasas el ID)
     suspend fun getReclamos(usuarioId: Int? = null): Resource<List<ReclamoResponse>> {
         return try {
             val response = api.obtenerReclamos(usuarioId)
