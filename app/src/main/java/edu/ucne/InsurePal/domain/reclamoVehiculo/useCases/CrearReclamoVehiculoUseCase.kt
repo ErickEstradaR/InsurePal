@@ -16,11 +16,12 @@ class CrearReclamoVehiculoUseCase @Inject constructor(
         direccion: String,
         tipoIncidente: String,
         fechaIncidente: String,
+        numCuenta : String,
         imagen: File
     ): Resource<ReclamoVehiculo> {
 
         return repository.crearReclamoVehiculo(
-            polizaId, usuarioId, descripcion, direccion, tipoIncidente, fechaIncidente, imagen
+            polizaId, usuarioId, descripcion, direccion, tipoIncidente, fechaIncidente,numCuenta, imagen
         )
     }
 }
