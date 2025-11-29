@@ -106,9 +106,7 @@ fun InsurePalNavigation() {
             )
         }
 
-        composable<Screen.CotizacionDetalle> { backStackEntry ->
-            val args = backStackEntry.toRoute<Screen.CotizacionDetalle>()
-
+        composable<Screen.CotizacionDetalle> {
             CotizacionVehiculoScreen(
                 onNavigateToPayment = { _, _ ->
                     navController.navigate(Screen.Home) {
@@ -119,9 +117,7 @@ fun InsurePalNavigation() {
             )
         }
 
-        composable<Screen.Pago> { backStackEntry ->
-            val args = backStackEntry.toRoute<Screen.Pago>()
-
+        composable<Screen.Pago> {
             PagoScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onPaymentSuccess = {
@@ -171,7 +167,7 @@ fun InsurePalNavigation() {
             )
         }
 
-        composable<Screen.ReclamoVida> { backStackEntry ->
+        composable<Screen.ReclamoVida> {
             ReclamoVidaScreen(
                 navigateBack = { navController.popBackStack() }
             )
