@@ -1,8 +1,6 @@
 package edu.ucne.InsurePal.data.remote.polizas.vida
 
-
 import edu.ucne.InsurePal.data.Resource
-import edu.ucne.InsurePal.data.remote.polizas.vehiculo.dto.SeguroVehiculoResponse
 import javax.inject.Inject
 
 class SeguroVidaRemoteDataSource @Inject constructor(

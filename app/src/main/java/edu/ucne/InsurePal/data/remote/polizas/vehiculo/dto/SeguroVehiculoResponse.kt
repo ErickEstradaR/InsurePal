@@ -1,7 +1,5 @@
 package edu.ucne.InsurePal.data.remote.polizas.vehiculo.dto
 
-import java.time.LocalDate
-
 data class SeguroVehiculoResponse(
     val idPoliza: String? = null,
     val usuarioId: Int,

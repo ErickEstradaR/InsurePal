@@ -1,6 +1,5 @@
 package edu.ucne.InsurePal.data.remote.polizas.vida
 
-import edu.ucne.InsurePal.data.remote.polizas.vehiculo.dto.SeguroVehiculoResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
