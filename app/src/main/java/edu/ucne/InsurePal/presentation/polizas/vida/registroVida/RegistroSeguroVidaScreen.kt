@@ -1,4 +1,4 @@
-package edu.ucne.InsurePal.presentation.polizas.vida
+package edu.ucne.InsurePal.presentation.polizas.vida.registroVida
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
