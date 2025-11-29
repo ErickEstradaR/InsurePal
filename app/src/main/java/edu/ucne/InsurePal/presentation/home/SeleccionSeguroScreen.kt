@@ -44,26 +44,20 @@ fun SeleccionSeguroScreen(
             isEnabled = true
         ),
         InsuranceOption(
-            id = "HOGAR",
-            title = "Seguro de Hogar",
-            description = "Cuida tu vivienda contra robos, incendios y daños.",
-            icon = Icons.Default.Home,
-            isEnabled = false
-        ),
-        InsuranceOption(
-            id = "SALUD",
-            title = "Seguro Médico",
-            description = "Atención médica de primera calidad para ti y tu familia.",
-            icon = Icons.Default.MedicalServices,
-            isEnabled = false
-        ),
-        InsuranceOption(
             id = "VIDA",
             title = "Seguro de Vida",
             description = "Asegura el futuro financiero de tus seres queridos.",
             icon = Icons.Default.Favorite,
             isEnabled = true
+        ),
+        InsuranceOption(
+            id = "HOGAR",
+            title = "Seguro de Hogar",
+            description = "Cuida tu vivienda contra robos, incendios y daños.",
+            icon = Icons.Default.Home,
+            isEnabled = false
         )
+
     )
 
     Scaffold(
