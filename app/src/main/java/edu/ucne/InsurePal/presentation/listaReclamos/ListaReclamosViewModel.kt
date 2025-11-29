@@ -7,6 +7,8 @@ import edu.ucne.InsurePal.data.Resource
 import edu.ucne.InsurePal.data.local.UserPreferences
 import edu.ucne.InsurePal.domain.reclamoVehiculo.model.ReclamoVehiculo
 import edu.ucne.InsurePal.domain.reclamoVehiculo.useCases.GetReclamoVehiculosUseCase
+import edu.ucne.InsurePal.domain.reclamoVida.model.ReclamoVida
+import edu.ucne.InsurePal.domain.reclamoVida.useCases.GetReclamosVidaUseCase
 import edu.ucne.InsurePal.presentation.listaReclamos.UiModels.ReclamoUiItem
 import edu.ucne.InsurePal.presentation.listaReclamos.UiModels.TipoReclamo
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,11 +17,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 @HiltViewModel
 class ListaReclamosViewModel @Inject constructor(
     private val getReclamosVehiculoUseCase: GetReclamoVehiculosUseCase,
-    // En el futuro inyectarás aquí: private val getReclamosVidaUseCase: GetReclamosVidaUseCase
+    private val getReclamosVidaUseCase: GetReclamosVidaUseCase,
     private val userPreferences: UserPreferences
 ) : ViewModel() {
 
@@ -35,41 +36,40 @@ class ListaReclamosViewModel @Inject constructor(
             ListaReclamosEvent.OnCargarReclamos -> cargarDatos()
             ListaReclamosEvent.OnErrorDismiss -> _state.update { it.copy(error = null) }
             is ListaReclamosEvent.OnReclamoClick -> {
-                // Aquí podrías navegar al detalle si lo deseas
+                // La navegación se maneja en la UI
             }
         }
     }
 
     private fun cargarDatos() {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
+            _state.update { it.copy(isLoading = true, error = null) }
 
             val userId = userPreferences.userId.first()
 
-            // 1. Obtener Reclamos de Vehículos
             val resultVehiculos = getReclamosVehiculoUseCase(userId)
+            val resultVida = getReclamosVidaUseCase(userId)
 
-            // 2. (Futuro) Obtener Reclamos de Vida
-            // val resultVida = getReclamosVidaUseCase(userId)
+            val listaVehiculos = resultVehiculos.data ?: emptyList()
+            val listaVida = resultVida.data ?: emptyList()
 
-            if (resultVehiculos is Resource.Success) {
-                val listaVehiculos = resultVehiculos.data ?: emptyList()
-
-                // Mapeamos a la lista Genérica
-                val itemsUi = listaVehiculos.map { it.toUiItem() }
-                // + (Futuro) listaVida.map { it.toUiItem() }
-
+            if (resultVehiculos is Resource.Error && resultVida is Resource.Error) {
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        reclamos = itemsUi.sortedByDescending { r -> r.fecha }
+                        error = "No se pudo cargar el historial completo."
                     )
                 }
             } else {
+                val itemsVehiculos = listaVehiculos.map { it.toUiItem() }
+                val itemsVida = listaVida.map { it.toUiItem() }
+
+                val todos = itemsVehiculos + itemsVida
+
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        error = resultVehiculos.message ?: "Error al cargar historial"
+                        reclamos = todos.sortedByDescending { r -> r.fecha }
                     )
                 }
             }
@@ -85,6 +85,18 @@ class ListaReclamosViewModel @Inject constructor(
             status = this.status,
             descripcion = this.descripcion,
             tipo = TipoReclamo.VEHICULO
+        )
+    }
+
+    private fun ReclamoVida.toUiItem(): ReclamoUiItem {
+        return ReclamoUiItem(
+             id = this.id,
+            polizaId = this.polizaId,
+            titulo = "Deceso: ${this.nombreAsegurado}",
+            fecha = this.fechaFallecimiento.take(10),
+            status = this.status,
+            descripcion = "Causa: ${this.causaMuerte}",
+            tipo = TipoReclamo.VIDA
         )
     }
 }
