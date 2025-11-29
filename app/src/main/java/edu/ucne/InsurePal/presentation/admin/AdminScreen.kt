@@ -117,7 +117,7 @@ fun AdminScreen(
                         title = "Reclamos Veh.",
                         icon = Icons.Default.CarCrash,
                         color = MaterialTheme.colorScheme.error,
-                        count = 0,
+                        count = state.vehicleClaimsCount,
                         onClick = onNavigateToVehicleClaims,
                         modifier = Modifier.weight(1f)
                     )
@@ -125,7 +125,7 @@ fun AdminScreen(
                         title = "Reclamos Vida",
                         icon = Icons.Default.MedicalServices,
                         color = MaterialTheme.colorScheme.secondary,
-                        count = 0,
+                        count = state.lifeClaimsCount,
                         onClick = onNavigateToLifeClaims,
                         modifier = Modifier.weight(1f)
                     )
