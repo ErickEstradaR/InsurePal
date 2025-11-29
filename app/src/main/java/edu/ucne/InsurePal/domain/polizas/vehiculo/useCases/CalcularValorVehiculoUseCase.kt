@@ -20,23 +20,21 @@ class CalcularValorVehiculoUseCase @Inject constructor(
 
         if (modelo.isBlank()) return 0.0
 
-        // Buscamos el precio base en la lista que nos pasan
         val precioBase = catalogo
             .find { it.nombre.equals(marca, ignoreCase = true) }
             ?.modelos
             ?.find { it.nombre.equals(modelo, ignoreCase = true) }
             ?.precioBase ?: return 0.0
 
-        val anioActual = Calendar.getInstance().get(Calendar.YEAR)
+        val anioActual = Calendar.getInstance()[Calendar.YEAR]
 
-        // Si es del año actual o futuro, no se deprecia
         if (anioVehiculo >= anioActual) return precioBase
 
         val antiguedad = anioActual - anioVehiculo
-        val porcentajeDepreciacion = antiguedad * 0.05 // 5% por año
+        val porcentajeDepreciacion = antiguedad * 0.05
         val valorDescontado = precioBase * (1.0 - porcentajeDepreciacion)
 
-        // El valor nunca baja del 20% del precio base
+
         val valorMinimo = precioBase * 0.20
 
         return max(valorDescontado, valorMinimo)

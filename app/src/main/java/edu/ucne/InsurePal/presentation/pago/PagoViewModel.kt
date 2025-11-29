@@ -31,9 +31,9 @@ class PagoViewModel @Inject constructor(
     private val _state = MutableStateFlow(PagoUiState())
     val state = _state.asStateFlow()
 
-    private val polizaId: String = savedStateHandle.get<String>("polizaId") ?: ""
-    private val monto: Double = savedStateHandle.get<Double>("monto") ?: 0.0
-    private val descripcion: String = savedStateHandle.get<String>("descripcion") ?: "Pago de Póliza"
+    private val polizaId: String = savedStateHandle["polizaId"] ?: ""
+    private val monto: Double = savedStateHandle["monto"] ?: 0.0
+    private val descripcion: String = savedStateHandle["descripcion"] ?: "Pago de Póliza"
 
     init {
         _state.update { it.copy(polizaId = polizaId, montoAPagar = monto) }

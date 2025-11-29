@@ -25,7 +25,7 @@ class CotizacionVehiculoViewModel @Inject constructor(
     private val _state = MutableStateFlow(CotizacionVehiculoUiState())
     val state = _state.asStateFlow()
 
-    private val vehiculoId: String? = savedStateHandle.get<String>("vehiculoId")
+    private val vehiculoId: String? = savedStateHandle["vehiculoId"]
 
     init {
         if (vehiculoId != null) {
@@ -37,7 +37,7 @@ class CotizacionVehiculoViewModel @Inject constructor(
 
     fun onEvent(event: CotizacionVehiculoEvent) {
         when (event) {
-            CotizacionVehiculoEvent.OnContinuarPagoClick -> {
+            CotizacionVehiculoEvent.OnContinuarPagoClick -> { //continua a pago
             }
             CotizacionVehiculoEvent.OnVolverClick -> {
                 eliminarVehiculoActual()

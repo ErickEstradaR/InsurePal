@@ -102,7 +102,11 @@ class ReclamoViewModel @Inject constructor(
                     is Resource.Error -> {
                         _uiState.update { it.copy(isLoading = false, esExitoso = false, error = result.message) }
                     }
-                    is Resource.Loading -> { }
+                    is Resource.Loading -> {
+                        _uiState.update {
+                            it.copy(isLoading = true)
+                        }
+                    }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

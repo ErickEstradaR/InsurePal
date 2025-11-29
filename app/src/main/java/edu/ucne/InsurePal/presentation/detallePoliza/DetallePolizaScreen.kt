@@ -37,6 +37,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -57,8 +58,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.InsurePal.presentation.pago.formateo.formatearMoneda
-// Asegúrate de importar tu función de utilidad aquí:
-// import edu.ucne.InsurePal.utils.formatearMoneda
 import edu.ucne.InsurePal.ui.theme.InsurePalTheme
 
 private const val COBERTURA_FULL = "Cobertura Full"
@@ -140,171 +139,224 @@ fun PolicyDetailContent(
                 HeaderCard(state)
 
                 if (isPendingApproval) {
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.tertiaryContainer
-                        ),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                Icons.Default.Info,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onTertiaryContainer
-                            )
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Text(
-                                text = "Tu póliza está siendo evaluada por la administración. Te notificaremos cuando sea aprobada para proceder con el pago.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onTertiaryContainer,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                    }
+                    PendingApprovalCard()
                 }
 
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    elevation = CardDefaults.cardElevation(2.dp)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            "Información de la Póliza",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        state.details.forEach { (label, value) ->
-                            DetailRow(label, value)
-                            HorizontalDivider(
-                                modifier = Modifier.padding(vertical = 8.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                            )
-                        }
-                    }
-                }
+                PolicyInfoCard(state)
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                if (policyType == "VEHICULO") {
-                    if (state.isPaid) {
-                        Button(
-                            onClick = {
-                                onNavigateToReclamo(state.policyId, state.usuarioId)
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer,
-                                contentColor = MaterialTheme.colorScheme.onErrorContainer
-                            ),
-                            shape = MaterialTheme.shapes.medium
-                        ) {
-                            Icon(Icons.Default.Warning, contentDescription = null)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Realizar Reclamo")
-                        }
-                    }
-                }
-
-                // Botón de Pago
-                if (!state.isPaid) {
-                    if (!isPendingApproval) {
-                        Button(
-                            onClick = {
-                                onNavigateToPago(state.price, "Pago de ${state.title}")
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            // CAMBIO: Color dinámico del tema en lugar de estático
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            ),
-                            shape = MaterialTheme.shapes.medium
-                        ) {
-                            Icon(Icons.Default.Payment, contentDescription = null)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Pagar ${formatearMoneda(state.price)}")
-                        }
-                    }
-                } else {
-                    Button(
-                        onClick = {},
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = MaterialTheme.shapes.medium,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-                    ) {
-
-                    }
-                }
-
-                OutlinedButton(
-                    onClick = { showDeleteDialog = true },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                    shape = MaterialTheme.shapes.medium
-                ) {
-                    Icon(Icons.Default.Delete, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Eliminar Póliza")
-                }
+                // Se extrajo la lógica compleja a su propio Composable
+                PolicyActionsSection(
+                    state = state,
+                    policyType = policyType,
+                    isPendingApproval = isPendingApproval,
+                    onNavigateToPago = onNavigateToPago,
+                    onNavigateToReclamo = onNavigateToReclamo,
+                    onDeleteClick = { showDeleteDialog = true }
+                )
             }
         }
     }
 
     if (showDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text("¿Eliminar Póliza?") },
-            text = { Text("Esta acción es permanente y perderás la cobertura inmediatamente.") },
-            confirmButton = {
-                TextButton(onClick = {
-                    onEvent(DetallePolizaEvent.OnEliminarPoliza)
-                    showDeleteDialog = false
-                }) {
-                    Text("Eliminar", color = MaterialTheme.colorScheme.error)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) { Text("Cancelar") }
+        DeleteConfirmationDialog(
+            onDismiss = { showDeleteDialog = false },
+            onConfirm = {
+                onEvent(DetallePolizaEvent.OnEliminarPoliza)
+                showDeleteDialog = false
             }
         )
     }
 
     if (showPlanSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showPlanSheet = false },
-            sheetState = sheetState
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("Selecciona nueva cobertura", style = MaterialTheme.typography.titleLarge)
-                Spacer(modifier = Modifier.height(16.dp))
+        PlanSelectionSheet(
+            sheetState = sheetState,
+            currentPlan = state.coverageType,
+            onDismiss = { showPlanSheet = false },
+            onPlanSelected = { plan ->
+                onEvent(DetallePolizaEvent.OnCambiarPlanVehiculo(plan))
+                showPlanSheet = false
+            }
+        )
+    }
+}
 
-                val planes = listOf(COBERTURA_FULL, "Ley", "Daños a Terceros")
-                planes.forEach { plan ->
-                    val selected = plan == state.coverageType
-                    ListItem(
-                        headlineContent = { Text(plan) },
-                        leadingContent = { RadioButton(selected = selected, onClick = null) },
-                        modifier = Modifier.clickable {
-                            onEvent(DetallePolizaEvent.OnCambiarPlanVehiculo(plan))
-                            showPlanSheet = false
-                        }
-                    )
-                }
-                Spacer(modifier = Modifier.height(40.dp))
+// --- Nuevos Composables extraídos para reducir complejidad ---
+
+@Composable
+fun PolicyActionsSection(
+    state: DetallePolizaUiState,
+    policyType: String,
+    isPendingApproval: Boolean,
+    onNavigateToPago: (Double, String) -> Unit,
+    onNavigateToReclamo: (String, Int) -> Unit,
+    onDeleteClick: () -> Unit
+) {
+    // FUSIÓN 1: Se unieron los IFs anidados (policyType == VEHICULO && state.isPaid)
+    if (policyType == "VEHICULO" && state.isPaid) {
+        Button(
+            onClick = { onNavigateToReclamo(state.policyId, state.usuarioId) },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.errorContainer,
+                contentColor = MaterialTheme.colorScheme.onErrorContainer
+            ),
+            shape = MaterialTheme.shapes.medium
+        ) {
+            Icon(Icons.Default.Warning, contentDescription = null)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Realizar Reclamo")
+        }
+    }
+
+    // FUSIÓN 2: Se aplanó la lógica del pago.
+    // Antes: if (!paid) { if (!pending) { boton } } else { placeholder }
+    // Ahora: lógica lineal
+    if (!state.isPaid && !isPendingApproval) {
+        Button(
+            onClick = { onNavigateToPago(state.price, "Pago de ${state.title}") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ),
+            shape = MaterialTheme.shapes.medium
+        ) {
+            Icon(Icons.Default.Payment, contentDescription = null)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Pagar ${formatearMoneda(state.price)}")
+        }
+    } else if (state.isPaid) {
+        // Este bloque corresponde al 'else' original del primer IF
+        Button(
+            onClick = {},
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+        ) {
+            // Botón vacío (placeholder) como estaba en el original
+        }
+    }
+
+    OutlinedButton(
+        onClick = onDeleteClick,
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Icon(Icons.Default.Delete, contentDescription = null)
+        Spacer(modifier = Modifier.width(8.dp))
+        Text("Eliminar Póliza")
+    }
+}
+
+@Composable
+fun PendingApprovalCard() {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer
+        ),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Default.Info,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onTertiaryContainer
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = "Tu póliza está siendo evaluada por la administración. Te notificaremos cuando sea aprobada para proceder con el pago.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onTertiaryContainer,
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
+}
+
+@Composable
+fun PolicyInfoCard(state: DetallePolizaUiState) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                "Información de la Póliza",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            state.details.forEach { (label, value) ->
+                DetailRow(label, value)
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                )
             }
         }
     }
 }
 
+@Composable
+fun DeleteConfirmationDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("¿Eliminar Póliza?") },
+        text = { Text("Esta acción es permanente y perderás la cobertura inmediatamente.") },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text("Eliminar", color = MaterialTheme.colorScheme.error)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancelar") }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PlanSelectionSheet(
+    sheetState: SheetState,
+    currentPlan: String,
+    onDismiss: () -> Unit,
+    onPlanSelected: (String) -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Selecciona nueva cobertura", style = MaterialTheme.typography.titleLarge)
+            Spacer(modifier = Modifier.height(16.dp))
+
+            val planes = listOf(COBERTURA_FULL, "Ley", "Daños a Terceros")
+            planes.forEach { plan ->
+                val selected = plan == currentPlan
+                ListItem(
+                    headlineContent = { Text(plan) },
+                    leadingContent = { RadioButton(selected = selected, onClick = null) },
+                    modifier = Modifier.clickable { onPlanSelected(plan) }
+                )
+            }
+            Spacer(modifier = Modifier.height(40.dp))
+        }
+    }
+}
 @Composable
 fun HeaderCard(state: DetallePolizaUiState) {
     Card(
@@ -331,7 +383,6 @@ fun HeaderCard(state: DetallePolizaUiState) {
                     )
                 }
 
-                // CAMBIO: Lógica de colores dinámica
                 val statusContainerColor = if (state.isPaid) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
                 val statusContentColor = if (state.isPaid) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onError
 
@@ -349,7 +400,6 @@ fun HeaderCard(state: DetallePolizaUiState) {
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            // CAMBIO: formatearMoneda
             Text(
                 text = "Prima: ${formatearMoneda(state.price)}",
                 style = MaterialTheme.typography.titleLarge,
@@ -371,7 +421,6 @@ fun DetailRow(label: String, value: String) {
     }
 }
 
-// Se eliminó la función formatMoney local para usar la importada
 
 @Preview(name = "Detalle Vehículo Pendiente", showSystemUi = true)
 @Composable

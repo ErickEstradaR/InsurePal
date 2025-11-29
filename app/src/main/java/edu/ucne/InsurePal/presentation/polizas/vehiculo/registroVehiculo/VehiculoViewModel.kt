@@ -166,6 +166,9 @@ class VehiculoRegistroViewModel @Inject constructor(
                     }
                 }
                 is Resource.Loading -> {
+                    _state.update {
+                        it.copy(isLoading = true)
+                    }
                 }
             }
         }

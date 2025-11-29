@@ -28,8 +28,8 @@ class DetalleReclamoViewModel @Inject constructor(
     private val _state = MutableStateFlow(DetalleReclamoUiState())
     val state = _state.asStateFlow()
 
-    private val reclamoId: String = savedStateHandle.get<String>("reclamoId") ?: ""
-    private val tipoReclamoStr: String = savedStateHandle.get<String>("tipo") ?: "VEHICULO"
+    private val reclamoId: String = savedStateHandle["reclamoId"] ?: ""
+    private val tipoReclamoStr: String = savedStateHandle["tipo"] ?: "VEHICULO"
 
     init {
         detectarTipoYCargar()
@@ -66,7 +66,11 @@ class DetalleReclamoViewModel @Inject constructor(
             when (val result = getReclamoVehiculoUseCase(reclamoId)) {
                 is Resource.Success -> _state.update { it.copy(isLoading = false, reclamoVehiculo = result.data) }
                 is Resource.Error -> _state.update { it.copy(isLoading = false, error = result.message) }
-                is Resource.Loading -> { }
+                is Resource.Loading -> {
+                    _state.update {
+                        it.copy(isLoading = true)
+                    }
+                }
             }
         }
     }
@@ -77,7 +81,11 @@ class DetalleReclamoViewModel @Inject constructor(
             when (val result = getReclamoVidaUseCase(reclamoId)) {
                 is Resource.Success -> _state.update { it.copy(isLoading = false, reclamoVida = result.data) }
                 is Resource.Error -> _state.update { it.copy(isLoading = false, error = result.message) }
-                is Resource.Loading -> { }
+                is Resource.Loading -> {
+                    _state.update {
+                        it.copy(isLoading = true)
+                    }
+                }
             }
         }
     }
@@ -106,7 +114,11 @@ class DetalleReclamoViewModel @Inject constructor(
                 _state.update { it.copy(isUpdating = false, exitoOperacion = "Reclamo $nuevoEstado correctamente") }
             }
             is Resource.Error -> _state.update { it.copy(isUpdating = false, error = result.message) }
-            else -> {}
+            is Resource.Loading -> {
+                _state.update {
+                    it.copy(isLoading = true)
+                }
+            }
         }
     }
 }

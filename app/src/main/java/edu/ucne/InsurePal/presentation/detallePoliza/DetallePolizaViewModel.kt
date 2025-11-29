@@ -33,8 +33,8 @@ class DetallePolizaViewModel @Inject constructor(
     private val _state = MutableStateFlow(DetallePolizaUiState())
     val state = _state.asStateFlow()
 
-    private val policyId: String = savedStateHandle.get<String>("policyId") ?: ""
-    val policyType: String = savedStateHandle.get<String>("policyType") ?: ""
+    private val policyId: String = savedStateHandle["policyId"] ?: ""
+    val policyType: String = savedStateHandle["policyType"] ?: ""
 
     init {
         viewModelScope.launch {
@@ -82,7 +82,7 @@ class DetallePolizaViewModel @Inject constructor(
                             usuarioId = v.usuarioId,
                             title = "${v.marca} ${v.modelo}",
                             subtitle = "${v.anio} • ${v.color}",
-                            status = v.status ?: "Pendiente",
+                            status = v.status,
                             price = precioTotal,
                             isPaid = v.esPagado,
                             coverageType = v.coverageType,

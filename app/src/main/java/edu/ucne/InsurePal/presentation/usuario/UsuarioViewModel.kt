@@ -236,7 +236,11 @@ class UsuarioViewModel @Inject constructor(
                         it.copy(userMessage = "Error al actualizar el usuario")
                     }
                 }
-               else -> {}
+                is Resource.Loading -> {
+                    _state.update {
+                        it.copy(isLoading = true)
+                    }
+                }
             }
         }
     }
@@ -259,7 +263,11 @@ class UsuarioViewModel @Inject constructor(
                             it.copy(userMessage = resource.message ?: "Error al cargar el usuario")
                         }
                     }
-                    else -> {}
+                    is Resource.Loading -> {
+                        _state.update {
+                            it.copy(isLoading = true)
+                        }
+                    }
                 }
             }
         }
