@@ -67,58 +67,15 @@ fun InsuranceHomeScreen(
             ) {
 
                 item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "¿Qué deseas proteger hoy?",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
+                    HomeWelcomeHeader()
                 }
 
                 item {
-                    SectionTitle("Mis Pólizas")
-                    if (state.isLoading && state.policies.isEmpty()) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(150.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    } else if (state.policies.isEmpty()) {
-                        Card(
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp)
-                        ) {
-                            Text(
-                                text = "No tienes pólizas activas aún.",
-                                modifier = Modifier.padding(24.dp),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    } else {
-                        LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            items(state.policies) { policy ->
-                                Box(modifier = Modifier.clickable {
-                                    val type = when(policy) {
-                                        is VehiclePolicyUi -> "VEHICULO"
-                                        is LifePolicyUi -> "VIDA"
-                                    }
-                                    onPolicyClick(policy.id, type)
-                                }) {
-                                    PolicyCard(policy)
-                                }
-                            }
-                        }
-                    }
+                    PolicyListSection(
+                        isLoading = state.isLoading,
+                        policies = state.policies,
+                        onPolicyClick = onPolicyClick
+                    )
                 }
 
                 item {
@@ -137,6 +94,70 @@ fun InsuranceHomeScreen(
         }
     }
 }
+
+@Composable
+fun HomeWelcomeHeader() {
+    Column {
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "¿Qué deseas proteger hoy?",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+    }
+}
+
+@Composable
+fun PolicyListSection(
+    isLoading: Boolean,
+    policies: List<PolicyUiModel>,
+    onPolicyClick: (String, String) -> Unit
+) {
+    SectionTitle("Mis Pólizas")
+    if (isLoading && policies.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(150.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+    } else if (policies.isEmpty()) {
+        Card(
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+        ) {
+            Text(
+                text = "No tienes pólizas activas aún.",
+                modifier = Modifier.padding(24.dp),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    } else {
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            items(policies) { policy ->
+                Box(modifier = Modifier.clickable {
+                    val type = when(policy) {
+                        is VehiclePolicyUi -> "VEHICULO"
+                        is LifePolicyUi -> "VIDA"
+                    }
+                    onPolicyClick(policy.id, type)
+                }) {
+                    PolicyCard(policy)
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
 fun HomeHeader(onLogout: () -> Unit) {
