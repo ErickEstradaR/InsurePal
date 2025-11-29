@@ -40,14 +40,15 @@ import java.io.File
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReclamoVidaScreen(
-    polizaId: String,
-    usuarioId: Int,
     viewModel: ReclamoVidaViewModel = hiltViewModel(),
     navigateBack: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val scrollState = rememberScrollState()
+
+    // Variable local para el ID de la póliza que ingresa el usuario
+    var polizaIdInput by remember { mutableStateOf("") }
 
     LaunchedEffect(state.esExitoso) {
         if (state.esExitoso) {
@@ -83,6 +84,25 @@ fun ReclamoVidaScreen(
                 .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            Text(
+                text = "Datos de la Póliza",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            OutlinedTextField(
+                value = polizaIdInput,
+                onValueChange = { polizaIdInput = it },
+                label = { Text("ID de la Póliza") },
+                placeholder = { Text("Ej: VIDA-102") },
+                leadingIcon = { Icon(Icons.Default.Badge, contentDescription = null) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+            )
+
+            HorizontalDivider()
+
             Text(
                 text = "Información del Deceso",
                 style = MaterialTheme.typography.titleMedium,
@@ -175,12 +195,16 @@ fun ReclamoVidaScreen(
 
             Button(
                 onClick = {
-                    viewModel.onEvent(ReclamoVidaEvent.GuardarReclamo(polizaId, usuarioId))
+                    if (polizaIdInput.isBlank()) {
+                        Toast.makeText(context, "Ingrese el ID de la Póliza", Toast.LENGTH_SHORT).show()
+                    } else {
+                        viewModel.onEvent(ReclamoVidaEvent.GuardarReclamo(polizaIdInput, 0))
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
-                enabled = state.camposValidos && !state.isLoading,
+                enabled = state.camposValidos && polizaIdInput.isNotBlank() && !state.isLoading,
                 shape = RoundedCornerShape(12.dp)
             ) {
                 if (state.isLoading) {
@@ -293,7 +317,7 @@ fun DocumentSelector(
                         Icon(
                             imageVector = Icons.Default.CheckCircle,
                             contentDescription = null,
-                            tint = Color.Green,
+                            tint = MaterialTheme.colorScheme.primary, // Color dinámico
                             modifier = Modifier.size(32.dp)
                         )
                         Text(
@@ -356,8 +380,6 @@ fun Context.crearArchivoTemporal(uri: Uri): File? {
 fun ReclamoVidaScreenPreview() {
     InsurePalTheme {
         ReclamoVidaScreen(
-            polizaId = "VIDA-123",
-            usuarioId = 1,
             navigateBack = {}
         )
     }
