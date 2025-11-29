@@ -4,17 +4,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,7 +17,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -35,9 +29,11 @@ import edu.ucne.InsurePal.presentation.listaReclamos.UiModels.TipoReclamo
 @Composable
 fun DetalleReclamoScreen(
     viewModel: DetalleReclamoViewModel = hiltViewModel(),
+    isAdmin: Boolean = false,
     onNavigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    var showRechazoDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -49,12 +45,22 @@ fun DetalleReclamoScreen(
                     }
                 }
             )
+        },
+        bottomBar = {
+            if (isAdmin && state.reclamoVehiculo?.status == "PENDIENTE") {
+                AdminActionsBar(
+                    isUpdating = state.isUpdating,
+                    onAprobar = { viewModel.onEvent(DetalleReclamoEvent.OnAprobar) },
+                    onRechazar = { showRechazoDialog = true }
+                )
+            }
         }
     ) { padding ->
-        Box(modifier = Modifier
-            .padding(padding)
-            .fillMaxSize()) {
-
+        Box(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+        ) {
             if (state.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             } else if (state.error != null) {
@@ -78,16 +84,35 @@ fun DetalleReclamoScreen(
                     }
                 }
             }
+
+            state.exitoOperacion?.let { msg ->
+                Snackbar(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp),
+                    containerColor = Color(0xFF2E7D32),
+                    contentColor = Color.White
+                ) {
+                    Text(msg)
+                }
+            }
         }
+    }
+
+    if (showRechazoDialog) {
+        RechazoDialog(
+            onDismiss = { showRechazoDialog = false },
+            onConfirm = { motivo ->
+                viewModel.onEvent(DetalleReclamoEvent.OnRechazar(motivo))
+                showRechazoDialog = false
+            }
+        )
     }
 }
 
 @Composable
 fun ContentDetalleVehiculo(reclamo: ReclamoVehiculo) {
     val imageUrl = reclamo.imagenUrl
-
-    // Estado para guardar el mensaje de error real de Coil
-    var loadError by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -111,52 +136,41 @@ fun ContentDetalleVehiculo(reclamo: ReclamoVehiculo) {
             elevation = CardDefaults.cardElevation(2.dp)
         ) {
             if (!imageUrl.isNullOrBlank()) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    SubcomposeAsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(imageUrl)
-                            .crossfade(true)
-                            .listener(
-                                onError = { _, result ->
-                                    loadError = result.throwable.message ?: "Error desconocido"
-                                }
-                            )
-                            .build(),
-                        contentDescription = "Evidencia del accidente",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop,
-                        loading = {
-                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                            }
-                        },
-                        error = {
-                            Box(
-                                Modifier
-                                    .fillMaxSize()
-                                    .background(MaterialTheme.colorScheme.errorContainer)
-                                    .padding(8.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Icon(
-                                        Icons.Default.BrokenImage,
-                                        contentDescription = "Error",
-                                        tint = MaterialTheme.colorScheme.error
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    // MOSTRAMOS EL ERROR TÉCNICO
-                                    Text(
-                                        text = "Fallo: $loadError",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.error,
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
+                SubcomposeAsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(imageUrl)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "Evidencia del accidente",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                    loading = {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                        }
+                    },
+                    error = {
+                        Box(
+                            Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.errorContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    Icons.Default.BrokenImage,
+                                    contentDescription = "Error",
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                                Text(
+                                    "Error al cargar imagen",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.error
+                                )
                             }
                         }
-                    )
-                }
+                    }
+                )
             } else {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -215,8 +229,96 @@ fun ContentDetalleVehiculo(reclamo: ReclamoVehiculo) {
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(80.dp))
     }
+}
+
+@Composable
+fun AdminActionsBar(
+    isUpdating: Boolean,
+    onAprobar: () -> Unit,
+    onRechazar: () -> Unit
+) {
+    Surface(
+        shadowElevation = 8.dp,
+        tonalElevation = 2.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Button(
+                onClick = onRechazar,
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                modifier = Modifier.weight(1f),
+                enabled = !isUpdating
+            ) {
+                Text("Rechazar")
+            }
+
+            Button(
+                onClick = onAprobar,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
+                modifier = Modifier.weight(1f),
+                enabled = !isUpdating
+            ) {
+                if (isUpdating) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White)
+                } else {
+                    Text("Aprobar")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun RechazoDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
+    var motivo by remember { mutableStateOf("") }
+    var isError by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Rechazar Reclamo") },
+        text = {
+            Column {
+                Text("Indica el motivo del rechazo para notificar al usuario:")
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = motivo,
+                    onValueChange = {
+                        motivo = it
+                        isError = false
+                    },
+                    label = { Text("Motivo") },
+                    isError = isError,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                if (isError) {
+                    Text("El motivo es obligatorio", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (motivo.isBlank()) {
+                        isError = true
+                    } else {
+                        onConfirm(motivo)
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+            ) {
+                Text("Confirmar Rechazo")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancelar") }
+        }
+    )
 }
 
 @Composable
