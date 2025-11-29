@@ -8,11 +8,13 @@ import edu.ucne.InsurePal.data.local.pago.PagoRepositoryImpl
 import edu.ucne.InsurePal.data.remote.polizas.vehiculo.SeguroVehiculoRepositoryImpl
 import edu.ucne.InsurePal.data.remote.polizas.vida.SeguroVidaRepositoryImpl
 import edu.ucne.InsurePal.data.remote.reclamoVehiculo.ReclamoVehiculoRepositoryImpl
+import edu.ucne.InsurePal.data.remote.reclamoVida.ReclamoVidaRepositoryImpl
 import edu.ucne.InsurePal.data.remote.usuario.UsuarioRepositoryImpl
 import edu.ucne.InsurePal.domain.pago.repository.PagoRepository
 import edu.ucne.InsurePal.domain.polizas.vehiculo.repository.SeguroVehiculoRepository
 import edu.ucne.InsurePal.domain.polizas.vida.repository.SeguroVidaRepository
 import edu.ucne.InsurePal.domain.reclamoVehiculo.repository.ReclamoVehiculoRepository
+import edu.ucne.InsurePal.domain.reclamoVida.repository.ReclamoVidaRepository
 import edu.ucne.InsurePal.domain.usuario.repository.UsuarioRepository
 import javax.inject.Singleton
 
@@ -48,4 +50,12 @@ abstract class RepositoryModule {
     abstract fun bindSeguroVidaRepository(
         impl: SeguroVidaRepositoryImpl
     ): SeguroVidaRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindReclamoVidaRepository(
+        impl: ReclamoVidaRepositoryImpl
+    ): ReclamoVidaRepository
+
+
 }
