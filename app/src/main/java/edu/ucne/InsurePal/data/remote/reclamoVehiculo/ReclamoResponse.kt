@@ -21,6 +21,8 @@ data class ReclamoResponse(
 
     val status: String,
 
+    val numCuenta: String,
+
     val motivoRechazo: String?,
 
     val fechaCreacion: String,
