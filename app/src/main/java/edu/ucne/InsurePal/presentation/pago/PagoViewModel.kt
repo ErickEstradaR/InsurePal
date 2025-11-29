@@ -95,8 +95,8 @@ class PagoViewModel @Inject constructor(
         }
     }
 
-    private suspend fun activarSeguroVida(idCompuesto: String) {
-        val resultGet = getSeguroVidaUseCase(idCompuesto)
+    private suspend fun activarSeguroVida(id: String) {
+        val resultGet = getSeguroVidaUseCase(id)
 
         if (resultGet is Resource.Success && resultGet.data != null) {
             val vidaActual = resultGet.data
@@ -106,7 +106,7 @@ class PagoViewModel @Inject constructor(
                 fechaPago = LocalDate.now().toString(),
             )
 
-            updateSeguroVidaUseCase(idCompuesto, vidaActualizada)
+            updateSeguroVidaUseCase(id, vidaActualizada)
         }
     }
 
