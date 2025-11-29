@@ -11,7 +11,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -158,19 +157,6 @@ fun HomeHeader(onLogout: () -> Unit) {
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            IconButton(
-                onClick = { /* TODO: Abrir notificaciones */ },
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape)
-                    .size(48.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Notifications,
-                    contentDescription = "Alertas",
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            }
-
             IconButton(
                 onClick = onLogout,
                 modifier = Modifier
