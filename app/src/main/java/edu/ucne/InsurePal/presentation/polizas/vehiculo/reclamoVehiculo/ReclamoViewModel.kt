@@ -1,6 +1,5 @@
 package edu.ucne.InsurePal.presentation.polizas.vehiculo.reclamoVehiculo
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
