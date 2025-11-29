@@ -18,7 +18,7 @@ import edu.ucne.InsurePal.presentation.listaReclamos.detalleReclamo.DetalleRecla
 import edu.ucne.InsurePal.presentation.pago.PagoScreen
 import edu.ucne.InsurePal.presentation.pago.listaPago.HistorialPagosScreen
 import edu.ucne.InsurePal.presentation.polizas.vehiculo.cotizacionVehiculo.CotizacionVehiculoScreen
-import edu.ucne.InsurePal.presentation.polizas.vehiculo.VehiculoRegistroScreen
+import edu.ucne.InsurePal.presentation.polizas.vehiculo.registroVehiculo.VehiculoRegistroScreen
 import edu.ucne.InsurePal.presentation.polizas.vehiculo.reclamoVehiculo.ReclamoScreen
 import edu.ucne.InsurePal.presentation.polizas.vida.reclamoVida.ReclamoVidaScreen
 import edu.ucne.InsurePal.presentation.polizas.vida.registroVida.RegistroSeguroVidaScreen
