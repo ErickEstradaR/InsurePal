@@ -8,6 +8,7 @@ data class ReclamoCreateRequest(
     val descripcion: String,
 
     val direccion: String,
+    val numCuenta:String,
 
     val tipoIncidente: String,
 
