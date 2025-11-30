@@ -36,6 +36,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import edu.ucne.InsurePal.ui.theme.InsurePalTheme
 import java.io.File
+import java.time.Instant
+import java.time.ZoneId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,8 +49,9 @@ fun ReclamoVidaScreen(
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
-    // Variable local para el ID de la póliza que ingresa el usuario
     var polizaIdInput by remember { mutableStateOf("") }
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState()
 
     LaunchedEffect(state.esExitoso) {
         if (state.esExitoso) {
@@ -61,6 +64,28 @@ fun ReclamoVidaScreen(
         state.error?.let {
             Toast.makeText(context, it, Toast.LENGTH_LONG).show()
             viewModel.onEvent(ReclamoVidaEvent.ErrorVisto)
+        }
+    }
+
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val localDate = Instant.ofEpochMilli(millis)
+                            .atZone(ZoneId.of("UTC"))
+                            .toLocalDate()
+                        viewModel.onEvent(ReclamoVidaEvent.FechaFallecimientoChanged(localDate.toString()))
+                    }
+                    showDatePicker = false
+                }) { Text("Aceptar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) { Text("Cancelar") }
+            }
+        ) {
+            DatePicker(state = datePickerState)
         }
     }
 
@@ -123,11 +148,22 @@ fun ReclamoVidaScreen(
 
             OutlinedTextField(
                 value = state.fechaFallecimiento.take(10),
-                onValueChange = { viewModel.onEvent(ReclamoVidaEvent.FechaFallecimientoChanged(it)) },
-                label = { Text("Fecha de Fallecimiento (YYYY-MM-DD)") },
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Fecha de Fallecimiento") },
                 leadingIcon = { Icon(Icons.Default.CalendarToday, contentDescription = null) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showDatePicker = true },
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
+                enabled = false
             )
 
             CausaMuerteDropdown(
@@ -317,7 +353,7 @@ fun DocumentSelector(
                         Icon(
                             imageVector = Icons.Default.CheckCircle,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary, // Color dinámico
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(32.dp)
                         )
                         Text(
