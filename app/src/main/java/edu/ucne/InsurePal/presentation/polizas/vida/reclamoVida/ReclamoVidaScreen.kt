@@ -46,7 +46,6 @@ fun ReclamoVidaScreen(
     onReclamoSuccess: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
     val scrollState = rememberScrollState()
 
     var polizaIdInput by remember { mutableStateOf("") }
