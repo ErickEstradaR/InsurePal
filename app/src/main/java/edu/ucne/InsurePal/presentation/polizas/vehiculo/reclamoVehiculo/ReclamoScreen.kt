@@ -1,7 +1,6 @@
 package edu.ucne.InsurePal.presentation.polizas.vehiculo.reclamoVehiculo
 
 import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -43,7 +42,8 @@ fun ReclamoScreen(
     polizaId: String,
     usuarioId: Int,
     viewModel: ReclamoViewModel = hiltViewModel(),
-    navigateBack: () -> Unit
+    navigateBack: () -> Unit,
+    onReclamoSuccess: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -54,17 +54,15 @@ fun ReclamoScreen(
 
     LaunchedEffect(state.esExitoso) {
         if (state.esExitoso) {
-            Toast.makeText(context, "Reclamo enviado correctamente", Toast.LENGTH_LONG).show()
-            navigateBack()
+            onReclamoSuccess()
         }
     }
-
     LaunchedEffect(state.error) {
-        state.error?.let {
-            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+        if (state.error != null) {
             viewModel.onEvent(ReclamoEvent.ErrorVisto)
         }
     }
+
 
     if (showDatePicker) {
         DatePickerDialog(
