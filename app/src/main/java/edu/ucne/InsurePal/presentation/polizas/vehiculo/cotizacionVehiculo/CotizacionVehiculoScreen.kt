@@ -106,7 +106,7 @@ fun CotizacionVehiculoContent(
                         shape = MaterialTheme.shapes.medium,
                         enabled = !state.isLoading && state.error == null
                     ) {
-                        Text("Aceptar")
+                        Text("Solicitar")
                         Spacer(modifier = Modifier.width(8.dp))
                         Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null)
                     }
@@ -161,7 +161,7 @@ fun CotizacionVehiculoContent(
                     }
 
                     InfoSectionCard(
-                        title = "Desglose de Prima (Anual)",
+                        title = "Desglose de Prima (Mensual)",
                         icon = Icons.Default.AttachMoney,
                         containerColor = MaterialTheme.colorScheme.surfaceContainer
                     ) {
