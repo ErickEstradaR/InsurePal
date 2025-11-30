@@ -6,8 +6,10 @@ import edu.ucne.InsurePal.data.remote.reclamoVehiculo.ReclamoRemoteDataSource
 import edu.ucne.InsurePal.data.remote.reclamoVehiculo.ReclamoResponse
 import edu.ucne.InsurePal.data.remote.reclamoVehiculo.ReclamoUpdateRequest
 import edu.ucne.InsurePal.data.remote.reclamoVehiculo.ReclamoVehiculoRepositoryImpl
+import edu.ucne.InsurePal.domain.reclamoVehiculo.model.CrearReclamoVehiculoParams
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.test.runTest
@@ -31,6 +33,8 @@ class ReclamoVehiculoRepositoryImplTest {
     @Test
     fun `crearReclamoVehiculo retorna Success y mapea el request correctamente`() = runTest {
         val fileMock = mockk<File>()
+        every { fileMock.name } returns "evidencia.jpg"
+
         val fakeResponse = ReclamoResponse(
             id = "REC-V-001",
             folio = "F-123",
@@ -53,8 +57,7 @@ class ReclamoVehiculoRepositoryImplTest {
         } returns Resource.Success(fakeResponse)
 
         val requestSlot = slot<ReclamoCreateRequest>()
-
-        val result = repository.crearReclamoVehiculo(
+        val params = CrearReclamoVehiculoParams(
             polizaId = "P-123",
             usuarioId = 1,
             descripcion = "Choque frontal",
@@ -64,6 +67,7 @@ class ReclamoVehiculoRepositoryImplTest {
             numCuenta = "999-999",
             imagen = fileMock
         )
+        val result = repository.crearReclamoVehiculo(params)
 
         coVerify {
             remoteDataSource.crearReclamo(capture(requestSlot), fileMock)
@@ -75,12 +79,10 @@ class ReclamoVehiculoRepositoryImplTest {
         assertEquals("Av. Independencia", capturedRequest.direccion)
         assertEquals("999-999", capturedRequest.numCuenta)
         assertEquals(1, capturedRequest.usuarioId)
-
         assertTrue(result is Resource.Success)
         assertEquals("REC-V-001", result.data?.id)
         assertEquals("PENDIENTE", result.data?.status)
     }
-
     @Test
     fun `crearReclamoVehiculo retorna Error cuando el datasource falla`() = runTest {
         val fileMock = mockk<File>()
@@ -89,12 +91,18 @@ class ReclamoVehiculoRepositoryImplTest {
         coEvery {
             remoteDataSource.crearReclamo(any(), any())
         } returns Resource.Error(errorMessage)
-
-        val result = repository.crearReclamoVehiculo(
-            polizaId = "", usuarioId = 0, descripcion = "",
-            direccion = "", tipoIncidente = "", fechaIncidente = "",
-            numCuenta = "", imagen = fileMock
+        val params = CrearReclamoVehiculoParams(
+            polizaId = "",
+            usuarioId = 0,
+            descripcion = "",
+            direccion = "",
+            tipoIncidente = "",
+            fechaIncidente = "",
+            numCuenta = "",
+            imagen = fileMock
         )
+        val result = repository.crearReclamoVehiculo(params)
+
 
         assertTrue(result is Resource.Error)
         assertEquals(errorMessage, result.message)
