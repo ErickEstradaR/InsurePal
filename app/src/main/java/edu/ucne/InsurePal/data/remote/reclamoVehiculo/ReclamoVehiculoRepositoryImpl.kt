@@ -2,41 +2,32 @@ package edu.ucne.InsurePal.data.remote.reclamoVehiculo
 
 import edu.ucne.InsurePal.data.Resource
 import edu.ucne.InsurePal.data.toDomain
+import edu.ucne.InsurePal.domain.reclamoVehiculo.model.CrearReclamoVehiculoParams
 import edu.ucne.InsurePal.domain.reclamoVehiculo.model.ReclamoVehiculo
 import edu.ucne.InsurePal.domain.reclamoVehiculo.repository.ReclamoVehiculoRepository
-import java.io.File
 import javax.inject.Inject
 
 class ReclamoVehiculoRepositoryImpl @Inject constructor(
     private val remoteDataSource: ReclamoRemoteDataSource
 ) : ReclamoVehiculoRepository {
 
-    override suspend fun crearReclamoVehiculo(
-        polizaId: String,
-        usuarioId: Int,
-        descripcion: String,
-        direccion: String,
-        tipoIncidente: String,
-        fechaIncidente: String,
-        numCuenta: String,
-        imagen: File
-    ): Resource<ReclamoVehiculo> {
-
-        val request = ReclamoCreateRequest(
-            polizaId = polizaId,
-            usuarioId = usuarioId,
-            descripcion = descripcion,
-            direccion = direccion,
-            tipoIncidente = tipoIncidente,
-            numCuenta = numCuenta,
-            fechaIncidente = fechaIncidente
+    override suspend fun crearReclamoVehiculo(params: CrearReclamoVehiculoParams): Resource<ReclamoVehiculo> {
+        val requestApi = ReclamoCreateRequest(
+            polizaId = params.polizaId,
+            usuarioId = params.usuarioId,
+            descripcion = params.descripcion,
+            direccion = params.direccion,
+            tipoIncidente = params.tipoIncidente,
+            fechaIncidente = params.fechaIncidente,
+            numCuenta = params.numCuenta
         )
-
-        val result = remoteDataSource.crearReclamo(request, imagen)
-
+        val result = remoteDataSource.crearReclamo(
+            request = requestApi,
+            archivoImagen = params.imagen
+        )
         return when (result) {
             is Resource.Success -> {
-                Resource.Success(result.data!!.toDomain())
+                Resource.Success(result.data?.toDomain())
             }
             is Resource.Error -> {
                 Resource.Error(result.message ?: "Error desconocido al crear reclamo")
