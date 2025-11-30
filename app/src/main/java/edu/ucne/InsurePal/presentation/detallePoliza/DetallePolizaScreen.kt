@@ -57,6 +57,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import edu.ucne.InsurePal.presentation.pago.formateo.formatearFecha
 import edu.ucne.InsurePal.presentation.pago.formateo.formatearMoneda
 import edu.ucne.InsurePal.ui.theme.InsurePalTheme
 
@@ -145,8 +146,6 @@ fun PolicyDetailContent(
                 PolicyInfoCard(state)
 
                 Spacer(modifier = Modifier.weight(1f))
-
-                // Se extrajo la lógica compleja a su propio Composable
                 PolicyActionsSection(
                     state = state,
                     policyType = policyType,
@@ -182,7 +181,6 @@ fun PolicyDetailContent(
     }
 }
 
-// --- Nuevos Composables extraídos para reducir complejidad ---
 
 @Composable
 fun PolicyActionsSection(
@@ -193,7 +191,6 @@ fun PolicyActionsSection(
     onNavigateToReclamo: (String, Int) -> Unit,
     onDeleteClick: () -> Unit
 ) {
-    // FUSIÓN 1: Se unieron los IFs anidados (policyType == VEHICULO && state.isPaid)
     if (policyType == "VEHICULO" && state.isPaid) {
         Button(
             onClick = { onNavigateToReclamo(state.policyId, state.usuarioId) },
@@ -209,10 +206,6 @@ fun PolicyActionsSection(
             Text("Realizar Reclamo")
         }
     }
-
-    // FUSIÓN 2: Se aplanó la lógica del pago.
-    // Antes: if (!paid) { if (!pending) { boton } } else { placeholder }
-    // Ahora: lógica lineal
     if (!state.isPaid && !isPendingApproval) {
         Button(
             onClick = { onNavigateToPago(state.price, "Pago de ${state.title}") },
@@ -287,7 +280,9 @@ fun PolicyInfoCard(state: DetallePolizaUiState) {
             Spacer(modifier = Modifier.height(12.dp))
 
             state.details.forEach { (label, value) ->
-                DetailRow(label, value)
+                val valorA_Mostrar = if (label == "Vigencia") formatearFecha(value) else
+                    value
+                DetailRow(label, valorA_Mostrar)
                 HorizontalDivider(
                     modifier = Modifier.padding(vertical = 8.dp),
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
