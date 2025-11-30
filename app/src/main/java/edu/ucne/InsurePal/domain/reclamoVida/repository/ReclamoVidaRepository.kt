@@ -3,11 +3,8 @@ package edu.ucne.InsurePal.domain.reclamoVida.repository
 import edu.ucne.InsurePal.data.Resource
 import edu.ucne.InsurePal.domain.reclamoVida.model.CrearReclamoVidaParams
 import edu.ucne.InsurePal.domain.reclamoVida.model.ReclamoVida
-import java.io.File
 
 interface ReclamoVidaRepository {
-
-
     suspend fun crearReclamoVida(params: CrearReclamoVidaParams): Resource<ReclamoVida>
 
 
