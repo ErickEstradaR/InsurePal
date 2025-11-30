@@ -40,14 +40,13 @@ class ListaReclamosViewModel @Inject constructor(
         when (event) {
             ListaReclamosEvent.OnCargarReclamos -> cargarDatos()
             ListaReclamosEvent.OnErrorDismiss -> _state.update { it.copy(error = null) }
-            is ListaReclamosEvent.OnReclamoClick -> {
+            is ListaReclamosEvent.OnReclamoClick -> {//navega al reclamo
             }
         }
     }
 
     private fun cargarDatos(overrideId: Int? = null) {
         viewModelScope.launch {
-            // Usamos el ID pasado por parámetro si existe, si no, usamos el del estado
             val userIdToUse = overrideId ?: _state.value.usuarioId
 
             if (userIdToUse == 0) {
