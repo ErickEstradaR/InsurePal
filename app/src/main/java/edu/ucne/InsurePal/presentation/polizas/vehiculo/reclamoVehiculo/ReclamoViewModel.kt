@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.InsurePal.data.Resource
+import edu.ucne.InsurePal.domain.reclamoVehiculo.model.CrearReclamoVehiculoParams
 import edu.ucne.InsurePal.domain.reclamoVehiculo.useCases.CrearReclamoVehiculoUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -75,6 +76,7 @@ class ReclamoViewModel @Inject constructor(
 
     private fun enviarReclamo(polizaId: String, usuarioId: Int) {
         val estado = _uiState.value
+
         if (estado.fotoEvidencia == null) {
             _uiState.update { it.copy(error = "Debes seleccionar una foto de evidencia") }
             return
@@ -84,7 +86,7 @@ class ReclamoViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, error = null) }
 
             try {
-                val result = crearReclamoUseCase(
+                val params = CrearReclamoVehiculoParams(
                     polizaId = polizaId,
                     usuarioId = usuarioId,
                     descripcion = estado.descripcion,
@@ -94,6 +96,7 @@ class ReclamoViewModel @Inject constructor(
                     numCuenta = estado.numCuenta,
                     imagen = estado.fotoEvidencia
                 )
+                val result = crearReclamoUseCase(params)
 
                 when (result) {
                     is Resource.Success -> {
@@ -103,9 +106,7 @@ class ReclamoViewModel @Inject constructor(
                         _uiState.update { it.copy(isLoading = false, esExitoso = false, error = result.message) }
                     }
                     is Resource.Loading -> {
-                        _uiState.update {
-                            it.copy(isLoading = true)
-                        }
+                        _uiState.update { it.copy(isLoading = true) }
                     }
                 }
             } catch (e: Exception) {
