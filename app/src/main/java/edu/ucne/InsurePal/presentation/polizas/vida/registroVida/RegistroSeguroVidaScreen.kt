@@ -222,9 +222,9 @@ fun SeguroVidaContent(
                 isError = state.errorMontoCobertura != null,
                 supportingText = {
                     if (state.errorMontoCobertura != null) {
-                        Text(state.errorMontoCobertura)
+                        Text(state.errorMontoCobertura, color = MaterialTheme.colorScheme.error)
                     } else {
-                        Text("El monto que recibirá su beneficiario.")
+                        Text("Máximo asegurado: RD$ 1,000,000")
                     }
                 },
                 leadingIcon = { Icon(Icons.Default.AttachMoney, null) },
@@ -333,6 +333,9 @@ fun DatePickerField(
         }
     }
 
+    // Corrección crítica: Se eliminó 'enabled = false'.
+    // Al usar readOnly = true, el campo no permite escribir (teclado no abre),
+    // pero sigue siendo clickeable e interactivo para abrir el diálogo.
     OutlinedTextField(
         value = fechaSeleccionada,
         onValueChange = { },
@@ -345,18 +348,13 @@ fun DatePickerField(
         },
         modifier = Modifier
             .fillMaxWidth()
+            // El InteractionSource del TextField manejará el click gracias a readOnly=true,
+            // pero mantenemos esto por seguridad en versiones antiguas de M3
             .clickable { showDialog = true },
         isError = isError,
         supportingText = errorMessage?.let { { Text(it) } },
-        colors = OutlinedTextFieldDefaults.colors(
-            disabledTextColor = MaterialTheme.colorScheme.onSurface,
-            disabledBorderColor = MaterialTheme.colorScheme.outline,
-            disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        ),
-        enabled = false
+        // Colores predeterminados están bien, no necesitamos forzar colores de "deshabilitado"
+        enabled = true // Valor por defecto, se pone explícito para claridad
     )
 }
 
