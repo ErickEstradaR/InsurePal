@@ -33,7 +33,7 @@ interface ReclamoVidaApiService {
 
     @GET("api/reclamos-vida")
     suspend fun obtenerReclamos(
-        @Query("usuario_id") usuarioId: Int? = null
+        @Query("usuarioId") usuarioId: Int? = null
     ): Response<List<ReclamoVidaResponse>>
 
     @GET("api/reclamos-vida/{id}")

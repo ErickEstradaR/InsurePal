@@ -28,7 +28,12 @@ class ListaReclamosViewModel @Inject constructor(
     val state = _state.asStateFlow()
 
     init {
-        cargarDatos()
+        viewModelScope.launch {
+            val idUsuario = userPreferences.userId.first() ?: 0
+            _state.update { it.copy(usuarioId = idUsuario) }
+
+            cargarDatos(idUsuario)
+        }
     }
 
     fun onEvent(event: ListaReclamosEvent) {
@@ -36,20 +41,24 @@ class ListaReclamosViewModel @Inject constructor(
             ListaReclamosEvent.OnCargarReclamos -> cargarDatos()
             ListaReclamosEvent.OnErrorDismiss -> _state.update { it.copy(error = null) }
             is ListaReclamosEvent.OnReclamoClick -> {
-                // La navegación se maneja en la UI
             }
         }
     }
 
-    private fun cargarDatos() {
+    private fun cargarDatos(overrideId: Int? = null) {
         viewModelScope.launch {
+            // Usamos el ID pasado por parámetro si existe, si no, usamos el del estado
+            val userIdToUse = overrideId ?: _state.value.usuarioId
+
+            if (userIdToUse == 0) {
+                _state.update { it.copy(isLoading = false, error = "ID de usuario no disponible.") }
+                return@launch
+            }
+
             _state.update { it.copy(isLoading = true, error = null) }
 
-            val userId = userPreferences.userId.first()
-
-            val resultVehiculos = getReclamosVehiculoUseCase(userId)
-            val resultVida = getReclamosVidaUseCase(userId)
-
+            val resultVehiculos = getReclamosVehiculoUseCase(userIdToUse)
+            val resultVida = getReclamosVidaUseCase(userIdToUse)
             val listaVehiculos = resultVehiculos.data ?: emptyList()
             val listaVida = resultVida.data ?: emptyList()
 

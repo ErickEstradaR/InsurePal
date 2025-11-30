@@ -35,7 +35,7 @@ interface ReclamosApiService {
 
     @GET("api/reclamos")
     suspend fun obtenerReclamos(
-        @Query("usuario_id") usuarioId: Int? = null
+        @Query("usuarioId") usuarioId: Int? = null
     ): Response<List<ReclamoResponse>>
 
 

@@ -19,9 +19,6 @@ import javax.inject.Inject
 class ReclamoViewModel @Inject constructor(
     private val crearReclamoUseCase: CrearReclamoVehiculoUseCase
 ) : ViewModel() {
-
-
-
     private val _uiState = MutableStateFlow(ReclamoUiState())
     val uiState: StateFlow<ReclamoUiState> = _uiState.asStateFlow()
 
@@ -69,7 +66,7 @@ class ReclamoViewModel @Inject constructor(
         val esValido = estado.descripcion.isNotBlank() &&
                 estado.direccion.isNotBlank() &&
                 estado.tipoIncidente.isNotBlank() &&
-                estado.fotoEvidencia != null // La foto es obligatoria
+                estado.fotoEvidencia != null
 
         _uiState.update { it.copy(camposValidos = esValido) }
     }
