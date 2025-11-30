@@ -58,24 +58,7 @@ class SeguroVidaViewModel @Inject constructor(
                 }
             }
             is SeguroVidaEvent.OnMontoCoberturaChanged -> {
-                val limpio = event.monto.filter { it.isDigit() || it == '.' }
-
-                _state.update {
-                    val montoDouble = limpio.toDoubleOrNull() ?: 0.0
-                    val errorMonto = if (montoDouble > 1_000_000) "Máximo 1,000,000" else null
-
-                    val newState = it.copy(
-                        montoCobertura = limpio,
-                        errorMontoCobertura = errorMonto
-                    )
-                    val nuevaPrima = if (errorMonto == null && montoDouble > 0) {
-                        calcularPrimaInterna(newState)
-                    } else {
-                        0.0
-                    }
-
-                    newState.copy(primaCalculada = nuevaPrima)
-                }
+                updateMontoCobertura(event.monto)
             }
             is SeguroVidaEvent.OnNombresChanged -> {
                 _state.update { it.copy(nombres = event.nombres, errorNombres = null) }
@@ -184,6 +167,26 @@ class SeguroVidaViewModel @Inject constructor(
                 }
                 is Resource.Loading -> { }
             }
+        }
+    }
+    private fun updateMontoCobertura(montoRaw: String) {
+        val limpio = montoRaw.filter { it.isDigit() || it == '.' }
+
+        _state.update {
+            val montoDouble = limpio.toDoubleOrNull() ?: 0.0
+            val errorMonto = if (montoDouble > 1_000_000) "Máximo 1,000,000" else null
+
+            val newState = it.copy(
+                montoCobertura = limpio,
+                errorMontoCobertura = errorMonto
+            )
+            val nuevaPrima = if (errorMonto == null && montoDouble > 0) {
+                calcularPrimaInterna(newState)
+            } else {
+                0.0
+            }
+
+            newState.copy(primaCalculada = nuevaPrima)
         }
     }
 }
