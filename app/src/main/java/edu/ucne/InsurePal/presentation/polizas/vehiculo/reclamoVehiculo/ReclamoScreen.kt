@@ -46,7 +46,6 @@ fun ReclamoScreen(
     onReclamoSuccess: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
     val scrollState = rememberScrollState()
 
     var showDatePicker by remember { mutableStateOf(false) }
