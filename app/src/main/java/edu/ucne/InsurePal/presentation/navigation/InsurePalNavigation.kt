@@ -136,7 +136,7 @@ fun InsurePalNavigation() {
                 onNavigateToPago = { idCreado, primaCalculada, descripcion ->
                     navController.navigate(
                         Screen.Pago(
-                            polizaId = "VIDA-$idCreado",
+                            polizaId = idCreado,
                             monto = primaCalculada,
                             descripcion = descripcion
                         )
