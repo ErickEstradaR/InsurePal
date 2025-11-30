@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.InsurePal.data.Resource
 import edu.ucne.InsurePal.data.local.UserPreferences
 import edu.ucne.InsurePal.domain.polizas.vida.useCases.GetSeguroVidaByIdUseCase
+import edu.ucne.InsurePal.domain.reclamoVida.model.CrearReclamoVidaParams
 import edu.ucne.InsurePal.domain.reclamoVida.useCases.CrearReclamoVidaUseCase
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -105,14 +106,13 @@ class ReclamoVidaViewModel @Inject constructor(
                     _uiState.update { it.copy(isLoading = false, error = "No se pudo identificar al usuario. Inicia sesión nuevamente.") }
                     return@launch
                 }
-
                 val polizaResult = getSeguroVidaByIdUseCase(polizaId)
-
                 if (polizaResult is Resource.Error) {
                     _uiState.update { it.copy(isLoading = false, error = "La póliza '$polizaId' no existe o no se encuentra.") }
                     return@launch
                 }
-                val result = crearReclamoVidaUseCase(
+
+                val params = CrearReclamoVidaParams(
                     polizaId = polizaId,
                     usuarioId = userId,
                     nombreAsegurado = estado.nombreAsegurado,
@@ -121,8 +121,10 @@ class ReclamoVidaViewModel @Inject constructor(
                     causaMuerte = estado.causaMuerte,
                     fechaFallecimiento = estado.fechaFallecimiento,
                     numCuenta = estado.numCuenta,
-                    actaDefuncion = estado.archivoActa
+                    actaDefuncion = estado.archivoActa,
                 )
+
+                val result = crearReclamoVidaUseCase(params)
 
                 when (result) {
                     is Resource.Success -> {
@@ -133,7 +135,7 @@ class ReclamoVidaViewModel @Inject constructor(
                         _uiState.update { it.copy(isLoading = false, error = result.message) }
                     }
                     is Resource.Loading -> {
-                        //manejado al inicio
+                        _uiState.update { it.copy(isLoading = true) }
                     }
                 }
             } catch (e: Exception) {
