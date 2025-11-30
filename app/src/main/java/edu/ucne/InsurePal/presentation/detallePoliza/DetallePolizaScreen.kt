@@ -64,6 +64,7 @@ import edu.ucne.InsurePal.presentation.pago.formateo.formatearMoneda
 import edu.ucne.InsurePal.ui.theme.InsurePalTheme
 
 private const val COBERTURA_FULL = "Cobertura Full"
+private const val pendienteDeAprobacion = "Pendiente de aprobación"
 
 @Composable
 fun DetallePolizaScreen(
@@ -111,7 +112,7 @@ fun PolicyDetailContent(
     var showPlanSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
 
-    val isPendingApproval = state.status == "Cotizando" || state.status == "Pendiente de aprobación"
+    val isPendingApproval = state.status == "Cotizando" || state.status == pendienteDeAprobacion
     val isRejected = state.status == "Rechazado"
 
     Scaffold(
@@ -406,6 +407,9 @@ fun PlanSelectionSheet(
 }
 @Composable
 fun HeaderCard(state: DetallePolizaUiState) {
+    val isRejected = state.status == "Rechazado"
+    val isPending = state.status == "Cotizando" || state.status == pendienteDeAprobacion
+
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
         modifier = Modifier.fillMaxWidth()
@@ -430,17 +434,18 @@ fun HeaderCard(state: DetallePolizaUiState) {
                     )
                 }
 
-                // Color dinámico según estado
-                val statusContainerColor = when(state.status) {
-                    "Rechazado" -> MaterialTheme.colorScheme.error
-                    "Cotizando", "Pendiente de aprobación" -> MaterialTheme.colorScheme.tertiary
-                    else -> if (state.isPaid) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                val statusContainerColor = when {
+                    isRejected -> MaterialTheme.colorScheme.error
+                    isPending -> MaterialTheme.colorScheme.tertiary
+                    state.isPaid -> MaterialTheme.colorScheme.primary
+                    else -> MaterialTheme.colorScheme.error
                 }
 
-                val statusContentColor = when(state.status) {
-                    "Rechazado" -> MaterialTheme.colorScheme.onError
-                    "Cotizando", "Pendiente de aprobación" -> MaterialTheme.colorScheme.onTertiary
-                    else -> if (state.isPaid) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onError
+                val statusContentColor = when {
+                    isRejected -> MaterialTheme.colorScheme.onError
+                    isPending -> MaterialTheme.colorScheme.onTertiary
+                    state.isPaid -> MaterialTheme.colorScheme.onPrimary
+                    else -> MaterialTheme.colorScheme.onError
                 }
 
                 Surface(
@@ -478,7 +483,8 @@ fun DetailRow(label: String, value: String) {
     }
 }
 
-// Preview para probar visualmente el estado "Rechazado"
+
+
 @Preview(name = "Detalle Vehículo Rechazado", showSystemUi = true)
 @Composable
 fun PolicyDetailRejectedPreview() {
