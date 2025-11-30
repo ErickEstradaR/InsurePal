@@ -115,7 +115,9 @@ fun SeguroVehiculo.toRequest(): SeguroVehiculoRequest = SeguroVehiculoRequest(
     cedulaBeneficiario = cedulaBeneficiario,
     parentesco = parentesco,
     montoCobertura = montoCobertura,
-    prima = prima
+    prima = prima,
+     fechaPago = fechaPago,
+     esPagado = esPagado
 )
 
 fun MarcaVehiculoDto.toDomain() = MarcaVehiculo(
