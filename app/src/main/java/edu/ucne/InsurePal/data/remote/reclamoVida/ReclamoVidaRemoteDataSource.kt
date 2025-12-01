@@ -6,6 +6,7 @@ import edu.ucne.InsurePal.data.remote.reclamoVida.dto.ReclamoVidaResponse
 import edu.ucne.InsurePal.data.remote.reclamoVida.dto.ReclamoVidaUpdateRequest
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
@@ -17,39 +18,34 @@ class ReclamoVidaRemoteDataSource @Inject constructor(
     private val errorNetwork = "Error de conexión con el servidor"
 
     suspend fun crearReclamoVida(
-        request: ReclamoVidaCreateRequest,
+        request: ReclamoVidaCreateRequest, // ✅ Ya agrupa los textos
         archivoActa: File,
         archivoIdentificacion: File?
     ): Resource<ReclamoVidaResponse> {
         return try {
             val textType = "text/plain".toMediaTypeOrNull()
-            val polizaRb = request.polizaId.toRequestBody(textType)
-            val usuarioRb = request.usuarioId.toString().toRequestBody(textType)
-            val nombreRb = request.nombreAsegurado.toRequestBody(textType)
-            val descRb = request.descripcion.toRequestBody(textType)
-            val lugarRb = request.lugarFallecimiento.toRequestBody(textType)
-            val causaRb = request.causaMuerte.toRequestBody(textType)
-            val fechaRb = request.fechaFallecimiento.toRequestBody(textType)
-            val cuentaRb = request.numCuenta.toRequestBody(textType)
 
+            fun toPart(value: String): RequestBody = value.toRequestBody(textType)
+
+            val dataMap = mapOf(
+                "PolizaId" to toPart(request.polizaId),
+                "UsuarioId" to toPart(request.usuarioId.toString()),
+                "NombreAsegurado" to toPart(request.nombreAsegurado),
+                "Descripcion" to toPart(request.descripcion),
+                "LugarFallecimiento" to toPart(request.lugarFallecimiento),
+                "CausaMuerte" to toPart(request.causaMuerte),
+                "FechaFallecimiento" to toPart(request.fechaFallecimiento),
+                "NumCuenta" to toPart(request.numCuenta)
+            )
             val actaRequest = archivoActa.asRequestBody("multipart/form-data".toMediaTypeOrNull())
             val actaPart = MultipartBody.Part.createFormData("ActaDefuncion", archivoActa.name, actaRequest)
-
             var idPart: MultipartBody.Part? = null
             if (archivoIdentificacion != null) {
                 val idRequest = archivoIdentificacion.asRequestBody("multipart/form-data".toMediaTypeOrNull())
                 idPart = MultipartBody.Part.createFormData("Identificacion", archivoIdentificacion.name, idRequest)
             }
-
             val response = api.crearReclamoVida(
-                polizaId = polizaRb,
-                usuarioId = usuarioRb,
-                nombreAsegurado = nombreRb,
-                descripcion = descRb,
-                lugarFallecimiento = lugarRb,
-                causaMuerte = causaRb,
-                fechaFallecimiento = fechaRb,
-                numCuenta = cuentaRb,
+                data = dataMap,
                 actaDefuncion = actaPart,
                 identificacion = idPart
             )
