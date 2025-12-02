@@ -8,13 +8,22 @@ data class ReclamoUiState(
     val esExitoso: Boolean = false,
 
     val descripcion: String = "",
+    val errorDescripcion: String? = null,
+
     val direccion: String = "",
+    val errorDireccion: String? = null,
+
     val tipoIncidente: String = "",
+    val errorTipoIncidente: String? = null,
+
     val fechaIncidente: String = "",
-    val numCuenta:String = "",
+    val errorFechaIncidente: String? = null,
+
+    val numCuenta: String = "",
+    val errorNumCuenta: String? = null,
 
     val fotoEvidencia: File? = null,
-
+    val errorFotoEvidencia: String? = null,
 
     val camposValidos: Boolean = false
 )
