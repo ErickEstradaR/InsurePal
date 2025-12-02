@@ -42,7 +42,7 @@ class VehiculoRegistroViewModel @Inject constructor(
 
     fun onEvent(event: VehiculoEvent) {
         when(event) {
-            is VehiculoEvent.OnNameChanged -> _state.update { it.copy(name = event.name) }
+            is VehiculoEvent.OnNameChanged -> _state.update { it.copy(name = event.name, errorName = null) }
             is VehiculoEvent.OnMarcaChanged -> {
                 _state.update { currentState ->
                     val modelosFiltrados = catalogoMarcas
@@ -51,6 +51,7 @@ class VehiculoRegistroViewModel @Inject constructor(
 
                     currentState.copy(
                         marca = event.marca,
+                        errorMarca = null,
                         modelo = "",
                         modelosDisponibles = modelosFiltrados,
                         valorMercado = ""
@@ -58,17 +59,17 @@ class VehiculoRegistroViewModel @Inject constructor(
                 }
             }
             is VehiculoEvent.OnModeloChanged -> {
-                _state.update { it.copy(modelo = event.modelo) }
+                _state.update { it.copy(modelo = event.modelo, errorModelo = null) }
                 calcularPrecio()
             }
             is VehiculoEvent.OnAnioChanged -> {
-                _state.update { it.copy(anio = event.anio) }
+                _state.update { it.copy(anio = event.anio, errorAnio = null) }
                 calcularPrecio()
             }
-            is VehiculoEvent.OnColorChanged -> _state.update { it.copy(color = event.color) }
-            is VehiculoEvent.OnPlacaChanged -> _state.update { it.copy(placa = event.placa) }
-            is VehiculoEvent.OnChasisChanged -> _state.update { it.copy(chasis = event.chasis) }
-            is VehiculoEvent.OnValorChanged -> _state.update { it.copy(valorMercado = event.valor) }
+            is VehiculoEvent.OnColorChanged -> _state.update { it.copy(color = event.color, errorColor = null) }
+            is VehiculoEvent.OnPlacaChanged -> _state.update { it.copy(placa = event.placa, errorPlaca = null) }
+            is VehiculoEvent.OnChasisChanged -> _state.update { it.copy(chasis = event.chasis, errorChasis = null) }
+            is VehiculoEvent.OnValorChanged -> _state.update { it.copy(valorMercado = event.valor, errorValorMercado = null) }
             is VehiculoEvent.OnCoverageChanged -> _state.update { it.copy(coverageType = event.type) }
 
             VehiculoEvent.OnMessageShown -> _state.update { it.copy(error = null) }
@@ -77,36 +78,87 @@ class VehiculoRegistroViewModel @Inject constructor(
             VehiculoEvent.OnExitoNavegacion -> _state.update {
                 it.copy(isSuccess = false, vehiculoIdCreado = null)
             }
-
         }
+    }
+
+    private fun validarFormulario(): Boolean {
+        val currentState = _state.value
+        var isValid = true
+
+        val errorName = if (currentState.name.isBlank()) {
+            isValid = false; "El nombre o descripción es obligatorio"
+        } else null
+
+        val errorMarca = if (currentState.marca.isBlank()) {
+            isValid = false; "Debe seleccionar una marca"
+        } else null
+
+        val errorModelo = if (currentState.modelo.isBlank()) {
+            isValid = false; "Debe seleccionar un modelo"
+        } else null
+
+        val errorAnio = if (currentState.anio.isBlank()) {
+            isValid = false; "El año es obligatorio"
+        } else null
+
+        val errorColor = if (currentState.color.isBlank()) {
+            isValid = false; "El color es obligatorio"
+        } else null
+
+        val errorPlaca = if (currentState.placa.isBlank()) {
+            isValid = false; "La placa es obligatoria"
+        } else null
+
+        val errorChasis = if (currentState.chasis.isBlank()) {
+            isValid = false; "El chasis es obligatorio"
+        } else null
+
+        val valorDouble = currentState.valorMercado.toDoubleOrNull()
+        val errorValor = if (valorDouble == null || valorDouble <= 0) {
+            isValid = false; "Monto inválido"
+        } else null
+
+        _state.update {
+            it.copy(
+                errorName = errorName,
+                errorMarca = errorMarca,
+                errorModelo = errorModelo,
+                errorAnio = errorAnio,
+                errorColor = errorColor,
+                errorPlaca = errorPlaca,
+                errorChasis = errorChasis,
+                errorValorMercado = errorValor
+            )
+        }
+
+        return isValid
     }
 
     private fun guardarVehiculo() {
         viewModelScope.launch {
-            val uiState = _state.value
-
-            if (uiState.usuarioId == null) {
-                _state.update { it.copy(error = "No se encontró sesión de usuario. Por favor inicie sesión nuevamente.") }
+            if (_state.value.usuarioId == null) {
+                _state.update { it.copy(error = "No se encontró sesión de usuario.") }
                 return@launch
             }
-            if (uiState.marca.isBlank() || uiState.modelo.isBlank() || uiState.placa.isBlank()) {
-                _state.update { it.copy(error = "Los campos Marca, Modelo y Placa son obligatorios.") }
+
+            if (!validarFormulario()) {
                 return@launch
             }
 
             _state.update { it.copy(isLoading = true) }
+            val uiState = _state.value
 
             val nuevoVehiculo = SeguroVehiculo(
                 idPoliza = "",
-                name = uiState.name.ifBlank { "${uiState.marca} ${uiState.modelo}" },
-                usuarioId = uiState.usuarioId,
+                name = uiState.name,
+                usuarioId = uiState.usuarioId!!,
                 marca = uiState.marca,
                 modelo = uiState.modelo,
                 anio = uiState.anio,
                 color = uiState.color,
                 placa = uiState.placa,
                 chasis = uiState.chasis,
-                valorMercado = uiState.valorMercado.toDoubleOrNull() ?: 0.0,
+                valorMercado = uiState.valorMercado.toDouble(),
                 coverageType = uiState.coverageType,
                 status = "Pendiente de aprobación",
                 expirationDate = LocalDate.now().toString(),
@@ -119,7 +171,6 @@ class VehiculoRegistroViewModel @Inject constructor(
             when(result) {
                 is Resource.Success -> {
                     val idCreado = result.data?.idPoliza ?: ""
-
                     _state.update {
                         it.copy(
                             isLoading = false,
@@ -147,7 +198,6 @@ class VehiculoRegistroViewModel @Inject constructor(
             when(result) {
                 is Resource.Success -> {
                     catalogoMarcas = result.data ?: emptyList()
-
                     val nombresMarcas = catalogoMarcas.map { it.nombre }
 
                     _state.update {
@@ -166,9 +216,7 @@ class VehiculoRegistroViewModel @Inject constructor(
                     }
                 }
                 is Resource.Loading -> {
-                    _state.update {
-                        it.copy(isLoading = true)
-                    }
+                    _state.update { it.copy(isLoading = true) }
                 }
             }
         }
@@ -190,7 +238,10 @@ class VehiculoRegistroViewModel @Inject constructor(
 
             if (precioCalculado > 0) {
                 _state.update {
-                    it.copy(valorMercado = String.format("%.2f", precioCalculado))
+                    it.copy(
+                        valorMercado = String.format("%.2f", precioCalculado),
+                        errorValorMercado = null
+                    )
                 }
             }
         }
