@@ -9,8 +9,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CarCrash
-import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.DirectionsCar
@@ -26,13 +26,13 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import java.text.NumberFormat
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminScreen(
     viewModel: AdminViewModel = hiltViewModel(),
@@ -43,6 +43,29 @@ fun AdminScreen(
     onLogout: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
+
+    AdminContent(
+        state = state,
+        onReload = { viewModel.loadDashboardData() },
+        onNavigateToVehicles = onNavigateToVehicles,
+        onNavigateToLife = onNavigateToLife,
+        onNavigateToVehicleClaims = onNavigateToVehicleClaims,
+        onNavigateToLifeClaims = onNavigateToLifeClaims,
+        onLogout = onLogout
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AdminContent(
+    state: AdminUiState,
+    onReload: () -> Unit,
+    onNavigateToVehicles: () -> Unit,
+    onNavigateToLife: () -> Unit,
+    onNavigateToVehicleClaims: () -> Unit,
+    onNavigateToLifeClaims: () -> Unit,
+    onLogout: () -> Unit
+) {
     val scrollState = rememberScrollState()
 
     Scaffold(
@@ -55,7 +78,7 @@ fun AdminScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { viewModel.loadDashboardData() }) {
+                    IconButton(onClick = onReload) {
                         Icon(Icons.Default.Refresh, "Recargar")
                     }
                     IconButton(onClick = onLogout) {
@@ -80,7 +103,7 @@ fun AdminScreen(
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
 
-                TotalBalanceCard(state.totalCoverageValue, state.totalPolicies)
+                FinancialCard(state.totalRevenue, state.totalPolicies)
 
                 Text("Gestión de Pólizas", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Row(
@@ -138,7 +161,7 @@ fun AdminScreen(
 }
 
 @Composable
-fun TotalBalanceCard(amount: Double, totalCount: Int) {
+fun FinancialCard(amount: Double, totalCount: Int) {
     val format = NumberFormat.getCurrencyInstance(Locale.US)
 
     Card(
@@ -149,7 +172,7 @@ fun TotalBalanceCard(amount: Double, totalCount: Int) {
         Column(
             modifier = Modifier.padding(24.dp)
         ) {
-            Text("Valor Total Asegurado", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f))
+            Text("Ingresos Totales", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f))
             Text(
                 text = format.format(amount),
                 style = MaterialTheme.typography.displaySmall,
@@ -158,9 +181,18 @@ fun TotalBalanceCard(amount: Double, totalCount: Int) {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Folder, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(16.dp))
+                Icon(
+                    Icons.Default.AttachMoney,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(20.dp)
+                )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("$totalCount pólizas registradas en el sistema", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimary)
+                Text(
+                    "Generados por $totalCount pólizas",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
             }
         }
     }
@@ -281,4 +313,28 @@ fun DonutChart(
             startAngle += sweepAngle
         }
     }
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun AdminDashboardPreview() {
+    val mockState = AdminUiState(
+        totalRevenue = 1250000.0,
+        totalPolicies = 45,
+        totalVehicles = 30,
+        totalLife = 15,
+        vehicleClaimsCount = 5,
+        lifeClaimsCount = 2,
+        isLoading = false
+    )
+
+    AdminContent(
+        state = mockState,
+        onReload = {},
+        onNavigateToVehicles = {},
+        onNavigateToLife = {},
+        onNavigateToVehicleClaims = {},
+        onNavigateToLifeClaims = {},
+        onLogout = {}
+    )
 }
