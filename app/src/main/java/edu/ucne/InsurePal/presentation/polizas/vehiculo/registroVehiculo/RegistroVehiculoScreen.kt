@@ -232,7 +232,7 @@ fun IdentificationSection(
         ),
         supportingText = {
             if (state.errorValorMercado != null) {
-                Text(state.errorValorMercado!!)
+                Text(state.errorValorMercado)
             } else if (state.valorMercado.isNotEmpty()) {
                 Text("Calculado automáticamente según marca, modelo y año.")
             }
