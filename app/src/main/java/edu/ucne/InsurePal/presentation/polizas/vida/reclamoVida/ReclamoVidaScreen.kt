@@ -290,7 +290,7 @@ private fun ReclamoVidaBody(
 
         if (state.errorArchivoActa != null) {
             Text(
-                text = state.errorArchivoActa!!,
+                text = state.errorArchivoActa,
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(start = 16.dp)
