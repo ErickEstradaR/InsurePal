@@ -76,6 +76,7 @@ class ListaVidaViewModel @Inject constructor(
     private fun filterList(list: List<SeguroVida>, query: String): List<SeguroVida> {
         if (query.isBlank()) return list
         return list.filter {
+            it.id.contains(query, ignoreCase = true)||
             it.nombresAsegurado.contains(query, ignoreCase = true) ||
                     it.cedulaAsegurado.contains(query, ignoreCase = true)
         }
