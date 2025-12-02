@@ -4,11 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.InsurePal.data.Resource
+import edu.ucne.InsurePal.domain.pago.useCase.GetHistorialPagosUseCase
 import edu.ucne.InsurePal.domain.polizas.vehiculo.useCases.GetAllVehiculosUseCase
 import edu.ucne.InsurePal.domain.polizas.vida.useCases.GetAllSegurosVidaUseCase
 import edu.ucne.InsurePal.domain.reclamoVehiculo.useCases.GetReclamoVehiculosUseCase
 import edu.ucne.InsurePal.domain.reclamoVida.useCases.GetReclamosVidaUseCase
-import jakarta.inject.Inject
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,7 +24,8 @@ class AdminViewModel @Inject constructor(
     private val getAllVehiculosUseCase: GetAllVehiculosUseCase,
     private val getAllSegurosVidaUseCase: GetAllSegurosVidaUseCase,
     private val getReclamoVehiculosUseCase: GetReclamoVehiculosUseCase,
-    private val getReclamosVidaUseCase: GetReclamosVidaUseCase
+    private val getReclamosVidaUseCase: GetReclamosVidaUseCase,
+    private val getHistorialPagosUseCase: GetHistorialPagosUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AdminUiState())
@@ -36,11 +38,11 @@ class AdminViewModel @Inject constructor(
     fun onEvent(event: AdminEvent) {
         when(event) {
             AdminEvent.LoadDashboard -> loadDashboardData()
-            AdminEvent.OnLogout -> { //cierra la sesion
+            AdminEvent.OnLogout -> {
             }
-            AdminEvent.OnDismissDetail -> { //cierra el detalle
+            AdminEvent.OnDismissDetail -> {
             }
-            is AdminEvent.OnSelectPolicy -> {//selecciona una poliza
+            is AdminEvent.OnSelectPolicy -> {
             }
         }
     }
@@ -49,21 +51,26 @@ class AdminViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, errorMessage = null) }
 
-             val flowReclamosV = flow { emit(getReclamoVehiculosUseCase(null)) }
+            val flowReclamosV = flow { emit(getReclamoVehiculosUseCase(null)) }
             val flowReclamosL = flow { emit(getReclamosVidaUseCase(null)) }
+
+            val flowPagos = getHistorialPagosUseCase(0)
 
             combine(
                 getAllVehiculosUseCase(),
                 getAllSegurosVidaUseCase(),
                 flowReclamosV,
-                flowReclamosL
-            ) { resVehiculos, resVida, resRecVehiculos, resRecVida ->
+                flowReclamosL,
+                flowPagos
+            ) { resVehiculos, resVida, resRecVehiculos, resRecVida, pagosList ->
 
                 val vehiculos = resVehiculos.data ?: emptyList()
                 val vida = resVida.data ?: emptyList()
 
                 val reclamosV = resRecVehiculos.data ?: emptyList()
                 val reclamosL = resRecVida.data ?: emptyList()
+
+                val totalIngresos = pagosList.sumOf { it.monto }
 
                 val errorMsg = if (
                     resVehiculos is Resource.Error ||
@@ -104,7 +111,9 @@ class AdminViewModel @Inject constructor(
                     totalClaims = recVCount + recLCount,
                     vehicleClaimsCount = recVCount,
                     lifeClaimsCount = recLCount,
-                    pendingClaimsCount = pendingRecV + pendingRecL
+                    pendingClaimsCount = pendingRecV + pendingRecL,
+
+                    totalRevenue = totalIngresos
                 )
 
             }.catch { e ->
