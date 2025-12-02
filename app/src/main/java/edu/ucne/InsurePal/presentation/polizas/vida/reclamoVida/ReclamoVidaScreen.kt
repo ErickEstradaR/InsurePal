@@ -1,12 +1,5 @@
 package edu.ucne.InsurePal.presentation.polizas.vida.reclamoVida
 
-import android.content.Context
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -17,15 +10,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -33,9 +20,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
+import edu.ucne.InsurePal.presentation.polizas.ImageSelector
 import edu.ucne.InsurePal.ui.theme.InsurePalTheme
-import java.io.File
 import java.time.Instant
 import java.time.ZoneId
 
@@ -293,10 +279,10 @@ private fun ReclamoVidaBody(
             color = MaterialTheme.colorScheme.primary
         )
 
-        DocumentSelector(
+        ImageSelector(
             selectedFile = state.archivoActa,
             label = "Subir Acta de Defunción",
-            onFileSelected = { file ->
+            onImageSelected = { file ->
                 onEvent(ReclamoVidaEvent.ActaDefuncionSeleccionada(file))
             },
             isError = state.errorArchivoActa != null
@@ -304,7 +290,7 @@ private fun ReclamoVidaBody(
 
         if (state.errorArchivoActa != null) {
             Text(
-                text = state.errorArchivoActa,
+                text = state.errorArchivoActa!!,
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(start = 16.dp)
@@ -379,118 +365,6 @@ fun CausaMuerteDropdown(
                 )
             }
         }
-    }
-}
-
-@Composable
-fun DocumentSelector(
-    selectedFile: File?,
-    label: String,
-    onFileSelected: (File) -> Unit,
-    isError: Boolean = false
-) {
-    val context = LocalContext.current
-
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia()
-    ) { uri: Uri? ->
-        uri?.let {
-            val file = context.crearArchivoTemporal(it)
-            if (file != null) {
-                onFileSelected(file)
-            }
-        }
-    }
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(180.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .clickable {
-                launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-            },
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        ),
-        border = if (isError) BorderStroke(2.dp, MaterialTheme.colorScheme.error) else null
-    ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            if (selectedFile != null) {
-                AsyncImage(
-                    model = selectedFile,
-                    contentDescription = "Documento seleccionado",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.4f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(32.dp)
-                        )
-                        Text(
-                            text = "Documento cargado",
-                            color = Color.White,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Text(
-                            text = "(Toque para cambiar)",
-                            color = Color.White.copy(alpha = 0.8f),
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
-                }
-            } else {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Description,
-                        contentDescription = null,
-                        modifier = Modifier.size(48.dp),
-                        tint = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = label,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = "(Obligatorio)",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            }
-        }
-    }
-}
-
-fun Context.crearArchivoTemporal(uri: Uri): File? {
-    return try {
-        val stream = contentResolver.openInputStream(uri)
-        val file = File.createTempFile("doc_vida_", ".jpg", cacheDir)
-        stream?.use { input ->
-            file.outputStream().use { output ->
-                input.copyTo(output)
-            }
-        }
-        file
-    } catch (e: Exception) {
-        null
     }
 }
 
