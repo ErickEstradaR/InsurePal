@@ -1,6 +1,5 @@
 package edu.ucne.InsurePal.presentation.polizas.vehiculo.reclamoVehiculo
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,9 +18,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import edu.ucne.InsurePal.presentation.polizas.ImageSelector
-import java.time.Instant
-import java.time.ZoneId
+import edu.ucne.InsurePal.presentation.components.DatePickerField
+import edu.ucne.InsurePal.presentation.components.ImageSelector
+import edu.ucne.InsurePal.presentation.polizas.vehiculo.AppDropdown
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,17 +32,8 @@ fun ReclamoScreen(
     onReclamoSuccess: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    var showDatePicker by remember { mutableStateOf(false) }
 
     ReclamoEffects(state, viewModel, onReclamoSuccess)
-
-    ReclamoDatePickerDialog(
-        show = showDatePicker,
-        onDismiss = { showDatePicker = false },
-        onDateSelected = { date ->
-            viewModel.onEvent(ReclamoEvent.FechaIncidenteChanged(date))
-        }
-    )
 
     Scaffold(
         topBar = { ReclamoTopBar(navigateBack) }
@@ -51,7 +41,6 @@ fun ReclamoScreen(
         ReclamoBody(
             paddingValues = paddingValues,
             state = state,
-            onDateClick = { showDatePicker = true },
             onEvent = viewModel::onEvent,
             onEnviarClick = {
                 viewModel.onEvent(ReclamoEvent.GuardarReclamo(polizaId, usuarioId))
@@ -80,37 +69,6 @@ private fun ReclamoEffects(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ReclamoDatePickerDialog(
-    show: Boolean,
-    onDismiss: () -> Unit,
-    onDateSelected: (String) -> Unit
-) {
-    val datePickerState = rememberDatePickerState()
-    if (show) {
-        DatePickerDialog(
-            onDismissRequest = onDismiss,
-            confirmButton = {
-                TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let { millis ->
-                        val localDate = Instant.ofEpochMilli(millis)
-                            .atZone(ZoneId.of("UTC"))
-                            .toLocalDate()
-                        onDateSelected(localDate.toString())
-                    }
-                    onDismiss()
-                }) { Text("Aceptar") }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismiss) { Text("Cancelar") }
-            }
-        ) {
-            DatePicker(state = datePickerState)
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
 private fun ReclamoTopBar(navigateBack: () -> Unit) {
     CenterAlignedTopAppBar(
         title = { Text("Reportar Siniestro") },
@@ -130,11 +88,14 @@ private fun ReclamoTopBar(navigateBack: () -> Unit) {
 private fun ReclamoBody(
     paddingValues: PaddingValues,
     state: ReclamoUiState,
-    onDateClick: () -> Unit,
     onEvent: (ReclamoEvent) -> Unit,
     onEnviarClick: () -> Unit
 ) {
     val scrollState = rememberScrollState()
+
+    // Lista de opciones para este formulario específico
+    val incidentTypes = listOf("Choque", "Robo", "Cristal Roto", "Incendio", "Inundación", "Otro")
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -149,29 +110,22 @@ private fun ReclamoBody(
             color = MaterialTheme.colorScheme.primary
         )
 
-        TipoIncidenteDropdown(
-            selectedOption = state.tipoIncidente,
-            onOptionSelected = { onEvent(ReclamoEvent.TipoIncidenteChanged(it)) },
+        AppDropdown(
+            label = "Tipo de Incidente",
+            items = incidentTypes,
+            selectedItem = state.tipoIncidente,
+            onItemSelected = { onEvent(ReclamoEvent.TipoIncidenteChanged(it)) },
+            modifier = Modifier.fillMaxWidth(),
             isError = state.errorTipoIncidente != null,
             errorMessage = state.errorTipoIncidente
         )
 
-        OutlinedTextField(
-            value = state.fechaIncidente.take(10),
-            onValueChange = {},
-            readOnly = true,
-            label = { Text("Fecha del suceso") },
-            leadingIcon = { Icon(Icons.Default.CalendarToday, contentDescription = null) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onDateClick() },
-            colors = OutlinedTextFieldDefaults.colors(
-                disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                disabledBorderColor = MaterialTheme.colorScheme.outline
-            ),
-            enabled = false,
+        DatePickerField(
+            label = "Fecha del suceso",
+            fechaSeleccionada = state.fechaIncidente.take(10),
+            onFechaChange = { onEvent(ReclamoEvent.FechaIncidenteChanged(it)) },
             isError = state.errorFechaIncidente != null,
-            supportingText = state.errorFechaIncidente?.let { { Text(it) } }
+            errorMessage = state.errorFechaIncidente
         )
 
         OutlinedTextField(
@@ -271,49 +225,3 @@ private fun ReclamoBody(
         }
     }
 }
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TipoIncidenteDropdown(
-    selectedOption: String,
-    onOptionSelected: (String) -> Unit,
-    isError: Boolean = false,
-    errorMessage: String? = null
-) {
-    val options = listOf("Choque", "Robo", "Cristal Roto", "Incendio", "Inundación", "Otro")
-    var expanded by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        OutlinedTextField(
-            modifier = Modifier.menuAnchor().fillMaxWidth(),
-            readOnly = true,
-            value = selectedOption,
-            onValueChange = {},
-            label = { Text("Tipo de Incidente") },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-            isError = isError,
-            supportingText = errorMessage?.let { { Text(it) } }
-        )
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-        ) {
-            options.forEach { selectionOption ->
-                DropdownMenuItem(
-                    text = { Text(selectionOption) },
-                    onClick = {
-                        onOptionSelected(selectionOption)
-                        expanded = false
-                    },
-                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-                )
-            }
-        }
-    }
-}
-
