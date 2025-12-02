@@ -1,6 +1,5 @@
 package edu.ucne.InsurePal.presentation.polizas.vehiculo.registroVehiculo
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -10,11 +9,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -24,7 +20,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.InsurePal.presentation.polizas.vehiculo.AppDropdown
 import edu.ucne.InsurePal.ui.theme.InsurePalTheme
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VehiculoRegistroScreen(
     viewModel: VehiculoRegistroViewModel = hiltViewModel(),
@@ -32,40 +28,24 @@ fun VehiculoRegistroScreen(
     onNavigateToCotizacion: (String) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(key1 = state.isSuccess) {
+    LaunchedEffect(state.isSuccess) {
         if (state.isSuccess && state.vehiculoIdCreado != null) {
-            Toast.makeText(context, "Vehículo registrado. Generando cotización...", Toast.LENGTH_SHORT).show()
             onNavigateToCotizacion(state.vehiculoIdCreado!!)
             viewModel.onEvent(VehiculoEvent.OnExitoNavegacion)
         }
     }
 
-    LaunchedEffect(key1 = state.error) {
+    LaunchedEffect(state.error) {
         state.error?.let { error ->
-            Toast.makeText(context, error, Toast.LENGTH_LONG).show()
+            snackbarHostState.showSnackbar(error)
             viewModel.onEvent(VehiculoEvent.OnMessageShown)
         }
     }
 
-    VehiculoRegistroContent(
-        state = state,
-        onEvent = viewModel::onEvent,
-        onNavigateBack = onNavigateBack
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun VehiculoRegistroContent(
-    state: VehiculoUiState,
-    onEvent: (VehiculoEvent) -> Unit,
-    onNavigateBack: () -> Unit
-) {
-    val scrollState = rememberScrollState()
-
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("Datos del Vehículo") },
@@ -80,37 +60,54 @@ fun VehiculoRegistroContent(
             )
         },
         floatingActionButton = {
-            CotizarFab(isLoading = state.isLoading, onClick = { onEvent(VehiculoEvent.OnGuardarClick) })
+            CotizarFab(
+                isLoading = state.isLoading,
+                onClick = { viewModel.onEvent(VehiculoEvent.OnGuardarClick) }
+            )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp)
-                .verticalScroll(scrollState),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Spacer(modifier = Modifier.height(8.dp))
-
-            GeneralInfoSection(state, onEvent)
-
-            Divider(color = MaterialTheme.colorScheme.outlineVariant)
-
-            IdentificationSection(state, onEvent)
-
-            Divider(color = MaterialTheme.colorScheme.outlineVariant)
-
-            CoverageSection(
-                selectedCoverage = state.coverageType,
-                onCoverageSelected = { onEvent(VehiculoEvent.OnCoverageChanged(it)) }
-            )
-
-            Spacer(modifier = Modifier.height(80.dp))
-        }
+        VehiculoRegistroContent(
+            state = state,
+            onEvent = viewModel::onEvent,
+            paddingValues = paddingValues
+        )
     }
 }
 
+@Composable
+fun VehiculoRegistroContent(
+    state: VehiculoUiState,
+    onEvent: (VehiculoEvent) -> Unit,
+    paddingValues: PaddingValues
+) {
+    val scrollState = rememberScrollState()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+            .padding(horizontal = 16.dp)
+            .verticalScroll(scrollState),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Spacer(modifier = Modifier.height(8.dp))
+
+        GeneralInfoSection(state, onEvent)
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        IdentificationSection(state, onEvent)
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        CoverageSection(
+            selectedCoverage = state.coverageType,
+            onCoverageSelected = { onEvent(VehiculoEvent.OnCoverageChanged(it)) }
+        )
+
+        Spacer(modifier = Modifier.height(80.dp))
+    }
+}
 
 @Composable
 fun GeneralInfoSection(
@@ -129,6 +126,8 @@ fun GeneralInfoSection(
         label = { Text("Alias (Ej. Mi Carro)") },
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
+        isError = state.errorName != null,
+        supportingText = state.errorName?.let { { Text(it) } },
         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences)
     )
 
@@ -141,7 +140,9 @@ fun GeneralInfoSection(
             items = state.marcasDisponibles,
             selectedItem = state.marca,
             onItemSelected = { onEvent(VehiculoEvent.OnMarcaChanged(it)) },
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            isError = state.errorMarca != null,
+            errorMessage = state.errorMarca
         )
 
         AppDropdown(
@@ -149,7 +150,9 @@ fun GeneralInfoSection(
             items = state.modelosDisponibles,
             selectedItem = state.modelo,
             onItemSelected = { onEvent(VehiculoEvent.OnModeloChanged(it)) },
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            isError = state.errorModelo != null,
+            errorMessage = state.errorModelo
         )
     }
 
@@ -163,6 +166,8 @@ fun GeneralInfoSection(
             label = { Text("Año") },
             modifier = Modifier.weight(0.8f),
             singleLine = true,
+            isError = state.errorAnio != null,
+            supportingText = state.errorAnio?.let { { Text(it) } },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
         OutlinedTextField(
@@ -171,6 +176,8 @@ fun GeneralInfoSection(
             label = { Text("Color") },
             modifier = Modifier.weight(1.2f),
             singleLine = true,
+            isError = state.errorColor != null,
+            supportingText = state.errorColor?.let { { Text(it) } },
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words)
         )
     }
@@ -193,6 +200,8 @@ fun IdentificationSection(
         label = { Text("Placa") },
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
+        isError = state.errorPlaca != null,
+        supportingText = state.errorPlaca?.let { { Text(it) } },
         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters)
     )
 
@@ -202,26 +211,33 @@ fun IdentificationSection(
         label = { Text("Chasis (VIN)") },
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
+        isError = state.errorChasis != null,
+        supportingText = state.errorChasis?.let { { Text(it) } },
         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters)
     )
 
     OutlinedTextField(
         value = state.valorMercado,
-        onValueChange = { },
+        onValueChange = { onEvent(VehiculoEvent.OnValorChanged(it)) },
         label = { Text("Valor de Mercado (Estimado)") },
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
-        readOnly = true,
+        // Eliminado readOnly=true estricto para permitir correcciones si el usuario lo desea,
+        // aunque el VM lo calcula. Puedes volver a ponerlo si prefieres que sea 100% automático.
         prefix = { Text("RD$ ") },
+        isError = state.errorValorMercado != null,
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
         ),
         supportingText = {
-            if (state.valorMercado.isNotEmpty()) {
+            if (state.errorValorMercado != null) {
+                Text(state.errorValorMercado!!)
+            } else if (state.valorMercado.isNotEmpty()) {
                 Text("Calculado automáticamente según marca, modelo y año.")
             }
-        }
+        },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
     )
 }
 
@@ -241,7 +257,7 @@ fun CoverageSection(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        val coberturas = listOf("Cobertura Full", "Ley", "Daños a Terceros")
+        val coberturas = listOf("Full Cobertura", "Ley", "Daños a Terceros")
 
         coberturas.forEach { tipo ->
             val isSelected = selectedCoverage == tipo
@@ -296,7 +312,7 @@ fun VehiculoRegistroScreenPreview() {
         VehiculoRegistroContent(
             state = VehiculoUiState(),
             onEvent = {},
-            onNavigateBack = {}
+            paddingValues = PaddingValues(0.dp)
         )
     }
 }
