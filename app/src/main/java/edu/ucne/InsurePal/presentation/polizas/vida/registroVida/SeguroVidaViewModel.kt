@@ -108,6 +108,11 @@ class SeguroVidaViewModel @Inject constructor(
 
     private fun cotizarSeguro() {
         val state = _state.value
+
+        if (state.isLoading) return
+
+        _state.update { it.copy(errorGlobal = null) }
+
         val validationParams = ValidateSeguroVidaParams(
             nombres = state.nombres,
             cedula = state.cedula,
@@ -130,14 +135,17 @@ class SeguroVidaViewModel @Inject constructor(
                 errorMontoCobertura = validationResult.errorMontoCobertura,
                 errorNombreBeneficiario = validationResult.errorNombreBeneficiario,
                 errorCedulaBeneficiario = validationResult.errorCedulaBeneficiario,
-                errorParentesco = validationResult.errorParentesco
+                errorParentesco = validationResult.errorParentesco,
+                isLoading = false
             )}
             return
         }
+
         val usuarioFinal = if (currentUserId == 0) 1 else currentUserId
 
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
+
             val nuevoSeguro = SeguroVida(
                 id = "",
                 usuarioId = usuarioFinal,
@@ -171,6 +179,7 @@ class SeguroVidaViewModel @Inject constructor(
             }
         }
     }
+
     private fun updateMontoCobertura(montoRaw: String) {
         val limpio = montoRaw.filter { it.isDigit() || it == '.' }
 
