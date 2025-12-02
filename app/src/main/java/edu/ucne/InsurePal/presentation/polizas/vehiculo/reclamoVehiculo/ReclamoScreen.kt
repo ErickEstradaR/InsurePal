@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -62,7 +63,6 @@ fun ReclamoScreen(
         }
     }
 
-
     if (showDatePicker) {
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
@@ -119,7 +119,9 @@ fun ReclamoScreen(
 
             TipoIncidenteDropdown(
                 selectedOption = state.tipoIncidente,
-                onOptionSelected = { viewModel.onEvent(ReclamoEvent.TipoIncidenteChanged(it)) }
+                onOptionSelected = { viewModel.onEvent(ReclamoEvent.TipoIncidenteChanged(it)) },
+                isError = state.errorTipoIncidente != null,
+                errorMessage = state.errorTipoIncidente
             )
 
             OutlinedTextField(
@@ -135,7 +137,9 @@ fun ReclamoScreen(
                     disabledTextColor = MaterialTheme.colorScheme.onSurface,
                     disabledBorderColor = MaterialTheme.colorScheme.outline
                 ),
-                enabled = false
+                enabled = false,
+                isError = state.errorFechaIncidente != null,
+                supportingText = state.errorFechaIncidente?.let { { Text(it) } }
             )
 
             OutlinedTextField(
@@ -149,7 +153,9 @@ fun ReclamoScreen(
                     capitalization = KeyboardCapitalization.Sentences,
                     imeAction = ImeAction.Next
                 ),
-                singleLine = true
+                singleLine = true,
+                isError = state.errorDireccion != null,
+                supportingText = state.errorDireccion?.let { { Text(it) } }
             )
 
             OutlinedTextField(
@@ -163,7 +169,9 @@ fun ReclamoScreen(
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Next
                 ),
-                singleLine = true
+                singleLine = true,
+                isError = state.errorNumCuenta != null,
+                supportingText = state.errorNumCuenta?.let { { Text(it) } }
             )
 
             OutlinedTextField(
@@ -177,7 +185,9 @@ fun ReclamoScreen(
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Sentences,
                     imeAction = ImeAction.Done
-                )
+                ),
+                isError = state.errorDescripcion != null,
+                supportingText = state.errorDescripcion?.let { { Text(it) } }
             )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -192,8 +202,18 @@ fun ReclamoScreen(
                 selectedFile = state.fotoEvidencia,
                 onImageSelected = { file ->
                     viewModel.onEvent(ReclamoEvent.FotoSeleccionada(file))
-                }
+                },
+                isError = state.errorFotoEvidencia != null
             )
+
+            if (state.errorFotoEvidencia != null) {
+                Text(
+                    text = state.errorFotoEvidencia!!,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -204,7 +224,7 @@ fun ReclamoScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
-                enabled = state.camposValidos && !state.isLoading,
+                enabled = !state.isLoading,
                 shape = RoundedCornerShape(12.dp)
             ) {
                 if (state.isLoading) {
@@ -229,7 +249,9 @@ fun ReclamoScreen(
 @Composable
 fun TipoIncidenteDropdown(
     selectedOption: String,
-    onOptionSelected: (String) -> Unit
+    onOptionSelected: (String) -> Unit,
+    isError: Boolean = false,
+    errorMessage: String? = null
 ) {
     val options = listOf("Choque", "Robo", "Cristal Roto", "Incendio", "Inundación", "Otro")
     var expanded by remember { mutableStateOf(false) }
@@ -246,7 +268,9 @@ fun TipoIncidenteDropdown(
             onValueChange = {},
             label = { Text("Tipo de Incidente") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+            isError = isError,
+            supportingText = errorMessage?.let { { Text(it) } }
         )
         ExposedDropdownMenu(
             expanded = expanded,
@@ -269,7 +293,8 @@ fun TipoIncidenteDropdown(
 @Composable
 fun ImageSelector(
     selectedFile: File?,
-    onImageSelected: (File) -> Unit
+    onImageSelected: (File) -> Unit,
+    isError: Boolean = false
 ) {
     val context = LocalContext.current
 
@@ -295,9 +320,7 @@ fun ImageSelector(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         ),
-        border = if (selectedFile == null) {
-            null
-        } else null
+        border = if (isError) BorderStroke(2.dp, MaterialTheme.colorScheme.error) else null
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -330,13 +353,13 @@ fun ImageSelector(
                         imageVector = Icons.Outlined.PhotoCamera,
                         contentDescription = null,
                         modifier = Modifier.size(48.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Toca para subir foto",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
                         text = "(Obligatorio)",
