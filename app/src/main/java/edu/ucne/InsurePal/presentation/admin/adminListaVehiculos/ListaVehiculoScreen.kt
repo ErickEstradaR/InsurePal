@@ -30,7 +30,7 @@ import edu.ucne.InsurePal.domain.polizas.vehiculo.model.SeguroVehiculo
 import java.text.NumberFormat
 import java.util.Locale
 
-
+private const val pendiente = "Pendiente de pago"
 @Composable
 fun VehicleListScreen(
     viewModel: VehicleListViewModel = hiltViewModel(),
@@ -42,7 +42,7 @@ fun VehicleListScreen(
             vehicle = state.selectedVehicle!!,
             onDismiss = { viewModel.onEvent(ListaVehiculoEvent.OnDismissDetail) },
             onApprove = {
-                viewModel.onEvent(ListaVehiculoEvent.OnUpdateStatus(state.selectedVehicle!!, "Pendiente de pago"))
+                viewModel.onEvent(ListaVehiculoEvent.OnUpdateStatus(state.selectedVehicle!!, pendiente))
             },
             onReject = {
                 viewModel.onEvent(ListaVehiculoEvent.OnUpdateStatus(state.selectedVehicle!!, "Rechazado"))
@@ -258,9 +258,9 @@ fun VehicleItemCard(vehicle: SeguroVehiculo, onClick: () -> Unit) {
 @Composable
 fun StatusChip(status: String) {
     val (color, containerColor) = when(status) {
-        "Aprobado", "Pendiente de pago" -> Pair(Color(0xFF2E7D32), Color(0xFFE8F5E9)) // Verdes
+        "Aprobado", pendiente -> Pair(Color(0xFF2E7D32), Color(0xFFE8F5E9)) // Verdes
         "Rechazado" -> Pair(MaterialTheme.colorScheme.error, MaterialTheme.colorScheme.errorContainer)
-        else -> Pair(Color(0xFFEF6C00), Color(0xFFFFF3E0)) // Naranja
+        else -> Pair(Color(0xFFEF6C00), Color(0xFFFFF3E0))
     }
 
     Surface(
@@ -287,7 +287,7 @@ fun VehicleDetailDialog(
 ) {
     val format = remember { NumberFormat.getCurrencyInstance(Locale.US) }
 
-    val showActions = vehicle.status != "Rechazado" && vehicle.status != "Pendiente de pago" && vehicle.status != "Activo"
+    val showActions = vehicle.status != "Rechazado" && vehicle.status != pendiente && vehicle.status != "Activo"
 
     Dialog(onDismissRequest = onDismiss) {
         Card(
