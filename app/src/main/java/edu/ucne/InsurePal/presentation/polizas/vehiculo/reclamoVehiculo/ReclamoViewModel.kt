@@ -31,29 +31,25 @@ class ReclamoViewModel @Inject constructor(
     fun onEvent(event: ReclamoEvent) {
         when (event) {
             is ReclamoEvent.DescripcionChanged -> {
-                _uiState.update { it.copy(descripcion = event.descripcion) }
-                validarFormulario()
+                _uiState.update { it.copy(descripcion = event.descripcion, errorDescripcion = null) }
             }
             is ReclamoEvent.DireccionChanged -> {
-                _uiState.update { it.copy(direccion = event.direccion) }
-                validarFormulario()
+                _uiState.update { it.copy(direccion = event.direccion, errorDireccion = null) }
             }
             is ReclamoEvent.TipoIncidenteChanged -> {
-                _uiState.update { it.copy(tipoIncidente = event.tipo) }
-                validarFormulario()
+                _uiState.update { it.copy(tipoIncidente = event.tipo, errorTipoIncidente = null) }
             }
             is ReclamoEvent.FechaIncidenteChanged -> {
-                _uiState.update { it.copy(fechaIncidente = event.fecha) }
+                _uiState.update { it.copy(fechaIncidente = event.fecha, errorFechaIncidente = null) }
+            }
+            is ReclamoEvent.NumCuentaChanged ->{
+                _uiState.update { it.copy(numCuenta = event.numCuenta, errorNumCuenta = null) }
             }
             is ReclamoEvent.FotoSeleccionada -> {
-                _uiState.update { it.copy(fotoEvidencia = event.archivo) }
-                validarFormulario()
+                _uiState.update { it.copy(fotoEvidencia = event.archivo, errorFotoEvidencia = null) }
             }
             is ReclamoEvent.GuardarReclamo -> {
                 enviarReclamo(event.polizaId, event.usuarioId)
-            }
-            is ReclamoEvent.NumCuentaChanged ->{
-                _uiState.update { it.copy(numCuenta = event.numCuenta) }
             }
             is ReclamoEvent.ErrorVisto -> {
                 _uiState.update { it.copy(error = null) }
@@ -61,27 +57,49 @@ class ReclamoViewModel @Inject constructor(
         }
     }
 
-    private fun validarFormulario() {
+    private fun validarFormulario(): Boolean {
         val estado = _uiState.value
-        val esValido = estado.descripcion.isNotBlank() &&
-                estado.direccion.isNotBlank() &&
-                estado.tipoIncidente.isNotBlank() &&
-                estado.fotoEvidencia != null
+        var esValido = true
 
-        _uiState.update { it.copy(camposValidos = esValido) }
+        val errorDescripcion = if (estado.descripcion.isBlank()) {
+            esValido = false; "La descripción del incidente es obligatoria"
+        } else null
+
+        val errorDireccion = if (estado.direccion.isBlank()) {
+            esValido = false; "La dirección es obligatoria"
+        } else null
+
+        val errorTipo = if (estado.tipoIncidente.isBlank()) {
+            esValido = false; "Debe seleccionar un tipo de incidente"
+        } else null
+
+        val errorNumCuenta = if (estado.numCuenta.isBlank()) {
+            esValido = false; "El número de cuenta es requerido para depósitos"
+        } else null
+
+        val errorFoto = if (estado.fotoEvidencia == null) {
+            esValido = false; "Debe adjuntar una foto de evidencia"
+        } else null
+
+        _uiState.update { it.copy(
+            errorDescripcion = errorDescripcion,
+            errorDireccion = errorDireccion,
+            errorTipoIncidente = errorTipo,
+            errorNumCuenta = errorNumCuenta,
+            errorFotoEvidencia = errorFoto,
+            camposValidos = esValido
+        )}
+
+        return esValido
     }
 
     private fun enviarReclamo(polizaId: String, usuarioId: Int) {
+        if (!validarFormulario()) {
+            return
+        }
+
         val estado = _uiState.value
-
-        if (estado.isLoading) {
-            return
-        }
-
-        if (estado.fotoEvidencia == null) {
-            _uiState.update { it.copy(error = "Debes seleccionar una foto de evidencia") }
-            return
-        }
+        if (estado.isLoading) return
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
@@ -95,7 +113,7 @@ class ReclamoViewModel @Inject constructor(
                     tipoIncidente = estado.tipoIncidente,
                     fechaIncidente = estado.fechaIncidente,
                     numCuenta = estado.numCuenta,
-                    imagen = estado.fotoEvidencia
+                    imagen = estado.fotoEvidencia!!
                 )
                 val result = crearReclamoUseCase(params)
 
@@ -112,7 +130,7 @@ class ReclamoViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                _uiState.update { it.copy(isLoading = false, error = "Error: ${e.message}") }
+                _uiState.update { it.copy(isLoading = false, error = "Error inesperado: ${e.message}") }
             }
         }
     }
