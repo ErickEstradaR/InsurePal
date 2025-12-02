@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -49,6 +50,7 @@ fun ReclamoVidaScreen(
     val scrollState = rememberScrollState()
 
     var polizaIdInput by remember { mutableStateOf("") }
+    var polizaIdError by remember { mutableStateOf<String?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
 
@@ -114,13 +116,18 @@ fun ReclamoVidaScreen(
 
             OutlinedTextField(
                 value = polizaIdInput,
-                onValueChange = { polizaIdInput = it },
+                onValueChange = {
+                    polizaIdInput = it
+                    if (polizaIdError != null) polizaIdError = null
+                },
                 label = { Text("ID de la Póliza") },
                 placeholder = { Text("Ej: VIDA-102") },
                 leadingIcon = { Icon(Icons.Default.Badge, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                isError = polizaIdError != null,
+                supportingText = polizaIdError?.let { { Text(it) } }
             )
 
             HorizontalDivider()
@@ -140,7 +147,9 @@ fun ReclamoVidaScreen(
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Words,
                     imeAction = ImeAction.Next
-                )
+                ),
+                isError = state.errorNombreAsegurado != null,
+                supportingText = state.errorNombreAsegurado?.let { { Text(it) } }
             )
 
             OutlinedTextField(
@@ -160,12 +169,16 @@ fun ReclamoVidaScreen(
                     disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
                 ),
-                enabled = false
+                enabled = false,
+                isError = state.errorFechaFallecimiento != null,
+                supportingText = state.errorFechaFallecimiento?.let { { Text(it) } }
             )
 
             CausaMuerteDropdown(
                 selectedOption = state.causaMuerte,
-                onOptionSelected = { viewModel.onEvent(ReclamoVidaEvent.CausaMuerteChanged(it)) }
+                onOptionSelected = { viewModel.onEvent(ReclamoVidaEvent.CausaMuerteChanged(it)) },
+                isError = state.errorCausaMuerte != null,
+                errorMessage = state.errorCausaMuerte
             )
 
             OutlinedTextField(
@@ -178,7 +191,9 @@ fun ReclamoVidaScreen(
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Sentences,
                     imeAction = ImeAction.Next
-                )
+                ),
+                isError = state.errorLugarFallecimiento != null,
+                supportingText = state.errorLugarFallecimiento?.let { { Text(it) } }
             )
 
             OutlinedTextField(
@@ -192,7 +207,9 @@ fun ReclamoVidaScreen(
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Next
                 ),
-                singleLine = true
+                singleLine = true,
+                isError = state.errorNumCuenta != null,
+                supportingText = state.errorNumCuenta?.let { { Text(it) } }
             )
 
             OutlinedTextField(
@@ -205,7 +222,9 @@ fun ReclamoVidaScreen(
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Sentences,
                     imeAction = ImeAction.Done
-                )
+                ),
+                isError = state.errorDescripcion != null,
+                supportingText = state.errorDescripcion?.let { { Text(it) } }
             )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -221,22 +240,34 @@ fun ReclamoVidaScreen(
                 label = "Subir Acta de Defunción",
                 onFileSelected = { file ->
                     viewModel.onEvent(ReclamoVidaEvent.ActaDefuncionSeleccionada(file))
-                }
+                },
+                isError = state.errorArchivoActa != null
             )
+
+            if (state.errorArchivoActa != null) {
+                Text(
+                    text = state.errorArchivoActa!!,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
                 onClick = {
-                    if (polizaIdInput.isNotBlank()) {
-                        // El usuario actual es 0 aquí porque se determina dentro del ViewModel
+                    if (polizaIdInput.isBlank()) {
+                        polizaIdError = "El ID de la póliza es obligatorio"
+                    } else {
+                        polizaIdError = null
                         viewModel.onEvent(ReclamoVidaEvent.GuardarReclamo(polizaIdInput, 0))
                     }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
-                enabled = state.camposValidos && polizaIdInput.isNotBlank() && !state.isLoading,
+                enabled = !state.isLoading,
                 shape = RoundedCornerShape(12.dp)
             ) {
                 if (state.isLoading) {
@@ -260,7 +291,9 @@ fun ReclamoVidaScreen(
 @Composable
 fun CausaMuerteDropdown(
     selectedOption: String,
-    onOptionSelected: (String) -> Unit
+    onOptionSelected: (String) -> Unit,
+    isError: Boolean = false,
+    errorMessage: String? = null
 ) {
     val options = listOf("Muerte Natural", "Accidente", "Enfermedad", "Homicidio", "Suicidio", "Otro")
     var expanded by remember { mutableStateOf(false) }
@@ -277,7 +310,9 @@ fun CausaMuerteDropdown(
             onValueChange = {},
             label = { Text("Causa de Muerte") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+            isError = isError,
+            supportingText = errorMessage?.let { { Text(it) } }
         )
         ExposedDropdownMenu(
             expanded = expanded,
@@ -301,7 +336,8 @@ fun CausaMuerteDropdown(
 fun DocumentSelector(
     selectedFile: File?,
     label: String,
-    onFileSelected: (File) -> Unit
+    onFileSelected: (File) -> Unit,
+    isError: Boolean = false
 ) {
     val context = LocalContext.current
 
@@ -326,7 +362,8 @@ fun DocumentSelector(
             },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+        ),
+        border = if (isError) BorderStroke(2.dp, MaterialTheme.colorScheme.error) else null
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -373,13 +410,13 @@ fun DocumentSelector(
                         imageVector = Icons.Outlined.Description,
                         contentDescription = null,
                         modifier = Modifier.size(48.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = label,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
                         text = "(Obligatorio)",
