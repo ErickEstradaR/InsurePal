@@ -122,7 +122,7 @@ class DetallePolizaViewModel @Inject constructor(
                         details = mapOf(
                             "Beneficiario" to v.nombreBeneficiario,
                             "Cédula Beneficiario" to v.cedulaBeneficiario,
-                            "Monto Cobertura" to "RD$ ${v.montoCobertura}",
+                            "Monto Cobertura" to "RD$ ${formatearMoneda(v.montoCobertura)}",
                             "Ocupación" to v.ocupacion,
                             "Próximo Pago" to (v.fechaPago ?: "Pendiente"),
                         )
