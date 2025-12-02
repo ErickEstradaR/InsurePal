@@ -144,14 +144,11 @@ fun InsurePalNavigation() {
                 onNavigateBack = {
                     navController.popBackStack()
                 },
-                onNavigateToPago = { idCreado, primaCalculada, descripcion ->
-                    navController.navigate(
-                        Screen.Pago(
-                            polizaId = idCreado,
-                            monto = primaCalculada,
-                            descripcion = descripcion
-                        )
-                    )
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home) {
+                        popUpTo(0) { inclusive = true }
+                        launchSingleTop = true
+                    }
                 }
             )
         }
