@@ -59,8 +59,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import edu.ucne.InsurePal.presentation.pago.formateo.formatearFecha
-import edu.ucne.InsurePal.presentation.pago.formateo.formatearMoneda
+import edu.ucne.InsurePal.presentation.utils.formatearFecha
+import edu.ucne.InsurePal.presentation.utils.formatearMoneda
 import edu.ucne.InsurePal.ui.theme.InsurePalTheme
 
 private const val COBERTURA_FULL = "Cobertura Full"

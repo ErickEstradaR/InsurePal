@@ -27,9 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import edu.ucne.InsurePal.presentation.pago.formateo.CreditCardFilter
-import edu.ucne.InsurePal.presentation.pago.formateo.DateFilter
-import edu.ucne.InsurePal.presentation.pago.formateo.formatearMoneda
+import edu.ucne.InsurePal.presentation.utils.CreditCardFilter
+import edu.ucne.InsurePal.presentation.utils.DateFilter
+import edu.ucne.InsurePal.presentation.utils.formatearMoneda
 import edu.ucne.InsurePal.ui.theme.InsurePalTheme
 
 

@@ -27,7 +27,7 @@ import edu.ucne.InsurePal.presentation.home.uiModels.LifePolicyUi
 import edu.ucne.InsurePal.presentation.home.uiModels.PolicyUiModel
 import edu.ucne.InsurePal.presentation.home.uiModels.QuickAction
 import edu.ucne.InsurePal.presentation.home.uiModels.VehiclePolicyUi
-import edu.ucne.InsurePal.presentation.pago.formateo.formatearMoneda
+import edu.ucne.InsurePal.presentation.utils.formatearMoneda
 import edu.ucne.InsurePal.ui.theme.InsurePalTheme
 
 @OptIn(ExperimentalMaterial3Api::class)

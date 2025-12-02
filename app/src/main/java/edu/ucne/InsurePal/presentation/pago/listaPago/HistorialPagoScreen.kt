@@ -42,7 +42,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.InsurePal.domain.pago.model.EstadoPago
 import edu.ucne.InsurePal.domain.pago.model.Pago
-import edu.ucne.InsurePal.presentation.pago.formateo.formatearMoneda
+import edu.ucne.InsurePal.presentation.utils.formatearMoneda
 import edu.ucne.InsurePal.ui.theme.InsurePalTheme
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
