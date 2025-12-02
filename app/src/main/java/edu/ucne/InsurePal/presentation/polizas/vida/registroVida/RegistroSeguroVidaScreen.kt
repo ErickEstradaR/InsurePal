@@ -1,7 +1,6 @@
 package edu.ucne.InsurePal.presentation.polizas.vida.registroVida
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -9,7 +8,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AttachMoney
-import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
@@ -24,14 +22,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import edu.ucne.InsurePal.presentation.components.DatePickerField
+import edu.ucne.InsurePal.presentation.components.SectionHeader
 import edu.ucne.InsurePal.presentation.polizas.vehiculo.AppDropdown
 import edu.ucne.InsurePal.ui.theme.InsurePalTheme
 import java.text.NumberFormat
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.Locale
-
 
 @Composable
 fun RegistroSeguroVidaScreen(
@@ -63,7 +59,6 @@ fun RegistroSeguroVidaScreen(
         snackbarHostState = snackbarHostState
     )
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -134,6 +129,7 @@ fun SeguroVidaContent(
             )
 
             DatePickerField(
+                label = "Fecha de Nacimiento",
                 fechaSeleccionada = state.fechaNacimiento,
                 onFechaChange = { onEvent(SeguroVidaEvent.OnFechaNacimientoChanged(it)) },
                 isError = state.errorFechaNacimiento != null,
@@ -145,6 +141,7 @@ fun SeguroVidaContent(
                 items = SeguroVidaDefaults.Ocupaciones,
                 selectedItem = state.ocupacion,
                 isError = state.errorOcupacion != null,
+                errorMessage = state.errorOcupacion,
                 onItemSelected = { onEvent(SeguroVidaEvent.OnOcupacionChanged(it)) },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -202,6 +199,7 @@ fun SeguroVidaContent(
                         items = SeguroVidaDefaults.Parentescos,
                         selectedItem = state.parentesco,
                         isError = state.errorParentesco != null,
+                        errorMessage = state.errorParentesco,
                         onItemSelected = { onEvent(SeguroVidaEvent.OnParentescoChanged(it)) },
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -233,8 +231,6 @@ fun SeguroVidaContent(
         }
     }
 }
-
-
 
 @Composable
 fun CotizacionBottomBar(
@@ -286,70 +282,6 @@ fun CotizacionBottomBar(
         }
     }
 }
-
-@Composable
-fun SectionHeader(title: String) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleMedium,
-        color = MaterialTheme.colorScheme.primary,
-        fontWeight = FontWeight.SemiBold,
-        modifier = Modifier.padding(vertical = 4.dp)
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DatePickerField(
-    fechaSeleccionada: String,
-    onFechaChange: (String) -> Unit,
-    isError: Boolean,
-    errorMessage: String?
-) {
-    var showDialog by remember { mutableStateOf(false) }
-    val datePickerState = rememberDatePickerState()
-
-    if (showDialog) {
-        DatePickerDialog(
-            onDismissRequest = { showDialog = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let { millis ->
-                        val localDate = Instant.ofEpochMilli(millis)
-                            .atZone(ZoneId.of("UTC"))
-                            .toLocalDate()
-                        onFechaChange(localDate.format(DateTimeFormatter.ISO_LOCAL_DATE))
-                    }
-                    showDialog = false
-                }) { Text("Aceptar") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDialog = false }) { Text("Cancelar") }
-            }
-        ) {
-            DatePicker(state = datePickerState)
-        }
-    }
-
-    OutlinedTextField(
-        value = fechaSeleccionada,
-        onValueChange = { },
-        label = { Text("Fecha de Nacimiento") },
-        readOnly = true,
-        trailingIcon = {
-            IconButton(onClick = { showDialog = true }) {
-                Icon(Icons.Default.CalendarToday, contentDescription = "Seleccionar fecha")
-            }
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { showDialog = true },
-        isError = isError,
-        supportingText = errorMessage?.let { { Text(it) } },
-        enabled = true
-    )
-}
-
 
 @Preview(showSystemUi = true, name = "Formulario Vacío")
 @Composable
