@@ -38,11 +38,11 @@ class AdminViewModel @Inject constructor(
     fun onEvent(event: AdminEvent) {
         when(event) {
             AdminEvent.LoadDashboard -> loadDashboardData()
-            AdminEvent.OnLogout -> {
+            AdminEvent.OnLogout -> {//cierra sesión
             }
-            AdminEvent.OnDismissDetail -> {
+            AdminEvent.OnDismissDetail -> {// quita la selección
             }
-            is AdminEvent.OnSelectPolicy -> {
+            is AdminEvent.OnSelectPolicy -> {//selecciona una poliza
             }
         }
     }
