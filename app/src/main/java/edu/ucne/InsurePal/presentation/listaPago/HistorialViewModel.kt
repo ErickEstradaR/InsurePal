@@ -32,8 +32,6 @@ class HistorialViewModel @Inject constructor(
                     _state.update { it.copy(usuarioId = id) }
 
                     obtenerHistorial(id)
-
-                    sincronizar()
                 }
             }
         }
