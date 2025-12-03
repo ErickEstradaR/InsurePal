@@ -11,5 +11,7 @@ data class CrearReclamoVidaParams(
     val causaMuerte: String,
     val fechaFallecimiento: String,
     val numCuenta: String,
-    val actaDefuncion: File
+    val actaDefuncion: File,
+
+    val identificacion :File
 )
