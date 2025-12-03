@@ -1,5 +1,7 @@
 package edu.ucne.InsurePal.presentation.registroVehiculo
 
+import java.io.File
+
 sealed interface VehiculoEvent {
 
     data class OnNameChanged(val name: String) : VehiculoEvent
@@ -11,7 +13,7 @@ sealed interface VehiculoEvent {
     data class OnChasisChanged(val chasis: String) : VehiculoEvent
     data class OnValorChanged(val valor: String) : VehiculoEvent
     data class OnCoverageChanged(val type: String) : VehiculoEvent
-
+    data class OnImagenChanged(val file: File) : VehiculoEvent
 
     data object OnGuardarClick : VehiculoEvent
     data object OnMessageShown : VehiculoEvent
