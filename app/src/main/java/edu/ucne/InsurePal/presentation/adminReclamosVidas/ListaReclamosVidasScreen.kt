@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Badge
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.HealthAndSafety
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
@@ -189,6 +190,41 @@ fun AdminReclamoVidaCard(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(start = 20.dp)
             )
+
+            if (!reclamo.actaDefuncionUrl.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Description,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "Acta de Defunción:",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(reclamo.actaDefuncionUrl)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "Foto Acta Defunción",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                )
+            }
 
             if (!reclamo.identificacionUrl.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(12.dp))
