@@ -1,5 +1,7 @@
 package edu.ucne.InsurePal.presentation.registroVehiculo
 
+import java.io.File
+
 data class VehiculoUiState(
     val isLoading: Boolean = false,
     val isSuccess: Boolean = false,
@@ -18,6 +20,9 @@ data class VehiculoUiState(
 
     val anio: String = "",
     val errorAnio: String? = null,
+
+    val archivoImagen: File? = null,
+    val errorImagen: String? = null,
 
     val color: String = "",
     val errorColor: String? = null,
