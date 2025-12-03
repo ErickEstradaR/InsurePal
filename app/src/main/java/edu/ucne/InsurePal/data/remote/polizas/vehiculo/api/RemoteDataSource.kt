@@ -4,6 +4,7 @@ import edu.ucne.InsurePal.data.Resource
 import edu.ucne.InsurePal.data.remote.polizas.vehiculo.dto.MarcaVehiculoDto
 import edu.ucne.InsurePal.data.remote.polizas.vehiculo.dto.SeguroVehiculoRequest
 import edu.ucne.InsurePal.data.remote.polizas.vehiculo.dto.SeguroVehiculoResponse
+import edu.ucne.InsurePal.presentation.utils.formatearMoneda
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -18,47 +19,16 @@ class RemoteDataSource @Inject constructor(
     private val errorNetwork = "Error de conexión con el servidor"
     suspend fun save(request: SeguroVehiculoRequest): Resource<SeguroVehiculoResponse> {
         return try {
-            val imagePart: MultipartBody.Part? = request.imagenVehiculo?.let { path ->
-                val file = File(path)
-                if (file.exists()) {
-                    val reqFile = file.asRequestBody("image/*".toMediaTypeOrNull())
-                    MultipartBody.Part.createFormData("imagenVehiculo", file.name, reqFile)
-                } else {
-                    null
-                }
-            }
-
-            val textType = "text/plain".toMediaTypeOrNull()
-
-            val dataMap = mutableMapOf<String, RequestBody>().apply {
-                put("name", request.name.toRequestBody(textType))
-                put("usuarioId", request.usuarioId.toString().toRequestBody(textType))
-                put("marca", request.marca.toRequestBody(textType))
-                put("modelo", request.modelo.toRequestBody(textType))
-                put("anio", request.anio.toRequestBody(textType))
-                put("color", request.color.toRequestBody(textType))
-                put("placa", request.placa.toRequestBody(textType))
-                put("chasis", request.chasis.toRequestBody(textType))
-                put("valorMercado", request.valorMercado.toString().toRequestBody(textType))
-                put("coverageType", request.coverageType.toRequestBody(textType))
-                put("status", request.status.toRequestBody(textType))
-
-                request.expirationDate?.let { put("expirationDate", it.toRequestBody(textType)) }
-                request.fechaPago?.let { put("fechaPago", it.toRequestBody(textType)) }
-                put("esPagado", request.esPagado.toString().toRequestBody(textType))
-            }
+            val imagePart = prepareImagePart(request.imagenVehiculo)
+            val dataMap = prepareDataMap(request)
 
             val response = api.postVehiculo(imagePart, dataMap)
 
             if (response.isSuccessful) {
-                val body = response.body()
-                if (body != null) {
-                    Resource.Success(body)
-                } else {
-                    Resource.Error("Respuesta vacía del servidor")
-                }
+                response.body()?.let { Resource.Success(it) }
+                    ?: Resource.Error("Respuesta vacía del servidor")
             } else {
-                Resource.Error("HTTP ${response.code()} ${response.message()}")
+                Resource.Error("Error HTTP ${response.code()}: ${response.message()}")
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -82,13 +52,18 @@ class RemoteDataSource @Inject constructor(
 
     suspend fun update(id: String?, request: SeguroVehiculoRequest): Resource<Unit> {
         return try {
-            val response = api.putVehiculo(id, request)
+            val imagePart = prepareImagePart(request.imagenVehiculo)
+            val dataMap = prepareDataMap(request)
+
+            val response = api.putVehiculo(id, imagePart, dataMap)
+
             if (response.isSuccessful) {
                 Resource.Success(Unit)
             } else {
-                Resource.Error("HTTP ${response.code()} ${response.message()}")
+                Resource.Error("Error HTTP ${response.code()}: ${response.message()}")
             }
         } catch (e: Exception) {
+            e.printStackTrace()
             Resource.Error(e.localizedMessage ?: errorNetwork)
         }
     }
@@ -144,6 +119,43 @@ class RemoteDataSource @Inject constructor(
             }
         } catch (e: Exception) {
             Resource.Error(e.localizedMessage ?: errorNetwork)
+        }
+    }
+
+    private fun prepareImagePart(path: String?): MultipartBody.Part? {
+        return path?.let {
+            val file = File(it)
+            if (file.exists()) {
+                val reqFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+                MultipartBody.Part.createFormData("imagenVehiculo", file.name, reqFile)
+            } else {
+                null
+            }
+        }
+    }
+
+    private fun prepareDataMap(request: SeguroVehiculoRequest): Map<String, RequestBody> {
+        val textType = "text/plain".toMediaTypeOrNull()
+        val valorMercadoString = formatearMoneda( request.valorMercado)
+
+        return mutableMapOf<String, RequestBody>().apply {
+            put("name", request.name.toRequestBody(textType))
+            put("usuarioId", request.usuarioId.toString().toRequestBody(textType))
+            put("marca", request.marca.toRequestBody(textType))
+            put("modelo", request.modelo.toRequestBody(textType))
+            put("anio", request.anio.toRequestBody(textType))
+            put("color", request.color.toRequestBody(textType))
+            put("placa", request.placa.toRequestBody(textType))
+            put("chasis", request.chasis.toRequestBody(textType))
+
+            put("valorMercado", valorMercadoString.toRequestBody(textType))
+
+            put("coverageType", request.coverageType.toRequestBody(textType))
+            put("status", request.status.toRequestBody(textType))
+            put("esPagado", request.esPagado.toString().toRequestBody(textType))
+
+            request.expirationDate?.let { put("expirationDate", it.toRequestBody(textType)) }
+            request.fechaPago?.let { put("fechaPago", it.toRequestBody(textType)) }
         }
     }
 }
