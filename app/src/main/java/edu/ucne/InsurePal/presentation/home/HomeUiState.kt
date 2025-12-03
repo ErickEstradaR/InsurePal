@@ -1,6 +1,6 @@
 package edu.ucne.InsurePal.presentation.home
 
-import edu.ucne.InsurePal.presentation.home.uiModels.PolicyUiModel
+import edu.ucne.InsurePal.presentation.UiModels.PolicyUiModel
 
 data class HomeUiState(
     val isLoading: Boolean = false,

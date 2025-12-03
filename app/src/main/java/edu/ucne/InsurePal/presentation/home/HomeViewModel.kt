@@ -9,9 +9,9 @@ import edu.ucne.InsurePal.domain.polizas.vehiculo.model.SeguroVehiculo
 import edu.ucne.InsurePal.domain.polizas.vehiculo.useCases.ObtenerVehiculosUseCase
 import edu.ucne.InsurePal.domain.polizas.vida.model.SeguroVida
 import edu.ucne.InsurePal.domain.polizas.vida.useCases.GetSegurosVidaUseCase
-import edu.ucne.InsurePal.presentation.home.uiModels.LifePolicyUi
-import edu.ucne.InsurePal.presentation.home.uiModels.PolicyUiModel
-import edu.ucne.InsurePal.presentation.home.uiModels.VehiclePolicyUi
+import edu.ucne.InsurePal.presentation.UiModels.LifePolicyUi
+import edu.ucne.InsurePal.presentation.UiModels.PolicyUiModel
+import edu.ucne.InsurePal.presentation.UiModels.VehiclePolicyUi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest

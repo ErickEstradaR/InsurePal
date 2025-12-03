@@ -6,23 +6,23 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import edu.ucne.InsurePal.presentation.admin.AdminScreen
-import edu.ucne.InsurePal.presentation.admin.adminListaVehiculos.VehicleListScreen
-import edu.ucne.InsurePal.presentation.admin.adminListaVidas.ListaVidaScreen
-import edu.ucne.InsurePal.presentation.admin.adminReclamosVehiculos.ListaReclamosAdminScreen
-import edu.ucne.InsurePal.presentation.admin.adminReclamosVidas.ListaReclamosVidasAdminScreen
+import edu.ucne.InsurePal.presentation.adminListaVehiculos.VehicleListScreen
+import edu.ucne.InsurePal.presentation.adminListaVidas.ListaVidaScreen
+import edu.ucne.InsurePal.presentation.adminReclamosVehiculos.ListaReclamosAdminScreen
+import edu.ucne.InsurePal.presentation.adminReclamosVidas.ListaReclamosVidasAdminScreen
 import edu.ucne.InsurePal.presentation.detallePoliza.DetallePolizaScreen
 import edu.ucne.InsurePal.presentation.home.InsuranceHomeScreen
 import edu.ucne.InsurePal.presentation.home.SeleccionSeguroScreen
 import edu.ucne.InsurePal.presentation.listaReclamos.ListaReclamosScreen
-import edu.ucne.InsurePal.presentation.listaReclamos.detalleReclamo.DetalleReclamoScreen
+import edu.ucne.InsurePal.presentation.detalleReclamo.DetalleReclamoScreen
 import edu.ucne.InsurePal.presentation.pago.PagoScreen
 import edu.ucne.InsurePal.presentation.pago.listaPago.HistorialPagosScreen
-import edu.ucne.InsurePal.presentation.polizas.vehiculo.SolicitudEnviadaScreen
-import edu.ucne.InsurePal.presentation.polizas.vehiculo.cotizacionVehiculo.CotizacionVehiculoScreen
-import edu.ucne.InsurePal.presentation.polizas.vehiculo.registroVehiculo.VehiculoRegistroScreen
-import edu.ucne.InsurePal.presentation.polizas.vehiculo.reclamoVehiculo.ReclamoScreen
-import edu.ucne.InsurePal.presentation.polizas.vida.reclamoVida.ReclamoVidaScreen
-import edu.ucne.InsurePal.presentation.polizas.vida.registroVida.RegistroSeguroVidaScreen
+import edu.ucne.InsurePal.presentation.vehiculo.SolicitudEnviadaScreen
+import edu.ucne.InsurePal.presentation.vehiculo.cotizacionVehiculo.CotizacionVehiculoScreen
+import edu.ucne.InsurePal.presentation.vehiculo.registroVehiculo.VehiculoRegistroScreen
+import edu.ucne.InsurePal.presentation.vehiculo.reclamoVehiculo.ReclamoScreen
+import edu.ucne.InsurePal.presentation.reclamoVida.ReclamoVidaScreen
+import edu.ucne.InsurePal.presentation.registroVida.RegistroSeguroVidaScreen
 import edu.ucne.InsurePal.presentation.usuario.LoginScreen
 
 @Composable

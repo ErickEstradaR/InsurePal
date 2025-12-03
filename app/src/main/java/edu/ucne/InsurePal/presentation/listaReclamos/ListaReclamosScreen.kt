@@ -45,8 +45,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import edu.ucne.InsurePal.presentation.listaReclamos.UiModels.ReclamoUiItem
-import edu.ucne.InsurePal.presentation.listaReclamos.UiModels.TipoReclamo
+import edu.ucne.InsurePal.presentation.UiModels.ReclamoUiItem
+import edu.ucne.InsurePal.presentation.UiModels.TipoReclamo
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListaReclamosScreen(

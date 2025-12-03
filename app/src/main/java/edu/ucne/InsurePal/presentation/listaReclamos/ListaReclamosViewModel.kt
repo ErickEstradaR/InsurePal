@@ -9,8 +9,8 @@ import edu.ucne.InsurePal.domain.reclamoVehiculo.model.ReclamoVehiculo
 import edu.ucne.InsurePal.domain.reclamoVehiculo.useCases.GetReclamoVehiculosUseCase
 import edu.ucne.InsurePal.domain.reclamoVida.model.ReclamoVida
 import edu.ucne.InsurePal.domain.reclamoVida.useCases.GetReclamosVidaUseCase
-import edu.ucne.InsurePal.presentation.listaReclamos.UiModels.ReclamoUiItem
-import edu.ucne.InsurePal.presentation.listaReclamos.UiModels.TipoReclamo
+import edu.ucne.InsurePal.presentation.UiModels.ReclamoUiItem
+import edu.ucne.InsurePal.presentation.UiModels.TipoReclamo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first

@@ -1,6 +1,6 @@
 package edu.ucne.InsurePal.presentation.listaReclamos
 
-import edu.ucne.InsurePal.presentation.listaReclamos.UiModels.ReclamoUiItem
+import edu.ucne.InsurePal.presentation.UiModels.ReclamoUiItem
 
 data class ListaReclamosUiState(
     val isLoading: Boolean = false,

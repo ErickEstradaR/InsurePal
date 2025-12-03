@@ -23,10 +23,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import edu.ucne.InsurePal.presentation.home.uiModels.LifePolicyUi
-import edu.ucne.InsurePal.presentation.home.uiModels.PolicyUiModel
-import edu.ucne.InsurePal.presentation.home.uiModels.QuickAction
-import edu.ucne.InsurePal.presentation.home.uiModels.VehiclePolicyUi
+import edu.ucne.InsurePal.presentation.UiModels.LifePolicyUi
+import edu.ucne.InsurePal.presentation.UiModels.PolicyUiModel
+import edu.ucne.InsurePal.presentation.UiModels.QuickAction
+import edu.ucne.InsurePal.presentation.UiModels.VehiclePolicyUi
 import edu.ucne.InsurePal.presentation.utils.formatearMoneda
 import edu.ucne.InsurePal.ui.theme.InsurePalTheme
 
