@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.InsurePal.presentation.components.AppDropdown
+import edu.ucne.InsurePal.presentation.components.ImageSelector
 import edu.ucne.InsurePal.ui.theme.InsurePalTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -91,6 +92,26 @@ fun VehiculoRegistroContent(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Spacer(modifier = Modifier.height(8.dp))
+
+        // --- INTEGRACIÓN DEL SELECTOR DE IMAGEN ---
+        ImageSelector(
+            selectedFile = state.archivoImagen,
+            onImageSelected = { file -> onEvent(VehiculoEvent.OnImagenChanged(file)) },
+            isError = state.errorImagen != null,
+            label = "Foto del Vehículo"
+        )
+
+        // Mensaje de error específico debajo de la imagen si falla la validación
+        if (state.errorImagen != null) {
+            Text(
+                text = state.errorImagen!!,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         GeneralInfoSection(state, onEvent)
 
@@ -222,8 +243,7 @@ fun IdentificationSection(
         label = { Text("Valor de Mercado (Estimado)") },
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
-        // Eliminado readOnly=true estricto para permitir correcciones si el usuario lo desea,
-        // aunque el VM lo calcula. Puedes volver a ponerlo si prefieres que sea 100% automático.
+        readOnly = true,
         prefix = { Text("RD$ ") },
         isError = state.errorValorMercado != null,
         colors = OutlinedTextFieldDefaults.colors(
