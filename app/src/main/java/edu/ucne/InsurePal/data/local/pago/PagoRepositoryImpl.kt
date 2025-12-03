@@ -25,7 +25,7 @@ class PagoRepositoryImpl @Inject constructor(
         return if (usuarioId == 0) {
             flow {
                 try {
-                    val result = remoteDataSource.getHistorialRemoto(0)
+                    val result = remoteDataSource.getHistorialRemoto(usuarioId)
 
                     when (result) {
                         is Resource.Success -> {
