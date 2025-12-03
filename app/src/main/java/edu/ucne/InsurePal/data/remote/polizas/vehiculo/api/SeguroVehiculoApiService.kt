@@ -3,12 +3,17 @@ package edu.ucne.InsurePal.data.remote.polizas.vehiculo.api
 import edu.ucne.InsurePal.data.remote.polizas.vehiculo.dto.MarcaVehiculoDto
 import edu.ucne.InsurePal.data.remote.polizas.vehiculo.dto.SeguroVehiculoRequest
 import edu.ucne.InsurePal.data.remote.polizas.vehiculo.dto.SeguroVehiculoResponse
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Part
+import retrofit2.http.PartMap
 import retrofit2.http.Path
 
 interface SeguroVehiculoApiService {
@@ -24,8 +29,13 @@ interface SeguroVehiculoApiService {
     @GET("api/Vehiculos/{id}")
     suspend fun getVehiculo(@Path("id") id: String?): Response<SeguroVehiculoResponse>
 
+    @Multipart
     @POST("api/Vehiculos")
-    suspend fun postVehiculo(@Body seguroVehiculo: SeguroVehiculoRequest): Response<SeguroVehiculoResponse>
+    suspend fun postVehiculo(
+        @Part imagen: MultipartBody.Part?,
+
+        @PartMap data: Map<String, @JvmSuppressWildcards RequestBody>
+    ): Response<SeguroVehiculoResponse>
 
     @PUT("api/Vehiculos/{id}")
     suspend fun putVehiculo(@Path("id") id: String?, @Body seguroVehiculo: SeguroVehiculoRequest): Response<Unit>
