@@ -1,6 +1,7 @@
 package edu.ucne.InsurePal.data
 
 import edu.ucne.InsurePal.data.local.pago.PagoEntity
+import edu.ucne.InsurePal.data.remote.pago.dto.HistorialPagoDto
 import edu.ucne.InsurePal.data.remote.polizas.vehiculo.dto.MarcaVehiculoDto
 import edu.ucne.InsurePal.data.remote.polizas.vehiculo.dto.ModeloVehiculoDto
 import edu.ucne.InsurePal.data.remote.polizas.vehiculo.dto.SeguroVehiculoRequest
@@ -68,6 +69,23 @@ fun SeguroVehiculo.toRequest(): SeguroVehiculoRequest = SeguroVehiculoRequest(
     esPagado = esPagado,
     fechaPago = fechaPago
 )
+
+fun HistorialPagoDto.toDomain(): Pago {
+    return Pago(
+        id = id,
+        polizaId = polizaId,
+        usuarioId = 0,
+        monto = monto,
+        fecha = try {
+            LocalDateTime.parse(fecha)
+        } catch (e: Exception) {
+            LocalDateTime.now()
+        },
+        estado = if (estado.equals("APROBADO", ignoreCase = true)) EstadoPago.APROBADO else EstadoPago.RECHAZADO,
+        tarjetaUltimosDigitos = tarjetaMascara,
+        numeroConfirmacion = numeroConfirmacion
+    )
+}
 
  fun PagoEntity.toDomain(): Pago {
     return Pago(
