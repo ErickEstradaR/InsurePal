@@ -51,6 +51,7 @@ dependencies {
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui.text.google.fonts)
+    implementation(libs.androidx.compose.ui.text)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.hilt.work)
     ksp(libs.androidx.hilt.compiler)
