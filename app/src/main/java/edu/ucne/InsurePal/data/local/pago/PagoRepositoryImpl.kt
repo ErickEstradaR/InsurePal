@@ -10,6 +10,7 @@ import edu.ucne.InsurePal.domain.pago.model.TarjetaCredito
 import edu.ucne.InsurePal.domain.pago.repository.PagoRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import java.time.LocalDateTime
 import javax.inject.Inject
@@ -21,8 +22,32 @@ class PagoRepositoryImpl @Inject constructor(
 ) : PagoRepository {
 
     override fun getHistorialPagos(usuarioId: Int): Flow<List<Pago>> {
-        return pagoDao.getPagosPorUsuario(usuarioId).map { entities ->
-            entities.map { it.toDomain() }
+        return if (usuarioId == 0) {
+            flow {
+                try {
+                    val result = remoteDataSource.getHistorialRemoto(0)
+
+                    when (result) {
+                        is Resource.Success -> {
+                            val dtos = result.data ?: emptyList()
+                            val domainList = dtos.map { it.toDomain() }
+                            emit(domainList)
+                        }
+                        is Resource.Error -> {
+                            emit(emptyList())
+                        }
+                        is Resource.Loading -> {
+                            emit(emptyList())
+                        }
+                    }
+                } catch (e: Exception) {
+                    emit(emptyList())
+                }
+            }
+        } else {
+            pagoDao.getPagosPorUsuario(usuarioId).map { entities ->
+                entities.map { it.toDomain() }
+            }
         }
     }
 
