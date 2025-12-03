@@ -4,11 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.InsurePal.data.Resource
+import edu.ucne.InsurePal.domain.pago.model.Pago
 import edu.ucne.InsurePal.domain.pago.useCase.GetHistorialPagosUseCase
 import edu.ucne.InsurePal.domain.polizas.vehiculo.useCases.GetAllVehiculosUseCase
 import edu.ucne.InsurePal.domain.polizas.vida.useCases.GetAllSegurosVidaUseCase
 import edu.ucne.InsurePal.domain.reclamoVehiculo.useCases.GetReclamoVehiculosUseCase
 import edu.ucne.InsurePal.domain.reclamoVida.useCases.GetReclamosVidaUseCase
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +18,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -46,15 +50,26 @@ class AdminViewModel @Inject constructor(
             }
         }
     }
-
     fun loadDashboardData() {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, errorMessage = null) }
+            val flowReclamosV = flow {
+                emit(getReclamoVehiculosUseCase(null))
+            }.onStart { emit(Resource.Loading()) }
 
-            val flowReclamosV = flow { emit(getReclamoVehiculosUseCase(null)) }
-            val flowReclamosL = flow { emit(getReclamosVidaUseCase(null)) }
+            val flowReclamosL = flow {
+                emit(getReclamosVidaUseCase(null))
+            }.onStart { emit(Resource.Loading()) }
 
-            val flowPagos = getHistorialPagosUseCase(0)
+            val flowPagos: Flow<Resource<List<Pago>>> = getHistorialPagosUseCase(0)
+                .map { list ->
+                    Resource.Success(list) as Resource<List<Pago>>
+                }
+                .onStart {
+                    emit(Resource.Loading())
+                }
+                .catch { error ->
+                    emit(Resource.Error(error.message ?: "Error obteniendo pagos"))
+                }
 
             combine(
                 getAllVehiculosUseCase(),
@@ -62,21 +77,28 @@ class AdminViewModel @Inject constructor(
                 flowReclamosV,
                 flowReclamosL,
                 flowPagos
-            ) { resVehiculos, resVida, resRecVehiculos, resRecVida, pagosList ->
+            ) { resVehiculos, resVida, resRecVehiculos, resRecVida, resPagos ->
 
                 val vehiculos = resVehiculos.data ?: emptyList()
                 val vida = resVida.data ?: emptyList()
-
                 val reclamosV = resRecVehiculos.data ?: emptyList()
                 val reclamosL = resRecVida.data ?: emptyList()
+                val pagosList = resPagos.data ?: emptyList()
 
                 val totalIngresos = pagosList.sumOf { it.monto }
+
+                val isLoadingData = resVehiculos is Resource.Loading ||
+                        resVida is Resource.Loading ||
+                        resRecVehiculos is Resource.Loading ||
+                        resRecVida is Resource.Loading ||
+                        resPagos is Resource.Loading
 
                 val errorMsg = if (
                     resVehiculos is Resource.Error ||
                     resVida is Resource.Error ||
                     resRecVehiculos is Resource.Error ||
-                    resRecVida is Resource.Error
+                    resRecVida is Resource.Error ||
+                    resPagos is Resource.Error
                 ) {
                     "Error sincronizando algunos datos del dashboard."
                 } else {
@@ -98,7 +120,7 @@ class AdminViewModel @Inject constructor(
                 val pendingRecL = reclamosL.count { it.status == "PENDIENTE" }
 
                 AdminUiState(
-                    isLoading = false,
+                    isLoading = isLoadingData,
                     errorMessage = errorMsg,
 
                     totalPolicies = totalV + totalL,
