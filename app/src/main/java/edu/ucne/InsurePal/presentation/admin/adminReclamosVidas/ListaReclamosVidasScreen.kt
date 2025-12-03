@@ -70,7 +70,7 @@ fun ListaReclamosVidasAdminScreen(
                     items(state.reclamos) { reclamo ->
                         AdminReclamoVidaCard(
                             reclamo = reclamo,
-                            onClick = { onReclamoClick(reclamo.id.toString()) }
+                            onClick = { onReclamoClick(reclamo.id) }
                         )
                     }
                 }
@@ -143,7 +143,6 @@ fun AdminReclamoVidaCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Información del Asegurado (Fallecido)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Default.Person,
@@ -162,7 +161,6 @@ fun AdminReclamoVidaCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Causa y Lugar
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Default.HealthAndSafety,
@@ -184,7 +182,16 @@ fun AdminReclamoVidaCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(start = 20.dp) // Indentación visual
+                modifier = Modifier.padding(start = 20.dp)
+            )
+
+            Text(
+                text = reclamo.lugarFallecimiento,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(start = 20.dp)
             )
 
             Spacer(modifier = Modifier.height(12.dp))
